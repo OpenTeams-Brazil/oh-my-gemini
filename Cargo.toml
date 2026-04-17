@@ -1,0 +1,22 @@
+[workspace]
+members = [
+  "crates/omg-explore",
+  "crates/omg-mux",
+  "crates/omg-runtime-core",
+  "crates/omg-runtime",
+  "crates/omg-sparkshell",
+]
+resolver = "2"
+
+[workspace.package]
+
+version = "0.13.1"
+
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Yeachan-Heo/oh-my-gemini"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

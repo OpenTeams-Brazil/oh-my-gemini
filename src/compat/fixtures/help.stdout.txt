@@ -1,0 +1,61 @@
+
+oh-my-gemini (omg) - Multi-agent orchestration for Gemini CLI
+
+Usage:
+  omg           Launch Gemini CLI (HUD auto-attaches only when already inside tmux)
+  omg exec      Run codex exec non-interactively with OMX AGENTS/overlay injection
+  omg setup     Install skills, prompts, MCP servers, and scope-specific GEMINI.md
+  omg uninstall Remove OMX configuration and clean up installed artifacts
+  omg doctor    Check installation health
+  omg cleanup   Kill orphaned OMX MCP server processes from prior sessions
+  omg doctor --team  Check team/swarm runtime health diagnostics
+  omg ask       Ask local provider CLI (claude|gemini) and write artifact output
+  omg autoresearch Launch thin-supervisor autoresearch with keep/discard/reset parity
+  omg explore   Default read-only exploration entrypoint (may adaptively use sparkshell backend)
+  omg session   Search prior local session transcripts and history artifacts
+  omg agents-init [path]
+                Bootstrap lightweight GEMINI.md files for a repo/subtree
+  omg deepinit [path]
+                Alias for agents-init (lightweight AGENTS bootstrap only)
+  omg team      Spawn parallel worker panes in tmux and bootstrap inbox/task state
+  omg ralph     Launch Gemini with ralph persistence mode active
+  omg version   Show version information
+  omg tmux-hook Manage tmux prompt injection workaround (init|status|validate|test)
+  omg hooks     Manage hook plugins (init|status|validate|test)
+  omg hud       Show HUD statusline (--watch, --json, --preset=NAME)
+  omg sparkshell <command> [args...]
+  omg sparkshell --tmux-pane <pane-id> [--tail-lines <100-1000>]
+                Run native sparkshell sidecar for direct command execution or explicit tmux-pane summarization
+                (also used as an adaptive backend for qualifying read-only explore tasks)
+  omg help      Show this help message
+  omg status    Show active modes and state
+  omg cancel    Cancel active execution modes
+  omg reasoning Show or set model reasoning effort (low|medium|high|xhigh)
+
+Options:
+  --yolo        Launch Gemini in yolo mode (shorthand for: omg launch --yolo)
+  --high        Launch Gemini with high reasoning effort
+                (shorthand for: -c model_reasoning_effort="high")
+  --xhigh       Launch Gemini with xhigh reasoning effort
+                (shorthand for: -c model_reasoning_effort="xhigh")
+  --madmax      DANGEROUS: bypass Gemini approvals and sandbox
+                (alias for --dangerously-bypass-approvals-and-sandbox)
+  --spark       Use the Gemini spark model (~1.3x faster) for team workers only
+                Workers get the configured low-complexity team model; leader model unchanged
+  --madmax-spark  spark model for workers + bypass approvals for leader and workers
+                (shorthand for: --spark --madmax)
+  --notify-temp  Enable temporary notification routing for this run/session only
+  --discord      Select Discord provider for temporary notification mode
+  --slack        Select Slack provider for temporary notification mode
+  --telegram     Select Telegram provider for temporary notification mode
+  --custom <name>
+                Select custom/OpenClaw gateway name for temporary notification mode
+  -w, --worktree[=<name>]
+                Launch Gemini in a git worktree (detached when no name is given)
+  --force       Force reinstall (overwrite existing files)
+  --dry-run     Show what would be done without doing it
+  --keep-config Skip config.toml cleanup during uninstall
+  --purge       Remove .omg/ cache directory during uninstall
+  --verbose     Show detailed output
+  --scope       Setup scope for "omg setup" only:
+                user | project

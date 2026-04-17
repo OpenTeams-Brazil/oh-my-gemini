@@ -1,0 +1,12 @@
+[package]
+name = "omg-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+omg-mux = { path = "../omg-mux" }
+omg-runtime-core = { path = "../omg-runtime-core" }
+serde_json = "1"
+

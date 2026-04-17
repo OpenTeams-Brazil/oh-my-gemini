@@ -1,0 +1,13 @@
+[package]
+name = "omg-sparkshell"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "omg-sparkshell"
+path = "src/main.rs"
+
+[dependencies]
+omg-mux = { path = "../omg-mux" }

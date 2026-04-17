@@ -1,0 +1,6 @@
+oh-my-gemini doctor --team
+=========================
+
+  [XX] resume_blocker: alpha references missing tmux session omg-team-alpha
+
+Results: 0 warnings, 1 failed

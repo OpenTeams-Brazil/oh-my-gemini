@@ -1,0 +1,22 @@
+oh-my-gemini doctor
+==================
+
+Resolved setup scope: user
+
+  [CODEX_CLI_STATUS]
+  [OK] Node.js: <NODE_VERSION>
+  [EXPLORE_HARNESS_STATUS]
+  [OK] Gemini home: <GEMINI_HOME>
+  [!!] Config: config.toml exists but no OMX entries yet (expected before first setup; run "omg setup --force" once)
+  [OK] Native hooks: hooks.json not found yet (expected before first setup)
+  [OK] Explore routing: enabled by default
+  [!!] Prompts: prompts directory not found
+  [!!] Skills: skills directory not found
+  [OK] Legacy skill roots: no ~/.agents/skills overlap detected
+  [!!] GEMINI.md: not found in <GEMINI_HOME>/GEMINI.md (run omg setup --scope user)
+  [!!] State dir: <REPO_STATE_DIR> (not created yet)
+  [!!] MCP Servers: 1 servers but no OMX servers yet (expected before first setup; run "omg setup --force" once)
+
+Results: <RESULTS>
+
+Run <SETUP_FOLLOWUP>
