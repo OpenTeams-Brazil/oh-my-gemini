@@ -554,7 +554,7 @@ describe('runtime', () => {
         'low',
         'claude',
       );
-      const geminiArgs = resolveWorkerLaunchArgsFromEnv(
+      const geminiArgsLow = resolveWorkerLaunchArgsFromEnv(
         { OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gemini-2.0-pro' },
         'executor',
         undefined,
@@ -563,18 +563,18 @@ describe('runtime', () => {
       );
       assert.deepEqual(geminiArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="high"', '--model', 'gpt-5.4']);
       assert.deepEqual(claudeArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="low"', '--model', 'claude-3-7-sonnet']);
-      assert.deepEqual(geminiArgs, ['-c', 'model_reasoning_effort="low"', '--model', 'gemini-2.0-pro']);
+      assert.deepEqual(geminiArgsLow, ['-c', 'model_reasoning_effort="low"', '--model', 'gemini-2.0-pro']);
     } finally {
       console.log = originalLog;
     }
-    const geminiLog = logs.find((line) => line.includes('thinking_level=high'));
+    const geminiLogHigh = logs.find((line) => line.includes('thinking_level=high'));
     const claudeLog = logs.find((line) => line.includes('model=claude'));
-    const geminiLog = logs.find((line) => line.includes('model=gemini'));
-    assert.ok(geminiLog);
+    const geminiLogLow = logs.find((line) => line.includes('model=gemini'));
+    assert.ok(geminiLogHigh);
     assert.ok(claudeLog);
-    assert.ok(geminiLog);
+    assert.ok(geminiLogLow);
     assert.doesNotMatch(claudeLog ?? '', /thinking_level=/);
-    assert.doesNotMatch(geminiLog ?? '', /thinking_level=/);
+    assert.doesNotMatch(geminiLogLow ?? '', /thinking_level=/);
   });
 
   it('waitForClaudeStartupEvidence requires first-start ACK/task progress before startup dispatch is treated as settled', async () => {

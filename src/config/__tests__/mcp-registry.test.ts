@@ -14,8 +14,6 @@ describe("unified MCP registry loader", () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-mcp-registry-"));
     try {
       const omgPath = join(wd, ".omg", "mcp-registry.json");
-      const omgPath = join(wd, ".omg", "mcp-registry.json");
-      await mkdir(join(wd, ".omg"), { recursive: true });
       await mkdir(join(wd, ".omg"), { recursive: true });
 
       await writeFile(

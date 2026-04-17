@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { access, constants, open } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, isAbsolute, join, resolve } from "node:path";
+import { safeJsonParse, safeReadJsonFile } from "../utils/safe-json.js";
 import {
   type AdaptBootstrapMetadata,
   type AdaptCapabilityReport,
@@ -110,14 +111,6 @@ interface HermesEvidence {
   resumable: boolean;
 }
 
-function safeJsonParse<T>(raw: string): T | null {
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
 function resolveRelativeToCwd(cwd: string, pathValue: string): string {
   return isAbsolute(pathValue) ? pathValue : resolve(cwd, pathValue);
 }
@@ -191,15 +184,6 @@ async function isReadable(path: string): Promise<boolean> {
   }
 }
 
-async function readJsonFile<T>(path: string): Promise<T | null> {
-  try {
-    const raw = await access(path, constants.R_OK).then(() => readFileSync(path, "utf-8"));
-    return safeJsonParse<T>(raw);
-  } catch {
-    return null;
-  }
-}
-
 async function sqliteHasTable(path: string, table: string): Promise<boolean> {
   if (!existsSync(path)) return false;
   let handle;
@@ -264,8 +248,8 @@ export async function collectHermesEvidence(cwd = process.cwd()): Promise<Hermes
     isReadable(gatewayPidPath),
     isReadable(gatewayStatePath),
     isReadable(stateDbPath),
-    readJsonFile<HermesPidRecord>(gatewayPidPath),
-    readJsonFile<HermesGatewayRuntimeFile>(gatewayStatePath),
+    safeReadJsonFile<HermesPidRecord | null>(gatewayPidPath, null),
+    safeReadJsonFile<HermesGatewayRuntimeFile | null>(gatewayStatePath, null),
     sqliteHasTable(stateDbPath, "sessions"),
   ]);
 

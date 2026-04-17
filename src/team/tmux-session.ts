@@ -682,7 +682,6 @@ export function translateWorkerLaunchArgsForCli(
   initialPrompt?: string,
   workerRole?: string,
 ): string[] {
-  if (workerCli === 'gemini') return [...args];
   if (workerCli === 'gemini') {
     const model = extractModelOverride(args);
     const geminiModel = model && /gemini/i.test(model) ? model : null;

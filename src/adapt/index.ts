@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { readLatestPlanningArtifacts } from "../planning/artifacts.js";
 import {
 	ADAPT_SCHEMA_VERSION,
+	FOUNDATION_CONSTRAINTS,
 	type AdaptDoctorIssue,
 	type AdaptDoctorReport,
 	type AdaptEnvelope,
@@ -29,12 +30,6 @@ import {
 } from "./openclaw.js";
 import { resolveAdaptPaths } from "./paths.js";
 import { getAdaptTargetDescriptor, listAdaptTargets } from "./registry.js";
-
-const FOUNDATION_CONSTRAINTS = [
-	"Thin adapter surface only; no bidirectional control plane is claimed in this foundation PR.",
-	"No direct writes to .omg/state/... or target runtime internals.",
-	"Capability reporting is asymmetric: OMX-owned, shared-contract, and target-observed surfaces are reported separately.",
-];
 
 function toIsoTimestamp(now = new Date()): string {
 	return now.toISOString();

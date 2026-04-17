@@ -6,7 +6,7 @@ import {
 export const OMG_GENERATED_AGENTS_MARKER = '<!-- omg:generated:agents-md -->'
 const AUTONOMY_DIRECTIVE_END_MARKER = '<!-- END AUTONOMY DIRECTIVE -->'
 
-export function isOmxGeneratedAgentsMd(content: string): boolean {
+export function isOmgGeneratedAgentsMd(content: string): boolean {
   return content.includes(OMG_GENERATED_AGENTS_MARKER)
 }
 

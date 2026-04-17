@@ -2,8 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   addGeneratedAgentsMarker,
-  hasOmxManagedAgentsSections,
-  isOmxGeneratedAgentsMd,
+  hasOmgManagedAgentsSections,
+  isOmgGeneratedAgentsMd,
   OMG_GENERATED_AGENTS_MARKER,
 } from '../agents-md.js';
 
@@ -40,7 +40,7 @@ describe('agents-md helpers', () => {
       '# oh-my-gemini - Intelligent Multi-Agent Orchestration',
     ].join('\n');
 
-    assert.equal(isOmxGeneratedAgentsMd(content), true);
+    assert.equal(isOmgGeneratedAgentsMd(content), true);
   });
 
   it('does not treat title-only user GEMINI.md content as OMX-generated', () => {
@@ -50,8 +50,8 @@ describe('agents-md helpers', () => {
       'User-authored guidance without any OMX ownership markers.',
     ].join('\n');
 
-    assert.equal(isOmxGeneratedAgentsMd(content), false);
-    assert.equal(hasOmxManagedAgentsSections(content), false);
+    assert.equal(isOmgGeneratedAgentsMd(content), false);
+    assert.equal(hasOmgManagedAgentsSections(content), false);
   });
 
   it('recognizes explicit OMX-owned model table blocks as managed sections', () => {
@@ -63,7 +63,7 @@ describe('agents-md helpers', () => {
       '<!-- OMX:MODELS:END -->',
     ].join('\n');
 
-    assert.equal(isOmxGeneratedAgentsMd(content), false);
-    assert.equal(hasOmxManagedAgentsSections(content), true);
+    assert.equal(isOmgGeneratedAgentsMd(content), false);
+    assert.equal(hasOmgManagedAgentsSections(content), true);
   });
 });

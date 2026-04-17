@@ -3,6 +3,12 @@ export const ADAPT_SCHEMA_VERSION = "1.0";
 export const ADAPT_TARGETS = ["openclaw", "hermes"] as const;
 export type AdaptTarget = (typeof ADAPT_TARGETS)[number];
 
+export const FOUNDATION_CONSTRAINTS = [
+	"Thin adapter surface only; no bidirectional control plane is claimed in this foundation PR.",
+	"No direct writes to .omg/state/... or target runtime internals.",
+	"Capability reporting is asymmetric: OMX-owned, shared-contract, and target-observed surfaces are reported separately.",
+];
+
 export const ADAPT_SUBCOMMANDS = [
 	"probe",
 	"status",
