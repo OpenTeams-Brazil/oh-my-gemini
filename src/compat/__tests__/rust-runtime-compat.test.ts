@@ -34,13 +34,13 @@ async function withTempTeamStateRoot<T>(
   teamStateRoot: string,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const previousRoot = process.env.OMX_TEAM_STATE_ROOT;
-  process.env.OMX_TEAM_STATE_ROOT = teamStateRoot;
+  const previousRoot = process.env.OMG_TEAM_STATE_ROOT;
+  process.env.OMG_TEAM_STATE_ROOT = teamStateRoot;
   try {
     return await fn();
   } finally {
-    if (previousRoot === undefined) delete process.env.OMX_TEAM_STATE_ROOT;
-    else process.env.OMX_TEAM_STATE_ROOT = previousRoot;
+    if (previousRoot === undefined) delete process.env.OMG_TEAM_STATE_ROOT;
+    else process.env.OMG_TEAM_STATE_ROOT = previousRoot;
   }
 }
 
@@ -120,7 +120,7 @@ describe('rust runtime legacy-reader compatibility', () => {
         await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
         await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-        const result = runOmx(wd, ['team', 'status', 'rust-compat-team', '--json'], { OMX_TEAM_STATE_ROOT: teamStateRoot });
+        const result = runOmx(wd, ['team', 'status', 'rust-compat-team', '--json'], { OMG_TEAM_STATE_ROOT: teamStateRoot });
         if (shouldSkipForSpawnPermissions(result.error)) return;
 
         assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -171,7 +171,7 @@ describe('rust runtime legacy-reader compatibility', () => {
         const result = runOmx(
           wd,
           ['doctor', '--team'],
-          { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMX_TEAM_STATE_ROOT: teamStateRoot },
+          { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMG_TEAM_STATE_ROOT: teamStateRoot },
         );
         if (shouldSkipForSpawnPermissions(result.error)) return;
 
@@ -225,7 +225,7 @@ describe('rust runtime legacy-reader compatibility', () => {
 
   it('prefers bridge-authored dispatch/mailbox compatibility views over stale legacy files', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-rust-compat-bridge-'));
-    const previousRuntimeBinary = process.env.OMX_RUNTIME_BINARY;
+    const previousRuntimeBinary = process.env.OMG_RUNTIME_BINARY;
     try {
       const teamStateRoot = join(wd, '.omg', 'state');
       await withTempTeamStateRoot(teamStateRoot, async () => {
@@ -234,7 +234,7 @@ describe('rust runtime legacy-reader compatibility', () => {
         await mkdir(fakeBin, { recursive: true });
         const runtimePath = join(fakeBin, 'omg-runtime');
         await writeCompatRuntimeFixture(runtimePath);
-        process.env.OMX_RUNTIME_BINARY = runtimePath;
+        process.env.OMG_RUNTIME_BINARY = runtimePath;
 
         const teamDir = join(teamStateRoot, 'team', 'rust-compat-bridge');
         await writeFile(
@@ -261,8 +261,8 @@ describe('rust runtime legacy-reader compatibility', () => {
         assert.equal(mailbox.some((entry) => entry.message_id === 'legacy-msg'), false, 'bridge compat view should win over stale legacy mailbox file');
       });
     } finally {
-      if (typeof previousRuntimeBinary === 'string') process.env.OMX_RUNTIME_BINARY = previousRuntimeBinary;
-      else delete process.env.OMX_RUNTIME_BINARY;
+      if (typeof previousRuntimeBinary === 'string') process.env.OMG_RUNTIME_BINARY = previousRuntimeBinary;
+      else delete process.env.OMG_RUNTIME_BINARY;
       await rm(wd, { recursive: true, force: true });
     }
   });

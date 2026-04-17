@@ -39,7 +39,7 @@ exit 2
 
 describe('notifyLifecycle tmux tail auto-capture', () => {
   let originalEnv: NodeJS.ProcessEnv;
-  const geminiHome = mkdtempSync(join(tmpdir(), 'omg-notify-index-codex-home-'));
+  const geminiHome = mkdtempSync(join(tmpdir(), 'omg-notify-index-gemini-home-'));
   const fakeBinDir = mkdtempSync(join(tmpdir(), 'omg-notify-index-fake-bin-'));
 
   before(() => {

@@ -83,8 +83,8 @@ export async function onHookEvent(event) {
           env: {
             ...process.env,
             HOME: homeDir,
-            OMX_HOOK_DERIVED_SIGNALS: '1',
-            OMX_HOOK_PLUGINS: '1',
+            OMG_HOOK_DERIVED_SIGNALS: '1',
+            OMG_HOOK_PLUGINS: '1',
           },
           encoding: 'utf8',
         },

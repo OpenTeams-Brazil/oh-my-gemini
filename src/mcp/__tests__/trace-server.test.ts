@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 
 describe('trace-server session-scoped mode discovery', () => {
   it('includes mode events from session-scoped state files', async () => {
-    process.env.OMX_TRACE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_TRACE_SERVER_DISABLE_AUTO_START = '1';
     const { readModeEvents } = await import('../trace-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-trace-test-'));
@@ -34,7 +34,7 @@ describe('trace-server session-scoped mode discovery', () => {
   });
 
   it('does not include unrelated session mode events when a current session is active', async () => {
-    process.env.OMX_TRACE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_TRACE_SERVER_DISABLE_AUTO_START = '1';
     const { readModeEvents } = await import('../trace-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-trace-test-'));
@@ -68,7 +68,7 @@ describe('trace-server session-scoped mode discovery', () => {
 
 describe('trace-server log readers', () => {
   it('returns only the most recent entries when last is provided', async () => {
-    process.env.OMX_TRACE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_TRACE_SERVER_DISABLE_AUTO_START = '1';
     const { readLogFiles } = await import('../trace-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-trace-test-'));
@@ -99,7 +99,7 @@ describe('trace-server log readers', () => {
   });
 
   it('summarizes log history incrementally without materializing turn entries', async () => {
-    process.env.OMX_TRACE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_TRACE_SERVER_DISABLE_AUTO_START = '1';
     const { summarizeLogFiles } = await import('../trace-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-trace-test-'));

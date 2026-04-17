@@ -1,6 +1,6 @@
 /**
  * Launch-time update checks for oh-my-gemini.
- * Non-fatal and throttled; can be disabled via OMX_AUTO_UPDATE=0.
+ * Non-fatal and throttled; can be disabled via OMG_AUTO_UPDATE=0.
  */
 
 import { readFile, writeFile, mkdir } from 'fs/promises';
@@ -146,7 +146,7 @@ export async function maybeCheckAndPromptUpdate(
   dependencies: Partial<UpdateDependencies> = {},
 ): Promise<void> {
   const updateDependencies = { ...defaultUpdateDependencies, ...dependencies };
-  if (process.env.OMX_AUTO_UPDATE === '0') return;
+  if (process.env.OMG_AUTO_UPDATE === '0') return;
   if (!process.stdin.isTTY || !process.stdout.isTTY) return;
 
   const now = Date.now();

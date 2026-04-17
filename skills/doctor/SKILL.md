@@ -5,28 +5,28 @@ description: Diagnose and fix oh-my-gemini installation issues
 
 # Doctor Skill
 
-Note: All `~/.gemini/...` paths in this guide respect `CODEX_HOME` when that environment variable is set.
+Note: All `~/.gemini/...` paths in this guide respect `GEMINI_HOME` when that environment variable is set.
 
 ## Canonical skill root
 
-OMX installs skills to `${CODEX_HOME:-~/.gemini}/skills/` — this is the path current Gemini CLI natively loads as its skill root.
+OMG installs skills to `${GEMINI_HOME:-~/.gemini}/skills/` — this is the path current Gemini CLI natively loads as its skill root.
 
-`~/.agents/skills/` is a **historical legacy path** from an older Gemini CLI release, before Gemini settled on `~/.gemini` as its home directory. Current Gemini CLI and OMX no longer write there.
+`~/.agents/skills/` is a **historical legacy path** from an older Gemini CLI release, before Gemini settled on `~/.gemini` as its home directory. Current Gemini CLI and OMG no longer write there.
 
-**In a mixed OMX + plain Gemini environment:**
-- **Use**: `${CODEX_HOME:-~/.gemini}/skills/` (user scope) or `.gemini/skills/` (project scope)
+**In a mixed OMG + plain Gemini environment:**
+- **Use**: `${GEMINI_HOME:-~/.gemini}/skills/` (user scope) or `.gemini/skills/` (project scope)
 - **Clean up if present**: `~/.agents/skills/` — if this still exists alongside the canonical root, Gemini's Enable/Disable Skills UI will show duplicate entries for any skill present in both trees
-- **Interop rule**: OMX writes only to the canonical path; archive or remove `~/.agents/skills/` once you have confirmed `${CODEX_HOME:-~/.gemini}/skills/` is your active root
+- **Interop rule**: OMG writes only to the canonical path; archive or remove `~/.agents/skills/` once you have confirmed `${GEMINI_HOME:-~/.gemini}/skills/` is your active root
 
 ## Task: Run Installation Diagnostics
 
-You are the OMX Doctor - diagnose and fix installation issues.
+You are the OMG Doctor - diagnose and fix installation issues.
 
 ### Step 1: Check Plugin Version
 
 ```bash
 # Get installed version
-INSTALLED=$(ls ~/.gemini/plugins/cache/omc/oh-my-gemini/ 2>/dev/null | sort -V | tail -1)
+INSTALLED=$(ls ~/.gemini/plugins/cache/omg/oh-my-gemini/ 2>/dev/null | sort -V | tail -1)
 echo "Installed: $INSTALLED"
 
 # Get latest from npm
@@ -66,19 +66,19 @@ ls -la ~/.gemini/hooks/*.sh 2>/dev/null
 # Check if GEMINI.md exists
 ls -la ~/.gemini/GEMINI.md 2>/dev/null
 
-# Check for OMX marker
-grep -q "oh-my-gemini Multi-Agent System" ~/.gemini/GEMINI.md 2>/dev/null && echo "Has OMX config" || echo "Missing OMX config"
+# Check for OMG marker
+grep -q "oh-my-gemini Multi-Agent System" ~/.gemini/GEMINI.md 2>/dev/null && echo "Has OMG config" || echo "Missing OMG config"
 ```
 
 **Diagnosis**:
 - If missing: CRITICAL - GEMINI.md not configured
-- If missing OMX marker: WARN - outdated GEMINI.md
+- If missing OMG marker: WARN - outdated GEMINI.md
 
 ### Step 5: Check for Stale Plugin Cache
 
 ```bash
 # Count versions in cache
-ls ~/.gemini/plugins/cache/omc/oh-my-gemini/ 2>/dev/null | wc -l
+ls ~/.gemini/plugins/cache/omg/oh-my-gemini/ 2>/dev/null | wc -l
 ```
 
 **Diagnosis**:
@@ -96,7 +96,7 @@ ls -la ~/.gemini/agents/ 2>/dev/null
 ls -la ~/.gemini/commands/ 2>/dev/null
 
 # Check canonical current skills directory
-ls -la ${CODEX_HOME:-~/.gemini}/skills/ 2>/dev/null
+ls -la ${GEMINI_HOME:-~/.gemini}/skills/ 2>/dev/null
 
 # Check historical legacy skill directory
 ls -la ~/.agents/skills/ 2>/dev/null
@@ -105,8 +105,8 @@ ls -la ~/.agents/skills/ 2>/dev/null
 **Diagnosis**:
 - If `~/.gemini/agents/` exists with oh-my-gemini-related files: WARN - legacy agents (now provided by plugin)
 - If `~/.gemini/commands/` exists with oh-my-gemini-related files: WARN - legacy commands (now provided by plugin)
-- If `${CODEX_HOME:-~/.gemini}/skills/` exists with OMX skills: OK - canonical current user skill root
-- If `~/.agents/skills/` exists: WARN - historical legacy skill root that can overlap with `${CODEX_HOME:-~/.gemini}/skills/` and cause duplicate Enable/Disable Skills entries
+- If `${GEMINI_HOME:-~/.gemini}/skills/` exists with OMG skills: OK - canonical current user skill root
+- If `~/.agents/skills/` exists: WARN - historical legacy skill root that can overlap with `${GEMINI_HOME:-~/.gemini}/skills/` and cause duplicate Enable/Disable Skills entries
 
 Look for files like:
 - `architect.md`, `researcher.md`, `explore.md`, `executor.md`, etc. in agents/
@@ -120,7 +120,7 @@ Look for files like:
 After running all checks, output a report:
 
 ```
-## OMX Doctor Report
+## OMG Doctor Report
 
 ### Summary
 [HEALTHY / ISSUES FOUND]
@@ -136,7 +136,7 @@ After running all checks, output a report:
 | Plugin Cache | OK/WARN | ... |
 | Legacy Agents (~/.gemini/agents/) | OK/WARN | ... |
 | Legacy Commands (~/.gemini/commands/) | OK/WARN | ... |
-| Skills (${CODEX_HOME:-~/.gemini}/skills) | OK/WARN | ... |
+| Skills (${GEMINI_HOME:-~/.gemini}/skills) | OK/WARN | ... |
 | Legacy Skill Root (~/.agents/skills) | OK/WARN | ... |
 
 ### Issues Found
@@ -168,14 +168,14 @@ rm -f ~/.gemini/hooks/stop-continuation.sh
 
 ### Fix: Outdated Plugin
 ```bash
-rm -rf ~/.gemini/plugins/cache/omc/oh-my-gemini
+rm -rf ~/.gemini/plugins/cache/omg/oh-my-gemini
 echo "Plugin cache cleared. Restart Gemini CLI to fetch latest version."
 ```
 
 ### Fix: Stale Cache (multiple versions)
 ```bash
 # Keep only latest version
-cd ~/.gemini/plugins/cache/omc/oh-my-gemini/
+cd ~/.gemini/plugins/cache/omg/oh-my-gemini/
 ls | sort -V | head -n -1 | xargs rm -rf
 ```
 
@@ -187,7 +187,7 @@ WebFetch(url: "https://raw.githubusercontent.com/Yeachan-Heo/oh-my-gemini/main/d
 
 ### Fix: Legacy Curl-Installed Content
 
-Remove legacy agents/commands plus the historical `~/.agents/skills` tree if it overlaps with the canonical `${CODEX_HOME:-~/.gemini}/skills` install:
+Remove legacy agents/commands plus the historical `~/.agents/skills` tree if it overlaps with the canonical `${GEMINI_HOME:-~/.gemini}/skills` install:
 
 ```bash
 # Backup first (optional - ask user)

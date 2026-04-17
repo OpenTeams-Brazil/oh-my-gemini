@@ -766,7 +766,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
 
         let mut engine = RuntimeEngine::new().with_state_dir(&dir);
-        let meta = serde_json::json!({"priority": "high", "worker_type": "codex"});
+        let meta = serde_json::json!({"priority": "high", "worker_type": "gemini"});
         engine
             .process(RuntimeCommand::QueueDispatch {
                 request_id: "req-meta".into(),

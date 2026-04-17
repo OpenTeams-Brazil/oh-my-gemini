@@ -430,9 +430,9 @@ describe("worker bootstrap", () => {
     assert.ok(message.length < 200);
   });
 
-  it("generateTriggerMessage does not contain [OMX_TMUX_INJECT]", () => {
+  it("generateTriggerMessage does not contain [OMG_TMUX_INJECT]", () => {
     const message = generateTriggerMessage("worker-1", "team-safe");
-    assert.equal(message.includes("[OMX_TMUX_INJECT]"), false);
+    assert.equal(message.includes("[OMG_TMUX_INJECT]"), false);
   });
 
   it("generateTriggerMessage contains the inbox path", () => {
@@ -451,18 +451,18 @@ describe("worker bootstrap", () => {
     const directive = buildTriggerDirective("worker-9", "team-path");
     assert.equal(directive.intent, "followup-relaunch");
     assert.match(directive.text, /\.omg\/state\/team\/team-path\/workers\/worker-9\/inbox\.md/);
-    assert.doesNotMatch(directive.text, /OMX_INTENT/);
+    assert.doesNotMatch(directive.text, /OMG_INTENT/);
   });
 
   it("generateTriggerMessage uses provided state-root reference for worktree workers", () => {
     const message = generateTriggerMessage(
       "worker-9",
       "team-path",
-      "$OMX_TEAM_STATE_ROOT",
+      "$OMG_TEAM_STATE_ROOT",
     );
     assert.match(
       message,
-      /\$OMX_TEAM_STATE_ROOT\/team\/team-path\/workers\/worker-9\/inbox\.md/,
+      /\$OMG_TEAM_STATE_ROOT\/team\/team-path\/workers\/worker-9\/inbox\.md/,
     );
     assert.match(message, /work now/i);
     assert.match(message, /report progress/i);
@@ -497,7 +497,7 @@ describe("worker bootstrap", () => {
     const directive = buildMailboxTriggerDirective("worker-2", "team-mail", 3);
     assert.equal(directive.intent, "pending-mailbox-review");
     assert.match(directive.text, /3 new message/);
-    assert.doesNotMatch(directive.text, /OMX_INTENT/);
+    assert.doesNotMatch(directive.text, /OMG_INTENT/);
   });
 
   it("generateMailboxTriggerMessage uses provided state-root reference for worktree workers", () => {
@@ -505,12 +505,12 @@ describe("worker bootstrap", () => {
       "worker-2",
       "team-mail",
       3,
-      "$OMX_TEAM_STATE_ROOT",
+      "$OMG_TEAM_STATE_ROOT",
     );
     assert.match(message, /3 new msg/);
     assert.match(
       message,
-      /read .*\$OMX_TEAM_STATE_ROOT\/team\/team-mail\/mailbox\/worker-2\.json/i,
+      /read .*\$OMG_TEAM_STATE_ROOT\/team\/team-mail\/mailbox\/worker-2\.json/i,
     );
     assert.match(message, /act/i);
     assert.match(message, /report progress/i);
@@ -545,18 +545,18 @@ describe("worker bootstrap", () => {
     const directive = buildLeaderMailboxTriggerDirective("team-mail", "worker-2");
     assert.equal(directive.intent, "pending-mailbox-review");
     assert.match(directive.text, /worker-2 sent a new message/);
-    assert.doesNotMatch(directive.text, /OMX_INTENT/);
+    assert.doesNotMatch(directive.text, /OMG_INTENT/);
   });
 
   it("generateLeaderMailboxTriggerMessage uses provided state-root reference for worktree leaders", () => {
     const message = generateLeaderMailboxTriggerMessage(
       "team-mail",
       "worker-2",
-      "$OMX_TEAM_STATE_ROOT",
+      "$OMG_TEAM_STATE_ROOT",
     );
     assert.match(
       message,
-      /read .*\$OMX_TEAM_STATE_ROOT\/team\/team-mail\/mailbox\/leader-fixed\.json/i,
+      /read .*\$OMG_TEAM_STATE_ROOT\/team\/team-mail\/mailbox\/leader-fixed\.json/i,
     );
     assert.match(message, /new msg from worker-2/i);
     assert.match(message, /review it; decide next step/i);

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
 
-const RESULT_PREFIX = '__OMX_PLUGIN_RESULT__ ';
+const RESULT_PREFIX = '__OMG_PLUGIN_RESULT__ ';
 
 function getRunnerPath(): string {
   // Resolve from dist after build

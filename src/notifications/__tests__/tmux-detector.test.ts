@@ -12,7 +12,7 @@ describe('analyzePaneContent', () => {
     assert.equal(result.confidence, 0);
   });
 
-  it('detects "codex" keyword', () => {
+  it('detects "gemini" keyword', () => {
     const result = analyzePaneContent('Running Gemini agent...');
     assert.equal(result.hasGemini, true);
     assert.ok(result.confidence >= 0.5);
@@ -73,10 +73,10 @@ describe('analyzePaneContent', () => {
     assert.ok(result.confidence >= 0.1);
   });
 
-  it('gives high confidence for codex content with prompt chars', () => {
+  it('gives high confidence for gemini content with prompt chars', () => {
     const result = analyzePaneContent('Gemini > Running agent task...');
     assert.equal(result.hasGemini, true);
-    // codex=0.5, >=0.1, agent/task=0.1, non-empty=0.1 = 0.8
+    // gemini=0.5, >=0.1, agent/task=0.1, non-empty=0.1 = 0.8
     assert.ok(result.confidence >= 0.7, `Expected confidence >= 0.7, got ${result.confidence}`);
   });
 
@@ -85,7 +85,7 @@ describe('analyzePaneContent', () => {
     assert.ok(result.confidence <= 1.0);
   });
 
-  it('gives some confidence for non-empty non-codex content', () => {
+  it('gives some confidence for non-empty non-gemini content', () => {
     const result = analyzePaneContent('some random text here');
     assert.equal(result.hasGemini, false);
     assert.ok(result.confidence > 0);

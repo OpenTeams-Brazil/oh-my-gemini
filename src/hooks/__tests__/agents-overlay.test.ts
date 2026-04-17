@@ -73,9 +73,9 @@ describe("generateOverlay", () => {
   });
 
   it("adds advisory explore routing guidance by default and hides it only on explicit opt-out", async () => {
-    const previous = process.env.USE_OMX_EXPLORE_CMD;
+    const previous = process.env.USE_OMG_EXPLORE_CMD;
     try {
-      delete process.env.USE_OMX_EXPLORE_CMD;
+      delete process.env.USE_OMG_EXPLORE_CMD;
       const defaultOverlay = await generateOverlay(
         tempDir,
         "explore-routing-default",
@@ -87,7 +87,7 @@ describe("generateOverlay", () => {
       assert.match(defaultOverlay, /default-on; opt out/i);
       assert.match(defaultOverlay, /omg explore` FIRST before attempting full code analysis/i);
 
-      process.env.USE_OMX_EXPLORE_CMD = "off";
+      process.env.USE_OMG_EXPLORE_CMD = "off";
       const disabledOverlay = await generateOverlay(
         tempDir,
         "explore-routing-off",
@@ -95,8 +95,8 @@ describe("generateOverlay", () => {
       assert.doesNotMatch(disabledOverlay, /\*\*Explore Command Preference:\*\*/);
     } finally {
       if (typeof previous === "string")
-        process.env.USE_OMX_EXPLORE_CMD = previous;
-      else delete process.env.USE_OMX_EXPLORE_CMD;
+        process.env.USE_OMG_EXPLORE_CMD = previous;
+      else delete process.env.USE_OMG_EXPLORE_CMD;
     }
   });
 

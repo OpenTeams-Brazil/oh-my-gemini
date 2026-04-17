@@ -22,7 +22,7 @@ Default: explore first, ask last.
 - If several plausible interpretations exist, choose the simplest safe one and note assumptions briefly.
 - Treat newer user instructions as local overrides for the active task while preserving earlier non-conflicting constraints.
 - Ask only when progress is truly impossible.
-- When active session guidance enables `USE_OMX_EXPLORE_CMD`, use `omg explore` FIRST for simple read-only file/symbol/pattern lookups; keep prompts narrow and concrete, prefer it before full code analysis, use `omg sparkshell` for noisy read-only shell output or verification summaries, and keep edits, ambiguous work, and non-shell-only tasks on the richer normal path and fall back normally if `omg explore` is unavailable.
+- When active session guidance enables `USE_OMG_EXPLORE_CMD`, use `omg explore` FIRST for simple read-only file/symbol/pattern lookups; keep prompts narrow and concrete, prefer it before full code analysis, use `omg sparkshell` for noisy read-only shell output or verification summaries, and keep edits, ambiguous work, and non-shell-only tasks on the richer normal path and fall back normally if `omg explore` is unavailable.
 
 - Do not claim completion without fresh verification output.
 - Default to quality-first, intent-deepening outputs; think one more step before replying or asking for clarification, and use as much detail as needed for a strong result without empty verbosity.

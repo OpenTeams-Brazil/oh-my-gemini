@@ -1,13 +1,13 @@
 ---
 name: cancel
-description: Cancel any active OMX mode (autopilot, ralph, ultrawork, ecomode, ultraqa, swarm, ultrapilot, pipeline, team)
+description: Cancel any active OMG mode (autopilot, ralph, ultrawork, ecomode, ultraqa, swarm, ultrapilot, pipeline, team)
 ---
 
 # Cancel Skill
 
-Intelligent cancellation that detects and cancels the active OMX mode.
+Intelligent cancellation that detects and cancels the active OMG mode.
 
-**The cancel skill is the standard way to complete and exit any OMX mode.**
+**The cancel skill is the standard way to complete and exit any OMG mode.**
 When the stop hook detects work is complete, it instructs the LLM to invoke
 this skill for proper state cleanup. If cancel fails or is interrupted,
 retry with `--force` flag, or wait for the 2-hour staleness timeout as
@@ -183,7 +183,7 @@ After graceful pass:
 
 **Cleanup:**
 ```
-  1. Strip GEMINI.md team worker overlay (<!-- OMX:TEAM:WORKER:START/END -->)
+  1. Strip GEMINI.md team worker overlay (<!-- OMG:TEAM:WORKER:START/END -->)
   2. Remove team state directory: rm -rf .omg/state/team/{name}/
   3. Clear team mode state: state_clear(mode="team")
   4. Emit structured cancel report
@@ -318,7 +318,7 @@ fi
 #### No Active Modes
 
 ```bash
-echo "No active OMX modes detected."
+echo "No active OMG modes detected."
 echo ""
 echo "Checked for:"
 echo "  - Autopilot (.omg/state/autopilot-state.json)"
@@ -355,8 +355,8 @@ Mode-specific subsections below describe what extra cleanup each handler perform
 | Pipeline | "Pipeline cancelled. Sequential agent chain stopped." |
 | Team | "Team cancelled. Teammates shut down and cleaned up." |
 | Plan Consensus | "Plan Consensus cancelled. Planning session ended." |
-| Force | "All OMX modes cleared. You are free to start fresh." |
-| None | "No active OMX modes detected." |
+| Force | "All OMG modes cleared. You are free to start fresh." |
+| None | "No active OMG modes detected." |
 
 ## What Gets Preserved
 
@@ -386,7 +386,7 @@ When cancelling team mode, the cancel skill should:
 
 1. **Kill all team tmux sessions**: `tmux list-sessions -F '#{session_name}' 2>/dev/null | grep '^omg-team-'` and kill each
 2. **Remove team state directories**: `rm -rf .omg/state/team/*/`
-3. **Strip GEMINI.md overlay**: Remove content between `<!-- OMX:TEAM:WORKER:START -->` and `<!-- OMX:TEAM:WORKER:END -->`
+3. **Strip GEMINI.md overlay**: Remove content between `<!-- OMG:TEAM:WORKER:START -->` and `<!-- OMG:TEAM:WORKER:END -->`
 
 ### Force Clear Addition
 

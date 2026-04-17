@@ -16,7 +16,7 @@ Verdict: **GO** ✅
 
 ### Ralph / runtime authority / workflow semantics
 - `src/cli/ralph.ts`, `src/ralph/*`, `skills/ralph/SKILL.md`, `skills/ralph-init/SKILL.md` — prompt-side Ralph vs PRD CLI startup and story validation semantics
-- `src/scripts/codex-native-hook.ts`, `src/hooks/keyword-detector.ts`, `src/mcp/state-server.ts`, `src/state/*` — Stop handling, metadata routing, MCP state transport, and session authority
+- `src/scripts/gemini-native-hook.ts`, `src/hooks/keyword-detector.ts`, `src/mcp/state-server.ts`, `src/state/*` — Stop handling, metadata routing, MCP state transport, and session authority
 - `src/scripts/notify-hook/team-leader-nudge.ts`, `src/scripts/notify-hook/team-dispatch.ts` — tmux Ralph nudge authority and startup inbox/dispatch regression coverage
 
 ### Launch / platform / worktree safety
@@ -26,11 +26,11 @@ Verdict: **GO** ✅
 
 ### Hooks / HUD / notifications
 - `src/hud/state.ts`, `src/hud/tmux.ts`, `src/notifications/*`, `src/team/leader-activity.ts` — live-session HUD binding, tmux detection, Slack mention parsing, macOS stale-polling git-probe reduction, and notification formatting/noise paths
-- `src/config/codex-hooks.ts`, `src/scripts/codex-native-pre-post.ts` — native hook configuration and metadata routing contracts
+- `src/config/gemini-hooks.ts`, `src/scripts/gemini-native-pre-post.ts` — native hook configuration and metadata routing contracts
 
 ### Setup / docs / release workflow
 - `src/cli/setup.ts`, `src/config/mcp-registry.ts`, `skills/wiki/SKILL.md` — wiki setup registration
-- `src/cli/doctor.ts`, `docs/codex-native-hooks.md` — native-hook doctor coverage and operator docs
+- `src/cli/doctor.ts`, `docs/gemini-native-hooks.md` — native-hook doctor coverage and operator docs
 - `CONTRIBUTING.md`, `.github/workflows/release.yml` — dev-base contribution guardrail and release workflow dependency refresh
 
 ### Release collateral

@@ -1,22 +1,22 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
-  buildManagedCodexHooksConfig,
-  getMissingManagedCodexHookEvents,
-  mergeManagedCodexHooksConfig,
-  removeManagedCodexHooks,
-} from "../codex-hooks.js";
+  buildManagedGeminiHooksConfig,
+  getMissingManagedGeminiHookEvents,
+  mergeManagedGeminiHooksConfig,
+  removeManagedGeminiHooks,
+} from "../gemini-hooks.js";
 
-describe("codex hooks helpers", () => {
+describe("gemini hooks helpers", () => {
   it("merges managed wrappers without dropping user hooks", () => {
     const merged = JSON.parse(
-      mergeManagedCodexHooksConfig(
+      mergeManagedGeminiHooksConfig(
         JSON.stringify({
           hooks: {
             SessionStart: [
               {
                 hooks: [
-                  { type: "command", command: 'node "/old/dist/scripts/codex-native-hook.js"' },
+                  { type: "command", command: 'node "/old/dist/scripts/gemini-native-hook.js"' },
                   { type: "command", command: "echo keep-me" },
                 ],
               },
@@ -33,7 +33,7 @@ describe("codex hooks helpers", () => {
     const sessionStart = merged.hooks.SessionStart;
     assert.equal(
       sessionStart.flatMap((entry) => entry.hooks ?? []).filter((hook) =>
-        String(hook.command ?? "").includes("codex-native-hook.js")
+        String(hook.command ?? "").includes("gemini-native-hook.js")
       ).length,
       1,
     );
@@ -43,13 +43,13 @@ describe("codex hooks helpers", () => {
   });
 
   it("removes only OMX-managed wrappers during uninstall cleanup", () => {
-    const managedOnly = JSON.stringify(buildManagedCodexHooksConfig("/repo"));
+    const managedOnly = JSON.stringify(buildManagedGeminiHooksConfig("/repo"));
     const preserved = JSON.stringify({
       hooks: {
         SessionStart: [
           {
             hooks: [
-              { type: "command", command: 'node "/repo/dist/scripts/codex-native-hook.js"' },
+              { type: "command", command: 'node "/repo/dist/scripts/gemini-native-hook.js"' },
               { type: "command", command: "echo keep-me" },
             ],
           },
@@ -58,26 +58,26 @@ describe("codex hooks helpers", () => {
       version: 1,
     });
 
-    const removedManagedOnly = removeManagedCodexHooks(managedOnly);
+    const removedManagedOnly = removeManagedGeminiHooks(managedOnly);
     assert.equal(removedManagedOnly.removedCount > 0, true);
     assert.equal(removedManagedOnly.nextContent, null);
 
-    const removedMixed = removeManagedCodexHooks(preserved);
+    const removedMixed = removeManagedGeminiHooks(preserved);
     assert.equal(removedMixed.removedCount, 1);
     assert.ok(removedMixed.nextContent);
     assert.match(removedMixed.nextContent, /echo keep-me/);
-    assert.doesNotMatch(removedMixed.nextContent, /codex-native-hook\.js/);
+    assert.doesNotMatch(removedMixed.nextContent, /gemini-native-hook\.js/);
     assert.match(removedMixed.nextContent, /"version": 1/);
   });
 
   it("reports missing managed hook coverage by event", () => {
-    const missing = getMissingManagedCodexHookEvents(
+    const missing = getMissingManagedGeminiHookEvents(
       JSON.stringify({
         hooks: {
           SessionStart: [
             {
               hooks: [
-                { type: "command", command: 'node "/repo/dist/scripts/codex-native-hook.js"' },
+                { type: "command", command: 'node "/repo/dist/scripts/gemini-native-hook.js"' },
               ],
             },
           ],
@@ -96,6 +96,6 @@ describe("codex hooks helpers", () => {
   });
 
   it("returns null for invalid hooks.json content", () => {
-    assert.equal(getMissingManagedCodexHookEvents("{ invalid json"), null);
+    assert.equal(getMissingManagedGeminiHookEvents("{ invalid json"), null);
   });
 });

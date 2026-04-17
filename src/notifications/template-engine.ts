@@ -242,7 +242,7 @@ export function validateTemplate(
  * leading \n so that false conditionals leave zero residual whitespace.
  * No post-processing collapsing is needed.
  *
- * Note: "agent-call" event is not supported in OMX (Codex CLI does not emit it).
+ * Note: "agent-call" event is not supported in OMX (Gemini CLI does not emit it).
  */
 const DEFAULT_TEMPLATES: Record<NotificationEvent, string> = {
   "session-start":
@@ -272,7 +272,7 @@ const DEFAULT_TEMPLATES: Record<NotificationEvent, string> = {
 
   "session-idle":
     "# Session Idle\n\n" +
-    "Codex has finished and is waiting for input.\n" +
+    "Gemini has finished and is waiting for input.\n" +
     "{{#if reason}}\n**Reason:** {{reason}}{{/if}}" +
     "{{#if modesDisplay}}\n**Modes:** {{modesDisplay}}{{/if}}" +
     "{{tmuxTailBlock}}" +
@@ -281,7 +281,7 @@ const DEFAULT_TEMPLATES: Record<NotificationEvent, string> = {
   "ask-user-question":
     "# Input Needed\n" +
     "{{#if question}}\n**Question:** {{question}}\n{{/if}}" +
-    "\nCodex is waiting for your response.\n\n{{footer}}",
+    "\nGemini is waiting for your response.\n\n{{footer}}",
 };
 
 /**

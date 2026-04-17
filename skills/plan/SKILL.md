@@ -30,7 +30,7 @@ Jumping into code without understanding requirements leads to rework, scope cree
 - Auto-detect interview vs direct mode based on request specificity
 - Ask one question at a time during interviews -- never batch multiple questions
 - Gather codebase facts via `explore` agent before asking the user about them
-- When session guidance enables `USE_OMX_EXPLORE_CMD`, prefer `omg explore` for simple read-only repository lookups during planning; keep prompts narrow and concrete, and keep prompt-heavy or ambiguous planning work on the richer normal path and fall back normally if `omg explore` is unavailable.
+- When session guidance enables `USE_OMG_EXPLORE_CMD`, prefer `omg explore` for simple read-only repository lookups during planning; keep prompts narrow and concrete, and keep prompt-heavy or ambiguous planning work on the richer normal path and fall back normally if `omg explore` is unavailable.
 - Plans must meet quality standards: 80%+ claims cite file/line, 90%+ criteria are testable
 - Implementation step count must be right-sized to task scope; avoid defaulting to exactly five steps when the work is clearly smaller or larger
 - Consensus mode outputs the final plan by default; add `--interactive` to enable execution handoff
@@ -83,8 +83,8 @@ Jumping into code without understanding requirements leads to rework, scope cree
    - **Request changes** — return to step 1 with user feedback incorporated
    - **Skip review** — go directly to final approval (step 7)
    If NOT running with `--interactive`, automatically proceed to review (step 3).
-3. **Architect** reviews for architectural soundness using `ask_codex` with `agent_role: "architect"`. Architect review **MUST** include: strongest steelman counterargument (antithesis) against the favored option, at least one meaningful tradeoff tension, and (when possible) a synthesis path. In deliberate mode, Architect should explicitly flag principle violations. **Wait for this step to complete before proceeding to step 4.** Do NOT run steps 3 and 4 in parallel.
-4. **Critic** evaluates against quality criteria using `ask_codex` with `agent_role: "critic"`. Critic **MUST** verify principle-option consistency, fair alternative exploration, risk mitigation clarity, testable acceptance criteria, and concrete verification steps. Critic **MUST** explicitly reject shallow alternatives, driver contradictions, vague risks, or weak verification. In deliberate mode, Critic **MUST** reject missing/weak pre-mortem or missing/weak expanded test plan. Run only after step 3 is complete.
+3. **Architect** reviews for architectural soundness using `ask_gemini` with `agent_role: "architect"`. Architect review **MUST** include: strongest steelman counterargument (antithesis) against the favored option, at least one meaningful tradeoff tension, and (when possible) a synthesis path. In deliberate mode, Architect should explicitly flag principle violations. **Wait for this step to complete before proceeding to step 4.** Do NOT run steps 3 and 4 in parallel.
+4. **Critic** evaluates against quality criteria using `ask_gemini` with `agent_role: "critic"`. Critic **MUST** verify principle-option consistency, fair alternative exploration, risk mitigation clarity, testable acceptance criteria, and concrete verification steps. Critic **MUST** explicitly reject shallow alternatives, driver contradictions, vague risks, or weak verification. In deliberate mode, Critic **MUST** reject missing/weak pre-mortem or missing/weak expanded test plan. Run only after step 3 is complete.
 5. **Re-review loop** (max 5 iterations): If Critic rejects or iterates, execute this closed loop:
    a. Collect all feedback from Architect + Critic
    b. Pass feedback to Planner to produce a revised plan
@@ -114,7 +114,7 @@ Jumping into code without understanding requirements leads to rework, scope cree
 
 0. Treat review as a reviewer-only pass. The context that wrote the plan, cleanup proposal, or diff MUST NOT be the context that approves it.
 1. Read plan file from `.omg/plans/`
-2. Evaluate via Critic using `ask_codex` with `agent_role: "critic"`
+2. Evaluate via Critic using `ask_gemini` with `agent_role: "critic"`
 3. For cleanup/refactor/anti-slop work, verify that the artifact includes a cleanup plan, regression tests or an explicit test gap, smell-by-smell passes, and quality gates.
 4. Return verdict: APPROVED, REVISE (with specific feedback), or REJECT (replanning required)
 5. If the current context authored the artifact, hand the review to `/review`, `critic`, `quality-reviewer`, `security-reviewer`, or `verifier` as appropriate.
@@ -141,9 +141,9 @@ Plans are saved to `.omg/plans/`. Drafts go to `.omg/drafts/`.
 - Use `AskUserQuestion` for preference questions (scope, priority, timeline, risk tolerance) -- provides clickable UI
 - Use plain text for questions needing specific values (port numbers, names, follow-up clarifications)
 - Use the `explore` agent (LOW tier, bounded quick pass) to gather codebase facts before asking the user
-- Use `ask_codex` with `agent_role: "planner"` for planning validation on large-scope plans
-- Use `ask_codex` with `agent_role: "analyst"` for requirements analysis
-- Use `ask_codex` with `agent_role: "critic"` for plan review in consensus and review modes
+- Use `ask_gemini` with `agent_role: "planner"` for planning validation on large-scope plans
+- Use `ask_gemini` with `agent_role: "analyst"` for requirements analysis
+- Use `ask_gemini` with `agent_role: "critic"` for plan review in consensus and review modes
 - If ToolSearch finds no MCP tools or Gemini is unavailable, fall back to equivalent OMX prompt agents -- never block on external tools
 - **CRITICAL — Consensus mode agent calls MUST be sequential, never parallel.** Always await the Architect result before issuing the Critic call.
 - In consensus mode, default to RALPLAN-DR short mode; enable deliberate mode on `--deliberate` or explicit high-risk signals (auth/security, migrations, destructive changes, production incidents, compliance/PII, public API breakage)

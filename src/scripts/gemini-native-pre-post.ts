@@ -200,7 +200,7 @@ const LORE_TRAILER_PREFIXES = [
   "Related:",
 ] as const;
 
-const OMX_COAUTHOR_TRAILER = "Co-authored-by: OmX <omg@oh-my-gemini.dev>";
+const OMG_COAUTHOR_TRAILER = "Co-authored-by: OmX <omg@oh-my-gemini.dev>";
 
 function isDoubleQuotedShellEscapeTarget(char: string | undefined): boolean {
   return char === "\"" || char === "\\" || char === "$" || char === "`" || char === "\n";
@@ -457,7 +457,7 @@ function parseGitCommitCommand(commandText: string): GitCommitCommandParseResult
 }
 
 function isLoreTrailerLine(line: string): boolean {
-  return line === OMX_COAUTHOR_TRAILER
+  return line === OMG_COAUTHOR_TRAILER
     || LORE_TRAILER_PREFIXES.some((prefix) => line.startsWith(prefix));
 }
 
@@ -525,8 +525,8 @@ function buildGitCommitComplianceErrors(message: string | null): string[] {
   if (!trailerLines.some((line) => LORE_TRAILER_PREFIXES.some((prefix) => line.startsWith(prefix)))) {
     errors.push("Add at least one Lore trailer such as `Constraint:`, `Confidence:`, or `Tested:`.");
   }
-  if (!trailerLines.includes(OMX_COAUTHOR_TRAILER)) {
-    errors.push(`Add the required co-author trailer: \`${OMX_COAUTHOR_TRAILER}\`.`);
+  if (!trailerLines.includes(OMG_COAUTHOR_TRAILER)) {
+    errors.push(`Add the required co-author trailer: \`${OMG_COAUTHOR_TRAILER}\`.`);
   }
 
   return errors;
@@ -599,7 +599,7 @@ export function buildNativePostToolUseOutput(
       hookSpecificOutput: {
         hookEventName: "PostToolUse",
         additionalContext:
-          `Clear MCP transport-death signal detected. Preserve current team/runtime state. ${fallbackText} OMX MCP servers are plain Node stdio processes, so they still shut down when stdin/transport closes. If this happened during team runtime, inspect first with \`omg team status <team>\` or \`omg team api read-stall-state --input '{"team_name":"<team>"}' --json\`, and only force cleanup after capturing needed state. For root-cause debugging, rerun with \`OMX_MCP_TRANSPORT_DEBUG=1\` to log why the stdio transport closed.`,
+          `Clear MCP transport-death signal detected. Preserve current team/runtime state. ${fallbackText} OMX MCP servers are plain Node stdio processes, so they still shut down when stdin/transport closes. If this happened during team runtime, inspect first with \`omg team status <team>\` or \`omg team api read-stall-state --input '{"team_name":"<team>"}' --json\`, and only force cleanup after capturing needed state. For root-cause debugging, rerun with \`OMG_MCP_TRANSPORT_DEBUG=1\` to log why the stdio transport closed.`,
       },
     };
   }

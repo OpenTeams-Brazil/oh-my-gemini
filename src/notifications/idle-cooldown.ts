@@ -2,10 +2,10 @@
  * Idle Notification Cooldown
  *
  * Prevents flooding users with session-idle notifications by enforcing a
- * minimum interval between dispatches. Ported from OMC persistent-mode hook.
+ * minimum interval between dispatches. Ported from OMG persistent-mode hook.
  *
  * Config key : notifications.idleCooldownSeconds in ~/.gemini/.omg-config.json
- * Env var    : OMX_IDLE_COOLDOWN_SECONDS  (overrides config)
+ * Env var    : OMG_IDLE_COOLDOWN_SECONDS  (overrides config)
  * State file : .omg/state/idle-notif-cooldown.json
  *              (session-scoped when sessionId is available)
  *
@@ -32,13 +32,13 @@ interface IdleNotificationState {
  * Read the idle notification cooldown in seconds.
  *
  * Resolution order:
- *   1. OMX_IDLE_COOLDOWN_SECONDS env var
+ *   1. OMG_IDLE_COOLDOWN_SECONDS env var
  *   2. notifications.idleCooldownSeconds in ~/.gemini/.omg-config.json
  *   3. Default: 60 seconds
  */
 export function getIdleNotificationCooldownSeconds(): number {
   // 1. Environment variable override
-  const envVal = process.env.OMX_IDLE_COOLDOWN_SECONDS;
+  const envVal = process.env.OMG_IDLE_COOLDOWN_SECONDS;
   if (envVal !== undefined) {
     const parsed = Number(envVal);
     if (Number.isFinite(parsed) && parsed >= 0) {

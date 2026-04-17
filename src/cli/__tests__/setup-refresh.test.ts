@@ -225,14 +225,14 @@ describe("omg setup refresh summary and dry-run behavior", () => {
     }
   });
 
-  it("offers an upgrade from gpt-5.3-codex to gpt-5.4 when accepted", async () => {
+  it("offers an upgrade from gpt-5.3-gemini to gpt-5.4 when accepted", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-refresh-"));
     try {
       await mkdir(join(wd, ".omg", "state"), { recursive: true });
       await mkdir(join(wd, ".gemini"), { recursive: true });
       await writeFile(
         join(wd, ".gemini", "config.toml"),
-        'model = \"gpt-5.3-codex\"\n',
+        'model = \"gpt-5.3-gemini\"\n',
       );
 
       let promptCalls = 0;
@@ -240,7 +240,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
         scope: "project",
         modelUpgradePrompt: async (currentModel, targetModel) => {
           promptCalls += 1;
-          assert.equal(currentModel, "gpt-5.3-codex");
+          assert.equal(currentModel, "gpt-5.3-gemini");
           assert.equal(targetModel, "gpt-5.4");
           return true;
         },
@@ -249,7 +249,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
       const config = await readFile(join(wd, ".gemini", "config.toml"), "utf-8");
       assert.equal(promptCalls, 1);
       assert.match(config, /^model = "gpt-5\.4"$/m);
-      assert.doesNotMatch(config, /^model = "gpt-5\.3-codex"$/m);
+      assert.doesNotMatch(config, /^model = "gpt-5\.3-gemini"$/m);
       assert.match(config, /^model_context_window = 1000000$/m);
       assert.match(config, /^model_auto_compact_token_limit = 900000$/m);
     } finally {
@@ -257,14 +257,14 @@ describe("omg setup refresh summary and dry-run behavior", () => {
     }
   });
 
-  it("preserves gpt-5.3-codex when the upgrade prompt is declined", async () => {
+  it("preserves gpt-5.3-gemini when the upgrade prompt is declined", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-refresh-"));
     try {
       await mkdir(join(wd, ".omg", "state"), { recursive: true });
       await mkdir(join(wd, ".gemini"), { recursive: true });
       await writeFile(
         join(wd, ".gemini", "config.toml"),
-        'model = \"gpt-5.3-codex\"\n',
+        'model = \"gpt-5.3-gemini\"\n',
       );
 
       await runSetupInTempDir(wd, {
@@ -273,7 +273,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
       });
 
       const config = await readFile(join(wd, ".gemini", "config.toml"), "utf-8");
-      assert.match(config, /^model = "gpt-5\.3-codex"$/m);
+      assert.match(config, /^model = "gpt-5\.3-gemini"$/m);
       assert.doesNotMatch(config, /^model = "gpt-5\.4"$/m);
       assert.doesNotMatch(config, /^model_context_window = 1000000$/m);
       assert.doesNotMatch(config, /^model_auto_compact_token_limit = 900000$/m);
@@ -282,20 +282,20 @@ describe("omg setup refresh summary and dry-run behavior", () => {
     }
   });
 
-  it("preserves gpt-5.3-codex in non-interactive runs without prompting", async () => {
+  it("preserves gpt-5.3-gemini in non-interactive runs without prompting", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-refresh-"));
     try {
       await mkdir(join(wd, ".omg", "state"), { recursive: true });
       await mkdir(join(wd, ".gemini"), { recursive: true });
       await writeFile(
         join(wd, ".gemini", "config.toml"),
-        'model = \"gpt-5.3-codex\"\n',
+        'model = \"gpt-5.3-gemini\"\n',
       );
 
       await runSetupInTempDir(wd, { scope: "project" });
 
       const config = await readFile(join(wd, ".gemini", "config.toml"), "utf-8");
-      assert.match(config, /^model = "gpt-5\.3-codex"$/m);
+      assert.match(config, /^model = "gpt-5\.3-gemini"$/m);
       assert.doesNotMatch(config, /^model = "gpt-5\.4"$/m);
       assert.doesNotMatch(config, /^model_context_window = 1000000$/m);
       assert.doesNotMatch(config, /^model_auto_compact_token_limit = 900000$/m);
@@ -316,7 +316,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
 
       const output = await runSetupWithCapturedLogs(wd, {
         scope: "project",
-        geminiVersionProbe: () => "codex-cli 0.107.0",
+        geminiVersionProbe: () => "gemini-cli 0.107.0",
       });
 
       const config = await readFile(join(wd, ".gemini", "config.toml"), "utf-8");
@@ -339,7 +339,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
 
       const output = await runSetupWithCapturedLogs(wd, {
         scope: "project",
-        geminiVersionProbe: () => "codex-cli 0.106.0",
+        geminiVersionProbe: () => "gemini-cli 0.106.0",
       });
 
       const config = await readFile(join(wd, ".gemini", "config.toml"), "utf-8");
@@ -547,7 +547,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
     }
   });
 
-  it("ignores legacy ~/.omc/mcp-registry.json during setup unless candidates are passed explicitly", async () => {
+  it("ignores legacy ~/.omg/mcp-registry.json during setup unless candidates are passed explicitly", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-refresh-"));
     const previousHome = process.env.HOME;
     const previousGeminiHome = process.env.GEMINI_HOME;
@@ -556,9 +556,9 @@ describe("omg setup refresh summary and dry-run behavior", () => {
       delete process.env.GEMINI_HOME;
 
       await mkdir(join(wd, ".omg", "state"), { recursive: true });
-      await mkdir(join(wd, ".omc"), { recursive: true });
+      await mkdir(join(wd, ".omg"), { recursive: true });
       await writeFile(
-        join(wd, ".omc", "mcp-registry.json"),
+        join(wd, ".omg", "mcp-registry.json"),
         JSON.stringify({
           legacy_helper: { command: "legacy-helper", args: ["mcp"] },
         }),
@@ -571,7 +571,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
       assert.doesNotMatch(config, /Shared MCP Server: legacy_helper/);
 
       const output = await runSetupWithCapturedLogs(wd, { scope: "project" });
-      assert.match(output, /legacy shared MCP registry detected at .*\.omc\/mcp-registry\.json but ignored by default/i);
+      assert.match(output, /legacy shared MCP registry detected at .*\.omg\/mcp-registry\.json but ignored by default/i);
       assert.match(output, /move it to .*\.omg\/mcp-registry\.json/i);
     } finally {
       if (typeof previousHome === "string") process.env.HOME = previousHome;

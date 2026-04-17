@@ -34,7 +34,7 @@ import { mcpParityCommand } from "./mcp-parity.js";
 import { adaptCommand } from "./adapt.js";
 import {
   MADMAX_FLAG,
-  CODEX_BYPASS_FLAG,
+  GEMINI_BYPASS_FLAG,
   HIGH_REASONING_FLAG,
   XHIGH_REASONING_FLAG,
   SPARK_FLAG,
@@ -113,7 +113,7 @@ import {
 } from "../team/worktree.js";
 import { ensureReusableNodeModules } from "../utils/repo-deps.js";
 import {
-  OMX_NOTIFY_TEMP_CONTRACT_ENV,
+  OMG_NOTIFY_TEMP_CONTRACT_ENV,
   parseNotifyTempContractFromArgs,
   serializeNotifyTempContract,
   type NotifyTempContract,
@@ -141,14 +141,14 @@ oh-my-gemini (omg) - Multi-agent orchestration for Gemini CLI
 
 Usage:
   omg           Launch Gemini CLI (HUD auto-attaches only when already inside tmux)
-  omg exec      Run codex exec non-interactively with OMX AGENTS/overlay injection
+  omg exec      Run gemini exec non-interactively with OMG AGENTS/overlay injection
   omg setup     Install skills, prompts, MCP servers, and scope-specific GEMINI.md
-  omg uninstall Remove OMX configuration and clean up installed artifacts
+  omg uninstall Remove OMG configuration and clean up installed artifacts
   omg doctor    Check installation health
-  omg cleanup   Kill orphaned OMX MCP server processes and remove stale OMX /tmp directories
+  omg cleanup   Kill orphaned OMG MCP server processes and remove stale OMG /tmp directories
   omg doctor --team  Check team/swarm runtime health diagnostics
   omg ask       Ask local provider CLI (claude|gemini) and write artifact output
-  omg adapt     Scaffold OMX-owned adapter foundations for persistent external targets
+  omg adapt     Scaffold OMG-owned adapter foundations for persistent external targets
   omg resume    Resume a previous interactive Gemini session
   omg explore   Default read-only exploration entrypoint (may adaptively use sparkshell backend)
   omg session   Search prior local session transcripts and history artifacts
@@ -164,14 +164,14 @@ Usage:
   omg tmux-hook Manage tmux prompt injection workaround (init|status|validate|test)
   omg hooks     Manage hook plugins (init|status|validate|test)
   omg hud       Show HUD statusline (--watch, --json, --preset=NAME)
-  omg state     Read/write/list OMX mode state via CLI parity surface
-  omg notepad   CLI parity for OMX notepad MCP tools
+  omg state     Read/write/list OMG mode state via CLI parity surface
+  omg notepad   CLI parity for OMG notepad MCP tools
   omg project-memory
-                CLI parity for OMX project-memory MCP tools
-  omg trace     CLI parity for OMX trace MCP tools
+                CLI parity for OMG project-memory MCP tools
+  omg trace     CLI parity for OMG trace MCP tools
   omg code-intel
-                CLI parity for OMX code-intel MCP tools
-  omg wiki      CLI parity for OMX wiki MCP tools
+                CLI parity for OMG code-intel MCP tools
+  omg wiki      CLI parity for OMG wiki MCP tools
   omg sparkshell <command> [args...]
   omg sparkshell --tmux-pane <pane-id> [--tail-lines <100-1000>]
                 Run native sparkshell sidecar for direct command execution or explicit tmux-pane summarization
@@ -211,19 +211,19 @@ Options:
                 user | project
   --skill-target
                 User-scope skills target for "omg setup" only:
-                codex-home
+                gemini-home
 `;
 
 const REASONING_KEY = "model_reasoning_effort";
 const MODEL_INSTRUCTIONS_FILE_KEY = "model_instructions_file";
-const TEAM_WORKER_LAUNCH_ARGS_ENV = "OMX_TEAM_WORKER_LAUNCH_ARGS";
-const TEAM_INHERIT_LEADER_FLAGS_ENV = "OMX_TEAM_INHERIT_LEADER_FLAGS";
-const OMX_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV = "OMX_BYPASS_DEFAULT_SYSTEM_PROMPT";
-const OMX_MODEL_INSTRUCTIONS_FILE_ENV = "OMX_MODEL_INSTRUCTIONS_FILE";
-const OMX_RALPH_APPEND_INSTRUCTIONS_FILE_ENV =
-  "OMX_RALPH_APPEND_INSTRUCTIONS_FILE";
-const OMX_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE_ENV =
-  "OMX_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE";
+const TEAM_WORKER_LAUNCH_ARGS_ENV = "OMG_TEAM_WORKER_LAUNCH_ARGS";
+const TEAM_INHERIT_LEADER_FLAGS_ENV = "OMG_TEAM_INHERIT_LEADER_FLAGS";
+const OMG_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV = "OMG_BYPASS_DEFAULT_SYSTEM_PROMPT";
+const OMG_MODEL_INSTRUCTIONS_FILE_ENV = "OMG_MODEL_INSTRUCTIONS_FILE";
+const OMG_RALPH_APPEND_INSTRUCTIONS_FILE_ENV =
+  "OMG_RALPH_APPEND_INSTRUCTIONS_FILE";
+const OMG_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE_ENV =
+  "OMG_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE";
 const REASONING_MODES = ["low", "medium", "high", "xhigh"] as const;
 type ReasoningMode = (typeof REASONING_MODES)[number];
 const REASONING_MODE_SET = new Set<string>(REASONING_MODES);
@@ -245,7 +245,7 @@ const ALLOWED_SHELLS = new Set([
   "/opt/homebrew/bin/zsh",
 ]);
 const WINDOWS_DETACHED_BOOTSTRAP_DELAY_MS = 2500;
-const CODEX_VERSION_FLAGS = new Set(["--version", "-V"]);
+const GEMINI_VERSION_FLAGS = new Set(["--version", "-V"]);
 const TMUX_EXTENDED_KEYS_MODE = "always";
 const TMUX_EXTENDED_KEYS_FALLBACK_MODE = "off";
 const TMUX_EXTENDED_KEYS_LEASE_DIR = "tmux-extended-keys";
@@ -548,7 +548,7 @@ export function classifyGeminiExecFailure(
   const message =
     typeof err.message === "string" && err.message.length > 0
       ? err.message
-      : "unknown codex launch failure";
+      : "unknown gemini launch failure";
   const hasExitStatus = typeof err.status === "number";
   const hasSignal = typeof err.signal === "string" && err.signal.length > 0;
 
@@ -574,12 +574,12 @@ export function classifyGeminiExecFailure(
 function runGeminiBlocking(
   cwd: string,
   launchArgs: string[],
-  codexEnv: NodeJS.ProcessEnv,
+  geminiEnv: NodeJS.ProcessEnv,
 ): void {
   const { result } = spawnPlatformCommandSync("gemini", launchArgs, {
     cwd,
     stdio: "inherit",
-    env: codexEnv,
+    env: geminiEnv,
     encoding: "utf-8",
   });
 
@@ -588,14 +588,14 @@ function runGeminiBlocking(
     const kind = classifySpawnError(errno);
     if (kind === "missing") {
       console.error(
-        "[omg] failed to launch codex: executable not found in PATH",
+        "[omg] failed to launch gemini: executable not found in PATH",
       );
     } else if (kind === "blocked") {
       console.error(
-        `[omg] failed to launch codex: executable is present but blocked in the current environment (${errno.code || "blocked"})`,
+        `[omg] failed to launch gemini: executable is present but blocked in the current environment (${errno.code || "blocked"})`,
       );
     } else {
-      console.error(`[omg] failed to launch codex: ${errno.message}`);
+      console.error(`[omg] failed to launch gemini: ${errno.message}`);
     }
     throw result.error;
   }
@@ -606,7 +606,7 @@ function runGeminiBlocking(
         ? result.status
         : resolveSignalExitCode(result.signal);
     if (result.signal) {
-      console.error(`[omg] codex exited due to signal ${result.signal}`);
+      console.error(`[omg] gemini exited due to signal ${result.signal}`);
     }
   }
 }
@@ -962,7 +962,7 @@ export async function launchWithHud(args: string[]): Promise<void> {
         worktreeDirty = true;
         process.stderr.write(
           `[omg] Caution: worktree at ${cwd} has uncommitted changes.\n` +
-          `  The session will launch as-is. Resolve the dirty state with OMX after launch, then proceed with your task.\n`,
+          `  The session will launch as-is. Resolve the dirty state with OMG after launch, then proceed with your task.\n`,
         );
       }
       const depBootstrap = ensureReusableNodeModules(cwd);
@@ -1062,7 +1062,7 @@ export async function execWithOverlay(args: string[]): Promise<void> {
         worktreeDirty = true;
         process.stderr.write(
           `[omg] Caution: worktree at ${cwd} has uncommitted changes.\n` +
-          `  The session will launch as-is. Resolve the dirty state with OMX after launch, then proceed with your task.\n`,
+          `  The session will launch as-is. Resolve the dirty state with OMG after launch, then proceed with your task.\n`,
         );
       }
       const depBootstrap = ensureReusableNodeModules(cwd);
@@ -1112,22 +1112,22 @@ export async function execWithOverlay(args: string[]): Promise<void> {
     const notifyTempContractRaw = notifyTempResult.contract.active
       ? serializeNotifyTempContract(notifyTempResult.contract)
       : null;
-    const codexArgs = injectModelInstructionsBypassArgs(
+    const geminiArgs = injectModelInstructionsBypassArgs(
       cwd,
       ["exec", ...normalizedArgs],
       process.env,
       sessionModelInstructionsPath(cwd, sessionId),
     );
-    const codexEnvBase = geminiHomeOverride
+    const geminiEnvBase = geminiHomeOverride
       ? { ...process.env, GEMINI_HOME: geminiHomeOverride }
       : process.env;
-    const codexEnv = notifyTempContractRaw
+    const geminiEnv = notifyTempContractRaw
       ? {
-          ...codexEnvBase,
-          [OMX_NOTIFY_TEMP_CONTRACT_ENV]: notifyTempContractRaw,
+          ...geminiEnvBase,
+          [OMG_NOTIFY_TEMP_CONTRACT_ENV]: notifyTempContractRaw,
         }
-      : codexEnvBase;
-    runGeminiBlocking(cwd, codexArgs, codexEnv);
+      : geminiEnvBase;
+    runGeminiBlocking(cwd, geminiArgs, geminiEnv);
   } finally {
     await postLaunch(cwd, sessionId, geminiHomeOverride, true);
   }
@@ -1147,7 +1147,7 @@ export function normalizeGeminiLaunchArgs(args: string[]): string[] {
       continue;
     }
 
-    if (arg === CODEX_BYPASS_FLAG) {
+    if (arg === GEMINI_BYPASS_FLAG) {
       wantsBypass = true;
       if (!hasBypass) {
         normalized.push(arg);
@@ -1181,7 +1181,7 @@ export function normalizeGeminiLaunchArgs(args: string[]): string[] {
   }
 
   if (wantsBypass && !hasBypass) {
-    normalized.push(CODEX_BYPASS_FLAG);
+    normalized.push(GEMINI_BYPASS_FLAG);
   }
 
   if (reasoningMode) {
@@ -1235,7 +1235,7 @@ function hasModelInstructionsOverride(args: string[]): boolean {
 }
 
 function shouldBypassDefaultSystemPrompt(env: NodeJS.ProcessEnv): boolean {
-  return env[OMX_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV] !== "0";
+  return env[OMG_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV] !== "0";
 }
 
 function buildModelInstructionsOverride(
@@ -1244,7 +1244,7 @@ function buildModelInstructionsOverride(
   defaultFilePath?: string,
 ): string {
   const filePath =
-    env[OMX_MODEL_INSTRUCTIONS_FILE_ENV] ||
+    env[OMG_MODEL_INSTRUCTIONS_FILE_ENV] ||
     defaultFilePath ||
     join(cwd, "GEMINI.md");
   return `${MODEL_INSTRUCTIONS_FILE_KEY}="${escapeTomlString(filePath)}"`;
@@ -1339,19 +1339,19 @@ export function injectModelInstructionsBypassArgs(
 }
 
 export function collectInheritableTeamWorkerArgs(
-  codexArgs: string[],
+  geminiArgs: string[],
 ): string[] {
-  return collectInheritableTeamWorkerArgsShared(codexArgs);
+  return collectInheritableTeamWorkerArgsShared(geminiArgs);
 }
 
 export function resolveTeamWorkerLaunchArgsEnv(
   existingRaw: string | undefined,
-  codexArgs: string[],
+  geminiArgs: string[],
   inheritLeaderFlags = true,
   defaultModel?: string,
 ): string | null {
   const inheritedArgs = inheritLeaderFlags
-    ? collectInheritableTeamWorkerArgs(codexArgs)
+    ? collectInheritableTeamWorkerArgs(geminiArgs)
     : [];
   const normalized = resolveTeamWorkerLaunchArgs({
     existingRaw,
@@ -1620,18 +1620,18 @@ function withTmuxExtendedKeysLeaseLock<T>(
 function buildDetachedSessionLeaderCommand(
   cwd: string,
   sessionName: string,
-  codexCmd: string,
+  geminiCmd: string,
 ): string {
   const wrapped = [
     buildTmuxExtendedKeysAcquireShellSnippet(cwd),
     'exec 3<&0;',
-    'omg_codex_pid="";',
+    'omg_gemini_pid="";',
     "omg_detached_session_cleanup() {",
     "status=$?;",
     "trap - 0 INT TERM HUP;",
-    'if [ -n "$omg_codex_pid" ] && kill -0 "$omg_codex_pid" 2>/dev/null; then',
-    'kill -TERM "$omg_codex_pid" 2>/dev/null || true;',
-    'wait "$omg_codex_pid" 2>/dev/null || true;',
+    'if [ -n "$omg_gemini_pid" ] && kill -0 "$omg_gemini_pid" 2>/dev/null; then',
+    'kill -TERM "$omg_gemini_pid" 2>/dev/null || true;',
+    'wait "$omg_gemini_pid" 2>/dev/null || true;',
     "fi;",
     'exec 3<&- 2>/dev/null || true;',
     buildTmuxExtendedKeysReleaseShellSnippet(cwd),
@@ -1641,9 +1641,9 @@ function buildDetachedSessionLeaderCommand(
     "exit $status;",
     "};",
     "trap omg_detached_session_cleanup 0 INT TERM HUP;",
-    `${codexCmd} <&3 &`,
-    "omg_codex_pid=$!;",
-    'wait "$omg_codex_pid";',
+    `${geminiCmd} <&3 &`,
+    "omg_gemini_pid=$!;",
+    'wait "$omg_gemini_pid";',
   ].join(" ");
   return `/bin/sh -c ${quoteShellArg(wrapped)}`;
 }
@@ -1757,11 +1757,11 @@ function buildTmuxExtendedKeysHelperCommand(
 }
 
 function buildTmuxExtendedKeysAcquireShellSnippet(cwd: string): string {
-  return `OMX_TMUX_EXTENDED_KEYS_LEASE=$(${buildTmuxExtendedKeysHelperCommand(cwd, "acquire")} 2>/dev/null || true);`;
+  return `OMG_TMUX_EXTENDED_KEYS_LEASE=$(${buildTmuxExtendedKeysHelperCommand(cwd, "acquire")} 2>/dev/null || true);`;
 }
 
 function buildTmuxExtendedKeysReleaseShellSnippet(cwd: string): string {
-  return `if [ -n "\${OMX_TMUX_EXTENDED_KEYS_LEASE:-}" ]; then ${buildTmuxExtendedKeysHelperCommand(cwd, "release")} "\${OMX_TMUX_EXTENDED_KEYS_LEASE}" >/dev/null 2>&1 || true; fi;`;
+  return `if [ -n "\${OMG_TMUX_EXTENDED_KEYS_LEASE:-}" ]; then ${buildTmuxExtendedKeysHelperCommand(cwd, "release")} "\${OMG_TMUX_EXTENDED_KEYS_LEASE}" >/dev/null 2>&1 || true; fi;`;
 }
 
 export function withTmuxExtendedKeys<T>(
@@ -1784,7 +1784,7 @@ export function withTmuxExtendedKeys<T>(
 export function buildDetachedSessionBootstrapSteps(
   sessionName: string,
   cwd: string,
-  codexCmd: string,
+  geminiCmd: string,
   hudCmd: string,
   workerLaunchArgs: string | null,
   geminiHomeOverride?: string,
@@ -1794,7 +1794,7 @@ export function buildDetachedSessionBootstrapSteps(
 ): DetachedSessionTmuxStep[] {
   const detachedLeaderCmd = nativeWindows
     ? "powershell.exe"
-    : buildDetachedSessionLeaderCommand(cwd, sessionName, codexCmd);
+    : buildDetachedSessionLeaderCommand(cwd, sessionName, geminiCmd);
   const newSessionArgs: string[] = [
     "new-session",
     "-d",
@@ -1808,10 +1808,10 @@ export function buildDetachedSessionBootstrapSteps(
     ...(workerLaunchArgs
       ? ["-e", `${TEAM_WORKER_LAUNCH_ARGS_ENV}=${workerLaunchArgs}`]
       : []),
-    ...(sessionId ? ["-e", `OMX_SESSION_ID=${sessionId}`] : []),
+    ...(sessionId ? ["-e", `OMG_SESSION_ID=${sessionId}`] : []),
     ...(geminiHomeOverride ? ["-e", `GEMINI_HOME=${geminiHomeOverride}`] : []),
     ...(notifyTempContractRaw
-      ? ["-e", `${OMX_NOTIFY_TEMP_CONTRACT_ENV}=${notifyTempContractRaw}`]
+      ? ["-e", `${OMG_NOTIFY_TEMP_CONTRACT_ENV}=${notifyTempContractRaw}`]
       : []),
     detachedLeaderCmd,
   ];
@@ -1838,8 +1838,8 @@ export function buildDetachedSessionBootstrapSteps(
 
 async function readLaunchAppendInstructions(): Promise<string> {
   const appendixCandidates = [
-    process.env[OMX_RALPH_APPEND_INSTRUCTIONS_FILE_ENV]?.trim(),
-    process.env[OMX_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE_ENV]?.trim(),
+    process.env[OMG_RALPH_APPEND_INSTRUCTIONS_FILE_ENV]?.trim(),
+    process.env[OMG_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE_ENV]?.trim(),
   ].filter(
     (value): value is string => typeof value === "string" && value.length > 0,
   );
@@ -1986,8 +1986,8 @@ export function buildNotifyFallbackWatcherEnv(
   return {
     ...nextEnv,
     ...(options.geminiHomeOverride ? { GEMINI_HOME: options.geminiHomeOverride } : {}),
-    ...(options.sessionId ? { OMX_SESSION_ID: options.sessionId } : {}),
-    OMX_HUD_AUTHORITY: options.enableAuthority ? "1" : "0",
+    ...(options.sessionId ? { OMG_SESSION_ID: options.sessionId } : {}),
+    OMG_HUD_AUTHORITY: options.enableAuthority ? "1" : "0",
   };
 }
 
@@ -1995,7 +1995,7 @@ export function shouldEnableNotifyFallbackWatcher(
   env: NodeJS.ProcessEnv = process.env,
   platform: NodeJS.Platform = process.platform,
 ): boolean {
-  const toggle = String(env.OMX_NOTIFY_FALLBACK ?? "").trim();
+  const toggle = String(env.OMG_NOTIFY_FALLBACK ?? "").trim();
   if (platform === "win32") {
     return toggle === "1";
   }
@@ -2242,12 +2242,12 @@ export async function reapPostLaunchOrphanedMcpProcesses(
     const result = await cleanup();
     if (result.terminatedCount > 0) {
       writeInfo(
-        `[omg] postLaunch: reaped ${result.terminatedCount} orphaned OMX MCP process(es).`,
+        `[omg] postLaunch: reaped ${result.terminatedCount} orphaned OMG MCP process(es).`,
       );
     }
     if (result.failedPids.length > 0) {
       writeWarn(
-        `[omg] postLaunch: failed to reap ${result.failedPids.length} orphaned OMX MCP process(es); continuing cleanup.`,
+        `[omg] postLaunch: failed to reap ${result.failedPids.length} orphaned OMG MCP process(es); continuing cleanup.`,
       );
     }
   } catch (err) {
@@ -2257,12 +2257,12 @@ export async function reapPostLaunchOrphanedMcpProcesses(
 
 /**
  * preLaunch: Prepare environment before Gemini starts.
- * 1. Best-effort launch-safe orphan cleanup for detached OMX MCP processes
+ * 1. Best-effort launch-safe orphan cleanup for detached OMG MCP processes
  * 2. Generate runtime overlay + write session-scoped model instructions file
  * 3. Write session.json
  *
  * Automatic broad stale-session cleanup remains disabled here. Only detached
- * OMX MCP processes without a live Gemini ancestor are reaped so new launches
+ * OMG MCP processes without a live Gemini ancestor are reaped so new launches
  * do not accumulate stale processes from prior crashed/closed sessions.
  */
 async function preLaunch(
@@ -2278,12 +2278,12 @@ async function preLaunch(
     const cleanup = await cleanupLaunchOrphanedMcpProcesses();
     if (cleanup.terminatedCount > 0) {
       console.log(
-        `[omg] Reaped ${cleanup.terminatedCount} orphaned OMX MCP process(es) before launch.`,
+        `[omg] Reaped ${cleanup.terminatedCount} orphaned OMG MCP process(es) before launch.`,
       );
     }
     if (cleanup.failedPids.length > 0) {
       console.warn(
-        `[omg] Failed to reap ${cleanup.failedPids.length} orphaned OMX MCP process(es); continuing launch.`,
+        `[omg] Failed to reap ${cleanup.failedPids.length} orphaned OMG MCP process(es); continuing launch.`,
       );
     }
   } catch (err) {
@@ -2332,7 +2332,7 @@ ${launchAppendix}${dirtyWorktreeGuidance}`
   // 6. Emit temp notification startup summary + warnings, then send session-start lifecycle notification (best effort)
   try {
     if (notifyTempContract?.active) {
-      process.env[OMX_NOTIFY_TEMP_CONTRACT_ENV] =
+      process.env[OMG_NOTIFY_TEMP_CONTRACT_ENV] =
         serializeNotifyTempContract(notifyTempContract);
       const { getNotificationConfig } =
         await import("../notifications/config.js");
@@ -2348,7 +2348,7 @@ ${launchAppendix}${dirtyWorktreeGuidance}`
         console.warn(`[omg] ${warning}`);
       }
     } else {
-      delete process.env[OMX_NOTIFY_TEMP_CONTRACT_ENV];
+      delete process.env[OMG_NOTIFY_TEMP_CONTRACT_ENV];
     }
     const { notifyLifecycle } = await import("../notifications/index.js");
     await notifyLifecycle("session-start", {
@@ -2399,11 +2399,11 @@ function runGemini(
   const nativeWindows = isNativeWindows();
   const omgBin = resolveOmxEntryPath();
   if (!omgBin) {
-    throw new Error("Unable to resolve OMX launcher path for tmux HUD bootstrap");
+    throw new Error("Unable to resolve OMG launcher path for tmux HUD bootstrap");
   }
   const hudCmd = nativeWindows
     ? buildWindowsPromptCommand("node", [omgBin, "hud", "--watch"])
-    : buildTmuxPaneCommand("env", [`OMX_SESSION_ID=${sessionId}`, "node", omgBin, "hud", "--watch"]);
+    : buildTmuxPaneCommand("env", [`OMG_SESSION_ID=${sessionId}`, "node", omgBin, "hud", "--watch"]);
   const inheritLeaderFlags = process.env[TEAM_INHERIT_LEADER_FLAGS_ENV] !== "0";
   const workerLaunchArgs = resolveTeamWorkerLaunchArgsEnv(
     process.env[TEAM_WORKER_LAUNCH_ARGS_ENV],
@@ -2411,16 +2411,16 @@ function runGemini(
     inheritLeaderFlags,
     workerDefaultModel,
   );
-  const codexBaseEnv = geminiHomeOverride
+  const geminiBaseEnv = geminiHomeOverride
     ? { ...process.env, GEMINI_HOME: geminiHomeOverride }
     : process.env;
-  const codexEnvWithSession = { ...codexBaseEnv, OMX_SESSION_ID: sessionId };
-  const codexEnv = workerLaunchArgs
-    ? { ...codexEnvWithSession, [TEAM_WORKER_LAUNCH_ARGS_ENV]: workerLaunchArgs }
-    : codexEnvWithSession;
-  const codexEnvWithNotify = notifyTempContractRaw
-    ? { ...codexEnv, [OMX_NOTIFY_TEMP_CONTRACT_ENV]: notifyTempContractRaw }
-    : codexEnv;
+  const geminiEnvWithSession = { ...geminiBaseEnv, OMG_SESSION_ID: sessionId };
+  const geminiEnv = workerLaunchArgs
+    ? { ...geminiEnvWithSession, [TEAM_WORKER_LAUNCH_ARGS_ENV]: workerLaunchArgs }
+    : geminiEnvWithSession;
+  const geminiEnvWithNotify = notifyTempContractRaw
+    ? { ...geminiEnv, [OMG_NOTIFY_TEMP_CONTRACT_ENV]: notifyTempContractRaw }
+    : geminiEnv;
 
   const launchPolicy = resolveGeminiLaunchPolicy(
     process.env,
@@ -2433,12 +2433,12 @@ function runGemini(
   );
 
   if (isGeminiVersionRequest(launchArgs)) {
-    runGeminiBlocking(cwd, launchArgs, codexEnvWithNotify);
+    runGeminiBlocking(cwd, launchArgs, geminiEnvWithNotify);
     return;
   }
 
   if (launchPolicy === "inside-tmux") {
-    // Already in tmux: launch codex in current pane, HUD in bottom split
+    // Already in tmux: launch gemini in current pane, HUD in bottom split
     const currentPaneId = process.env.TMUX_PANE;
     const staleHudPaneIds = listHudWatchPaneIdsInCurrentWindow(currentPaneId);
     for (const paneId of staleHudPaneIds) {
@@ -2455,8 +2455,8 @@ function runGemini(
 
     // Enable mouse scrolling at session start so scroll works before team
     // expansion. Previously this was only called from createTeamSession().
-    // Opt-out: set OMX_MOUSE=0. (closes #128)
-    if (process.env.OMX_MOUSE !== "0") {
+    // Opt-out: set OMG_MOUSE=0. (closes #128)
+    if (process.env.OMG_MOUSE !== "0") {
       try {
         const tmuxPaneTarget = process.env.TMUX_PANE;
         const displayArgs = tmuxPaneTarget
@@ -2483,7 +2483,7 @@ function runGemini(
 
     try {
       withTmuxExtendedKeys(cwd, () => {
-        runGeminiBlocking(cwd, launchArgs, codexEnvWithNotify);
+        runGeminiBlocking(cwd, launchArgs, geminiEnvWithNotify);
       });
     } finally {
       const cleanupPaneIds = buildHudPaneCleanupTargets(
@@ -2498,12 +2498,12 @@ function runGemini(
   } else if (launchPolicy === "direct") {
     // Detached HUD sessions require tmux. Skip the bootstrap entirely when the
     // binary is unavailable so direct launches do not emit noisy ENOENT logs.
-    runGeminiBlocking(cwd, launchArgs, codexEnvWithNotify);
+    runGeminiBlocking(cwd, launchArgs, geminiEnvWithNotify);
   } else {
-    // Not in tmux: create a new tmux session with codex + HUD pane
-    const codexCmd = buildTmuxPaneCommand("codex", launchArgs);
+    // Not in tmux: create a new tmux session with gemini + HUD pane
+    const geminiCmd = buildTmuxPaneCommand("gemini", launchArgs);
     const detachedWindowsGeminiCmd = nativeWindows
-      ? buildWindowsPromptCommand("codex", launchArgs)
+      ? buildWindowsPromptCommand("gemini", launchArgs)
       : null;
     const sessionName = buildDetachedTmuxSessionName(cwd, sessionId);
     let createdDetachedSession = false;
@@ -2514,7 +2514,7 @@ function runGemini(
       const bootstrapSteps = buildDetachedSessionBootstrapSteps(
         sessionName,
         cwd,
-        codexCmd,
+        geminiCmd,
         hudCmd,
         workerLaunchArgs,
         geminiHomeOverride,
@@ -2562,7 +2562,7 @@ function runGemini(
             sessionName,
             hudPaneId,
             hookWindowIndex,
-            process.env.OMX_MOUSE !== "0",
+            process.env.OMG_MOUSE !== "0",
             nativeWindows,
           );
           if (nativeWindows && detachedWindowsGeminiCmd) {
@@ -2625,8 +2625,8 @@ function runGemini(
           }
         }
       }
-      // tmux not available or failed, just run codex directly
-      runGeminiBlocking(cwd, launchArgs, codexEnvWithNotify);
+      // tmux not available or failed, just run gemini directly
+      runGeminiBlocking(cwd, launchArgs, geminiEnvWithNotify);
     }
   }
 }
@@ -2663,7 +2663,7 @@ function encodePowerShellCommand(commandText: string): string {
 }
 
 function isGeminiVersionRequest(args: string[]): boolean {
-  return args.some((arg) => CODEX_VERSION_FLAGS.has(arg));
+  return args.some((arg) => GEMINI_VERSION_FLAGS.has(arg));
 }
 
 export function buildWindowsPromptCommand(
@@ -2778,7 +2778,7 @@ async function postLaunch(
   // 0. Reap MCP orphans left behind by the session that just exited.
   await reapPostLaunchOrphanedMcpProcesses();
 
-  // 0. Flush fallback watcher once to reduce race with fast codex exit.
+  // 0. Flush fallback watcher once to reduce race with fast gemini exit.
   try {
     await flushNotifyFallbackOnce(cwd, { geminiHomeOverride, enableAuthority: enableNotifyFallbackAuthority, sessionId });
   } catch (err) {
@@ -2882,7 +2882,7 @@ async function postLaunch(
       process.exitCode && process.exitCode !== 0 ? "failed" : "finished";
     const errorSummary =
       normalizedEvent === "failed"
-        ? `codex exited with code ${process.exitCode}`
+        ? `gemini exited with code ${process.exitCode}`
         : undefined;
     await emitNativeHookEvent(cwd, "session-end", {
       session_id: sessionId,
@@ -3142,10 +3142,10 @@ async function startNotifyFallbackWatcher(
         pidPath,
         "--parent-pid",
         String(process.pid),
-        ...(process.env.OMX_NOTIFY_FALLBACK_MAX_LIFETIME_MS
+        ...(process.env.OMG_NOTIFY_FALLBACK_MAX_LIFETIME_MS
           ? [
             "--max-lifetime-ms",
-            process.env.OMX_NOTIFY_FALLBACK_MAX_LIFETIME_MS,
+            process.env.OMG_NOTIFY_FALLBACK_MAX_LIFETIME_MS,
           ]
           : []),
       ],
@@ -3183,7 +3183,7 @@ async function startNotifyFallbackWatcher(
 }
 
 async function startHookDerivedWatcher(cwd: string): Promise<void> {
-  if (process.env.OMX_HOOK_DERIVED_SIGNALS !== "1") return;
+  if (process.env.OMG_HOOK_DERIVED_SIGNALS !== "1") return;
 
   const { mkdir, writeFile, readFile } = await import("fs/promises");
   const pidPath = hookDerivedWatcherPidPath(cwd);
@@ -3343,7 +3343,7 @@ async function flushNotifyFallbackOnce(
 }
 
 async function flushHookDerivedWatcherOnce(cwd: string): Promise<void> {
-  if (process.env.OMX_HOOK_DERIVED_SIGNALS !== "1") return;
+  if (process.env.OMG_HOOK_DERIVED_SIGNALS !== "1") return;
   const { spawnSync } = await import("child_process");
   const pkgRoot = getPackageRoot();
   const watcherScript = resolveHookDerivedWatcherScript(pkgRoot);
@@ -3355,7 +3355,7 @@ async function flushHookDerivedWatcherOnce(cwd: string): Promise<void> {
     windowsHide: true,
     env: {
       ...process.env,
-      OMX_HOOK_DERIVED_SIGNALS: "1",
+      OMG_HOOK_DERIVED_SIGNALS: "1",
     },
   });
 }

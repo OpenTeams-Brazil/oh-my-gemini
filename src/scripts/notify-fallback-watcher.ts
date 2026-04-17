@@ -93,7 +93,7 @@ const authorityOnly = process.argv.includes('--authority-only');
 const pollMs = Math.max(50, asNumber(argValue('--poll-ms', '250'), 250));
 const idleMaxPollMs = Math.max(
   pollMs,
-  asNumber(argValue('--idle-max-poll-ms', process.env.OMX_NOTIFY_FALLBACK_IDLE_MAX_POLL_MS || '1000'), 1000),
+  asNumber(argValue('--idle-max-poll-ms', process.env.OMG_NOTIFY_FALLBACK_IDLE_MAX_POLL_MS || '1000'), 1000),
 );
 const parentPid = Math.trunc(asNumber(argValue('--parent-pid', String(process.ppid || 0)), process.ppid || 0));
 const startedAt = Date.now();
@@ -104,7 +104,7 @@ const maxLifetimeMs = runOnce
   : Math.max(
     pollMs,
     asNumber(
-      argValue('--max-lifetime-ms', process.env.OMX_NOTIFY_FALLBACK_MAX_LIFETIME_MS || String(defaultMaxLifetimeMs)),
+      argValue('--max-lifetime-ms', process.env.OMG_NOTIFY_FALLBACK_MAX_LIFETIME_MS || String(defaultMaxLifetimeMs)),
       defaultMaxLifetimeMs
     )
   );
@@ -120,7 +120,7 @@ const logLockPath = `${logPath}.lock`;
 const defaultMaxLogBytes = 10 * 1024 * 1024;
 const maxLogBytes = Math.max(
   0,
-  asNumber(argValue('--log-max-bytes', process.env.OMX_NOTIFY_FALLBACK_LOG_MAX_BYTES || String(defaultMaxLogBytes)), defaultMaxLogBytes),
+  asNumber(argValue('--log-max-bytes', process.env.OMG_NOTIFY_FALLBACK_LOG_MAX_BYTES || String(defaultMaxLogBytes)), defaultMaxLogBytes),
 );
 const ralphSteerTimestampPath = join(stateDir, 'ralph-last-steer-at');
 const ralphSteerLockPath = join(stateDir, 'ralph-continue-steer.lock');
@@ -252,7 +252,7 @@ let shutdownPromise: Promise<void> | null = null;
 const dispatchTickMax = Math.max(1, asNumber(argValue('--dispatch-max-per-tick', '5'), 5));
 let dispatchDrainRuns = 0;
 let lastDispatchDrain: DispatchDrainState = {
-  leader_only: safeString(process.env.OMX_TEAM_WORKER || '').trim() === '',
+  leader_only: safeString(process.env.OMG_TEAM_WORKER || '').trim() === '',
   last_tick_at: null,
   last_result: null,
   last_error: null,
@@ -260,7 +260,7 @@ let lastDispatchDrain: DispatchDrainState = {
 let leaderNudgeRuns = 0;
 let lastLeaderNudge: LeaderNudgeState = {
   enabled: true,
-  leader_only: safeString(process.env.OMX_TEAM_WORKER || '').trim() === '',
+  leader_only: safeString(process.env.OMG_TEAM_WORKER || '').trim() === '',
   stale_threshold_ms: null,
   precomputed_leader_stale: null,
   last_tick_at: null,
@@ -301,7 +301,7 @@ let lastAuthorityBackoff: AuthorityBackoffState = {
 };
 const AUTO_NUDGE_STALL_MS = Math.max(
   pollMs,
-  asNumber(process.env.OMX_NOTIFY_FALLBACK_AUTO_NUDGE_STALL_MS || '5000', 5000),
+  asNumber(process.env.OMG_NOTIFY_FALLBACK_AUTO_NUDGE_STALL_MS || '5000', 5000),
 );
 let lastFallbackAutoNudge: FallbackAutoNudgeState = {
   enabled: true,
@@ -808,7 +808,7 @@ async function readRalphProgressGate(
   activeRalphState: Record<string, unknown> | null,
   now: number,
 ): Promise<RalphProgressGateResult> {
-  const subagentSessionId = safeString(activeRalphState?.owner_codex_session_id).trim();
+  const subagentSessionId = safeString(activeRalphState?.owner_gemini_session_id).trim();
   if (subagentSessionId) {
     const summary = await readSubagentSessionSummary(cwd, subagentSessionId, {
       now: new Date(now),
@@ -1017,7 +1017,7 @@ async function runRalphContinueSteerTick(): Promise<void> {
     state_path: activeRalph.path,
     pane_id: activePaneId,
     pane_current_command: '',
-    subagent_session_id: safeString(activeRalph.state?.owner_codex_session_id).trim(),
+    subagent_session_id: safeString(activeRalph.state?.owner_gemini_session_id).trim(),
     active_subagent_thread_ids: [],
     shared_timestamp_path: ralphSteerTimestampPath,
     singleton_lock_path: ralphSteerLockPath,
@@ -1608,7 +1608,7 @@ async function pollFiles(): Promise<number> {
 
 async function runLeaderNudgeTick(): Promise<boolean> {
   const startedIso = new Date().toISOString();
-  const leaderOnly = safeString(process.env.OMX_TEAM_WORKER || '').trim() === '';
+  const leaderOnly = safeString(process.env.OMG_TEAM_WORKER || '').trim() === '';
   const staleThresholdMs = resolveLeaderStalenessThresholdMs();
 
   if (!leaderOnly) {
@@ -1683,7 +1683,7 @@ async function runDispatchDrainTick(): Promise<boolean> {
     const result = await drainPendingTeamDispatch({ cwd, stateDir, logsDir, maxPerTick: dispatchTickMax } as any);
     dispatchDrainRuns += 1;
     lastDispatchDrain = {
-      leader_only: safeString(process.env.OMX_TEAM_WORKER || '').trim() === '',
+      leader_only: safeString(process.env.OMG_TEAM_WORKER || '').trim() === '',
       last_tick_at: startedIso,
       last_result: result,
       last_error: null,
@@ -1701,7 +1701,7 @@ async function runDispatchDrainTick(): Promise<boolean> {
   } catch (err) {
     dispatchDrainRuns += 1;
     lastDispatchDrain = {
-      leader_only: safeString(process.env.OMX_TEAM_WORKER || '').trim() === '',
+      leader_only: safeString(process.env.OMG_TEAM_WORKER || '').trim() === '',
       last_tick_at: startedIso,
       last_result: null,
       last_error: err instanceof Error ? err.message : safeString(err),

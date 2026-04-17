@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: "Run deep investigation of architecture, bugs, performance issues, or dependencies and return structured findings with file:line evidence. Use when a user says 'analyze', 'investigate', 'why does', 'what's causing', or needs root cause analysis before making changes. Routes to architect agent or Codex MCP for thorough cross-file reasoning."
+description: "Run deep investigation of architecture, bugs, performance issues, or dependencies and return structured findings with file:line evidence. Use when a user says 'analyze', 'investigate', 'why does', 'what's causing', or needs root cause analysis before making changes. Routes to architect agent or Gemini MCP for thorough cross-file reasoning."
 ---
 
 # Analyze — Evidence-Driven Investigation
@@ -137,7 +137,7 @@ After the initial evidence pass, pressure-test with these lenses when relevant:
 4. **Route to analyzer**:
    - For simple cases: investigate directly with file reads and reasoning
    - For complex cases: use `$team` with tracer lanes
-   - Use `ask_codex` with `agent_role: "architect"` when available
+   - Use `ask_gemini` with `agent_role: "architect"` when available
 5. **Falsify**: Try to break your own best hypothesis
 6. **Return structured findings**: Present with evidence, file references, and actionable recommendations
 

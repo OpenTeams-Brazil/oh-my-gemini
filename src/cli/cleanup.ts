@@ -16,10 +16,10 @@ const HELP = [
 const PROCESS_EXIT_POLL_MS = 100;
 const SIGTERM_GRACE_MS = 5_000;
 const STALE_TMP_MAX_AGE_MS = 60 * 60 * 1000;
-const OMX_MCP_SERVER_PATTERN = /(?:^|[\\/])dist[\\/]mcp[\\/](?:state|memory|code-intel|trace|wiki)-server\.(?:[cm]?js|ts)\b/i;
-const CODEX_PROCESS_PATTERN = /(?:^|[\\/\s])codex(?:\.js)?(?:\s|$)|@openai[\\/]codex/i;
-const OMX_LAUNCH_PROCESS_PATTERN = /(?:^|[\\/\s])omg(?:\.js)?(?:\s|$)|(?:^|[\\/])(?:bin|dist[\\/]cli)[\\/]omg\.js(?:\s|$)|oh-my-gemini[\\/]dist[\\/]cli[\\/]omg\.js/i;
-const OMX_TMP_DIRECTORY_PATTERN = /^(omc|omg|oh-my-gemini)-/;
+const OMG_MCP_SERVER_PATTERN = /(?:^|[\\/])dist[\\/]mcp[\\/](?:state|memory|code-intel|trace|wiki)-server\.(?:[cm]?js|ts)\b/i;
+const GEMINI_PROCESS_PATTERN = /(?:^|[\\/\s])gemini(?:\.js)?(?:\s|$)|@openai[\\/]gemini/i;
+const OMG_LAUNCH_PROCESS_PATTERN = /(?:^|[\\/\s])omg(?:\.js)?(?:\s|$)|(?:^|[\\/])(?:bin|dist[\\/]cli)[\\/]omg\.js(?:\s|$)|oh-my-gemini[\\/]dist[\\/]cli[\\/]omg\.js/i;
+const OMG_TMP_DIRECTORY_PATTERN = /^(omg|omg|oh-my-gemini)-/;
 const PROCESS_LIST_COMMAND_OPTIONS: ExecFileSyncOptionsWithStringEncoding = {
   encoding: 'utf-8',
   windowsHide: true,
@@ -101,7 +101,7 @@ function formatPlural(count: number, singular: string, plural = `${singular}s`):
 
 export function isOmxMcpProcess(command: string): boolean {
   const normalized = normalizeCommand(command);
-  return OMX_MCP_SERVER_PATTERN.test(normalized);
+  return OMG_MCP_SERVER_PATTERN.test(normalized);
 }
 
 export function parsePsOutput(output: string): ProcessEntry[] {
@@ -179,11 +179,11 @@ export function listOmxProcesses(
 }
 
 function isGeminiSessionProcess(command: string): boolean {
-  return CODEX_PROCESS_PATTERN.test(normalizeCommand(command));
+  return GEMINI_PROCESS_PATTERN.test(normalizeCommand(command));
 }
 
 function isOmxLaunchProcess(command: string): boolean {
-  return OMX_LAUNCH_PROCESS_PATTERN.test(normalizeCommand(command));
+  return OMG_LAUNCH_PROCESS_PATTERN.test(normalizeCommand(command));
 }
 
 function hasAncestorMatching(
@@ -461,7 +461,7 @@ export async function cleanupStaleTmpDirectories(
 
   const staleDirectories: string[] = [];
   for (const entry of await listTmpEntries(tmpRoot)) {
-    if (!entry.isDirectory() || !OMX_TMP_DIRECTORY_PATTERN.test(entry.name)) continue;
+    if (!entry.isDirectory() || !OMG_TMP_DIRECTORY_PATTERN.test(entry.name)) continue;
 
     const entryPath = join(tmpRoot, entry.name);
     let entryStat: { mtimeMs: number };

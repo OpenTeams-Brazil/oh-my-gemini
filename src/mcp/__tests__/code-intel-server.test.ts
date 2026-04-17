@@ -51,8 +51,8 @@ describe('mcp/code-intel-server module contract', () => {
   });
 
   it('skips tsc diagnostics when the project has no tsconfig', async () => {
-    const previous = process.env.OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START;
-    process.env.OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START = '1';
+    const previous = process.env.OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START;
+    process.env.OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START = '1';
 
     const projectDir = await mkdtemp(join(tmpdir(), 'omg-code-intel-'));
 
@@ -75,9 +75,9 @@ describe('mcp/code-intel-server module contract', () => {
       assert.equal(result.command, 'tsc skipped: no tsconfig found');
     } finally {
       if (previous === undefined) {
-        delete process.env.OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START;
+        delete process.env.OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START;
       } else {
-        process.env.OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START = previous;
+        process.env.OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START = previous;
       }
       await rm(projectDir, { recursive: true, force: true });
     }

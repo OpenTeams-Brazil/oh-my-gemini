@@ -92,8 +92,8 @@ describe('notify-hook tmux target healing', () => {
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -117,7 +117,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#S" && "$target" == "%42" ]]; then
@@ -151,17 +151,17 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX_PANE;
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);
@@ -208,8 +208,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -234,11 +234,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%42" ]]; then
-    echo "codex --model gpt-5"
+    echo "gemini --model gpt-5"
     exit 0
   fi
   if [[ "$format" == "#{pane_current_path}" && "$target" == "%42" ]]; then
@@ -274,16 +274,16 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);
@@ -321,8 +321,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -361,11 +361,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_current_path}" && "$target" == "%42" ]]; then
@@ -373,11 +373,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#S" && "$target" == "%42" ]]; then
@@ -407,18 +407,18 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       const previousTmuxPane = process.env.TMUX_PANE;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         process.env.TMUX_PANE = '%42';
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
         if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
         else delete process.env.TMUX_PANE;
       }
@@ -458,8 +458,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -498,11 +498,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_current_path}" && "$target" == "%42" ]]; then
@@ -510,11 +510,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#S" && "$target" == "%42" ]]; then
@@ -544,18 +544,18 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       const previousTmuxPane = process.env.TMUX_PANE;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         process.env.TMUX_PANE = '%42';
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
         if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
         else delete process.env.TMUX_PANE;
       }
@@ -600,11 +600,11 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$target" == "%42" && "$format" == "#{pane_start_command}" ]]; then
-    echo "codex --model gpt-5"
+    echo "gemini --model gpt-5"
     exit 0
   fi
   if [[ "$target" == "%42" && "$format" == "#{pane_current_command}" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$target" == "%42" && "$format" == "#{pane_current_path}" ]]; then
@@ -623,12 +623,12 @@ exit 1
       await chmod(fakeTmuxPath, 0o755);
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       const previousTmux = process.env.TMUX;
       const previousTmuxPane = process.env.TMUX_PANE;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX;
         delete process.env.TMUX_PANE;
 
@@ -645,8 +645,8 @@ exit 1
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
         if (typeof previousTmux === 'string') process.env.TMUX = previousTmux;
         else delete process.env.TMUX;
         if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
@@ -681,8 +681,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -758,17 +758,17 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX_PANE;
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);
@@ -777,7 +777,7 @@ exit 1
     });
   });
 
-  it('heals a stale HUD pane target back to the canonical codex pane', async () => {
+  it('heals a stale HUD pane target back to the canonical gemini pane', async () => {
     await withTempWorkingDir(async (cwd) => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
@@ -802,8 +802,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -843,7 +843,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%99" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#S" && "$target" == "%99" ]]; then
@@ -865,7 +865,7 @@ if [[ "$cmd" == "list-panes" ]]; then
     esac
   done
   if [[ "$target" == "${managedSessionName}" ]]; then
-    printf "%%77\t1\tnode\tnode dist/cli/omg.js hud --watch\n%%99\t0\tcodex\tcodex\n"
+    printf "%%77\t1\tnode\tnode dist/cli/omg.js hud --watch\n%%99\t0\tgemini\tgemini\n"
     exit 0
   fi
   exit 1
@@ -889,18 +889,18 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       const previousTmuxPane = process.env.TMUX_PANE;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         process.env.TMUX_PANE = '%99';
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
         if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
         else delete process.env.TMUX_PANE;
       }
@@ -944,8 +944,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -1003,17 +1003,17 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX_PANE;
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);
@@ -1060,8 +1060,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -1093,7 +1093,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%99" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_in_mode}" && "$target" == "%99" ]]; then
@@ -1127,17 +1127,17 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX_PANE;
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);
@@ -1175,8 +1175,8 @@ exit 1
         allowed_modes: ['ralph'],
         cooldown_ms: 0,
         max_injections_per_session: 10,
-        prompt_template: 'Continue [OMX_TMUX_INJECT]',
-        marker: '[OMX_TMUX_INJECT]',
+        prompt_template: 'Continue [OMG_TMUX_INJECT]',
+        marker: '[OMG_TMUX_INJECT]',
         dry_run: false,
         log_level: 'debug',
       });
@@ -1200,7 +1200,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%42" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#S" && "$target" == "%42" ]]; then
@@ -1242,17 +1242,17 @@ exit 1
       };
 
       const previousPath = process.env.PATH;
-      const previousTeamWorker = process.env.OMX_TEAM_WORKER;
+      const previousTeamWorker = process.env.OMG_TEAM_WORKER;
       try {
         process.env.PATH = `${fakeBinDir}:${process.env.PATH || ''}`;
-        process.env.OMX_TEAM_WORKER = '';
+        process.env.OMG_TEAM_WORKER = '';
         delete process.env.TMUX_PANE;
         await handleTmuxInjection({ payload, cwd, stateDir, logsDir });
       } finally {
         if (typeof previousPath === 'string') process.env.PATH = previousPath;
         else delete process.env.PATH;
-        if (typeof previousTeamWorker === 'string') process.env.OMX_TEAM_WORKER = previousTeamWorker;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof previousTeamWorker === 'string') process.env.OMG_TEAM_WORKER = previousTeamWorker;
+        else delete process.env.OMG_TEAM_WORKER;
       }
 
       const hookState = await readJson<Record<string, unknown>>(hookStatePath);

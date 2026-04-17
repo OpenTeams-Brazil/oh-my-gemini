@@ -24,7 +24,7 @@ import {
   listAutoresearchDeepInterviewResultPaths,
   resolveAutoresearchDeepInterviewResult,
 } from './autoresearch-intake.js';
-import { CODEX_BYPASS_FLAG, MADMAX_FLAG } from './constants.js';
+import { GEMINI_BYPASS_FLAG, MADMAX_FLAG } from './constants.js';
 import { restoreStandaloneHudPane, enableMouseScrolling } from '../team/tmux-session.js';
 import { resolveOmxEntryPath } from '../utils/paths.js';
 
@@ -34,9 +34,9 @@ Usage:
   omg autoresearch                                                (human entrypoint: launch Gemini CLI deep-interview intake, then execute)
   omg autoresearch [--topic T] [--evaluator CMD] [--keep-policy P] [--slug S]
   omg autoresearch init [--topic T] [--evaluator CMD] [--keep-policy P] [--slug S]
-  omg autoresearch run <mission-dir> [codex-args...]              (agent/explicit execution entrypoint)
-  omg autoresearch <mission-dir> [codex-args...]                  (compatibility alias for run)
-  omg autoresearch --resume <run-id> [codex-args...]
+  omg autoresearch run <mission-dir> [gemini-args...]              (agent/explicit execution entrypoint)
+  omg autoresearch <mission-dir> [gemini-args...]                  (compatibility alias for run)
+  omg autoresearch --resume <run-id> [gemini-args...]
 
 Arguments:
   (no args)        Launch an interactive Gemini session that activates deep-interview --autoresearch,
@@ -57,7 +57,7 @@ Behavior:
   - --resume loads the authoritative per-run manifest and continues from the last kept commit
 `;
 
-const AUTORESEARCH_APPEND_INSTRUCTIONS_ENV = 'OMX_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE';
+const AUTORESEARCH_APPEND_INSTRUCTIONS_ENV = 'OMG_AUTORESEARCH_APPEND_INSTRUCTIONS_FILE';
 const AUTORESEARCH_MAX_CONSECUTIVE_NOOPS = 3;
 
 function buildAutoresearchDeepInterviewAppendix(): string {
@@ -119,19 +119,19 @@ async function runGuidedAutoresearchDeepInterview(
   return materializeAutoresearchDeepInterviewResult(result);
 }
 
-export function normalizeAutoresearchGeminiArgs(codexArgs: readonly string[]): string[] {
+export function normalizeAutoresearchGeminiArgs(geminiArgs: readonly string[]): string[] {
   const normalized: string[] = [];
   let hasBypass = false;
 
-  for (const arg of codexArgs) {
+  for (const arg of geminiArgs) {
     if (arg === MADMAX_FLAG) {
       if (!hasBypass) {
-        normalized.push(CODEX_BYPASS_FLAG);
+        normalized.push(GEMINI_BYPASS_FLAG);
         hasBypass = true;
       }
       continue;
     }
-    if (arg === CODEX_BYPASS_FLAG) {
+    if (arg === GEMINI_BYPASS_FLAG) {
       if (!hasBypass) {
         normalized.push(arg);
         hasBypass = true;
@@ -142,16 +142,16 @@ export function normalizeAutoresearchGeminiArgs(codexArgs: readonly string[]): s
   }
 
   if (!hasBypass) {
-    normalized.push(CODEX_BYPASS_FLAG);
+    normalized.push(GEMINI_BYPASS_FLAG);
   }
 
   return normalized;
 }
 
-function runAutoresearchTurn(worktreePath: string, instructionsFile: string, codexArgs: string[]): void {
+function runAutoresearchTurn(worktreePath: string, instructionsFile: string, geminiArgs: string[]): void {
   const prompt = readFileSync(instructionsFile, 'utf-8');
-  const launchArgs = ['exec', ...normalizeAutoresearchGeminiArgs(codexArgs), '-'];
-  const result = spawnSync('codex', launchArgs, {
+  const launchArgs = ['exec', ...normalizeAutoresearchGeminiArgs(geminiArgs), '-'];
+  const result = spawnSync('gemini', launchArgs, {
     cwd: worktreePath,
     stdio: ['pipe', 'inherit', 'inherit'],
     input: prompt,
@@ -165,14 +165,14 @@ function runAutoresearchTurn(worktreePath: string, instructionsFile: string, cod
   }
   if (result.status !== 0) {
     process.exitCode = typeof result.status === 'number' ? result.status : 1;
-    throw new Error(`autoresearch_codex_exec_failed:${result.status ?? 'unknown'}`);
+    throw new Error(`autoresearch_gemini_exec_failed:${result.status ?? 'unknown'}`);
   }
 }
 
 export interface ParsedAutoresearchArgs {
   missionDir: string | null;
   runId: string | null;
-  codexArgs: string[];
+  geminiArgs: string[];
   guided?: boolean;
   initArgs?: string[];
   seedArgs?: ReturnType<typeof parseInitArgs>;
@@ -194,46 +194,46 @@ export function parseAutoresearchArgs(args: readonly string[]): ParsedAutoresear
     if (!process.stdin.isTTY) {
       throw new Error(`mission-dir is required.\n${AUTORESEARCH_HELP}`);
     }
-    return { missionDir: null, runId: null, codexArgs: [], guided: true };
+    return { missionDir: null, runId: null, geminiArgs: [], guided: true };
   }
 
   const first = values[0];
   if (first === 'init') {
-    return { missionDir: null, runId: null, codexArgs: [], guided: true, initArgs: values.slice(1) };
+    return { missionDir: null, runId: null, geminiArgs: [], guided: true, initArgs: values.slice(1) };
   }
   if (first === '--help' || first === '-h' || first === 'help') {
-    return { missionDir: '--help', runId: null, codexArgs: [] };
+    return { missionDir: '--help', runId: null, geminiArgs: [] };
   }
   if (first === '--resume') {
     const runId = values[1]?.trim();
     if (!runId) {
       throw new Error(`--resume requires <run-id>.\n${AUTORESEARCH_HELP}`);
     }
-    return { missionDir: null, runId, codexArgs: values.slice(2) };
+    return { missionDir: null, runId, geminiArgs: values.slice(2) };
   }
   if (first.startsWith('--resume=')) {
     const runId = first.slice('--resume='.length).trim();
     if (!runId) {
       throw new Error(`--resume requires <run-id>.\n${AUTORESEARCH_HELP}`);
     }
-    return { missionDir: null, runId, codexArgs: values.slice(1) };
+    return { missionDir: null, runId, geminiArgs: values.slice(1) };
   }
   if (first === 'run') {
     const missionDir = values[1]?.trim();
     if (!missionDir) {
       throw new Error(`run requires <mission-dir>.\n${AUTORESEARCH_HELP}`);
     }
-    return { missionDir, runId: null, codexArgs: values.slice(2), runSubcommand: true };
+    return { missionDir, runId: null, geminiArgs: values.slice(2), runSubcommand: true };
   }
   if (first.startsWith('-')) {
     const seedArgs = parseInitArgs(values);
-    return { missionDir: null, runId: null, codexArgs: [], guided: true, seedArgs };
+    return { missionDir: null, runId: null, geminiArgs: [], guided: true, seedArgs };
   }
-  return { missionDir: first, runId: null, codexArgs: values.slice(1) };
+  return { missionDir: first, runId: null, geminiArgs: values.slice(1) };
 }
 
 async function runAutoresearchLoop(
-  codexArgs: string[],
+  geminiArgs: string[],
   runtime: {
     instructionsFile: string;
     manifestFile: string;
@@ -248,7 +248,7 @@ async function runAutoresearchLoop(
 
   try {
     while (true) {
-      runAutoresearchTurn(runtime.worktreePath, runtime.instructionsFile, codexArgs);
+      runAutoresearchTurn(runtime.worktreePath, runtime.instructionsFile, geminiArgs);
 
       const contract = await loadAutoresearchMissionContract(missionDir);
       const { run_id: runId } = JSON.parse(readFileSync(runtime.manifestFile, 'utf-8')) as { run_id: string };
@@ -320,7 +320,7 @@ function launchAutoresearchInSplitPane(args: {
   currentPaneId: string;
   repoRoot: string;
   missionDir: string;
-  codexArgs: string[];
+  geminiArgs: string[];
 }): boolean {
   if (!checkTmuxAvailable()) return false;
 
@@ -334,7 +334,7 @@ function launchAutoresearchInSplitPane(args: {
   if (!omgPath) return false;
   // Re-enter through the bare compatibility alias so the new pane executes immediately
   // instead of recursively taking the split-pane branch again.
-  const launchArgs = ['autoresearch', args.missionDir, ...args.codexArgs];
+  const launchArgs = ['autoresearch', args.missionDir, ...args.geminiArgs];
   const command = [process.execPath, omgPath, ...launchArgs]
     .map((part) => `'${part.replace(/'/g, `'\\''`)}'`)
     .join(' ');
@@ -348,7 +348,7 @@ function launchAutoresearchInSplitPane(args: {
     return false;
   }
 
-  if (sessionName && process.env.OMX_MOUSE !== '0') {
+  if (sessionName && process.env.OMG_MOUSE !== '0') {
     enableMouseScrolling(sessionName);
   }
   if (existingHudPaneIds.length === 0) {
@@ -358,7 +358,7 @@ function launchAutoresearchInSplitPane(args: {
   return true;
 }
 
-async function executeAutoresearchMissionRun(missionDir: string, codexArgs: string[]): Promise<void> {
+async function executeAutoresearchMissionRun(missionDir: string, geminiArgs: string[]): Promise<void> {
   const contract = await loadAutoresearchMissionContract(missionDir);
   await assertModeStartAllowed('autoresearch', contract.repoRoot);
   const runTag = buildAutoresearchRunTag();
@@ -375,7 +375,7 @@ async function executeAutoresearchMissionRun(missionDir: string, codexArgs: stri
 
   const worktreeContract = await materializeAutoresearchMissionToWorktree(contract, ensured.worktreePath);
   const runtime = await prepareAutoresearchRuntime(worktreeContract, contract.repoRoot, ensured.worktreePath, { runTag });
-  await runAutoresearchLoop(codexArgs, runtime, worktreeContract.missionDir);
+  await runAutoresearchLoop(geminiArgs, runtime, worktreeContract.missionDir);
 }
 
 export async function autoresearchCommand(args: string[]): Promise<void> {
@@ -413,7 +413,7 @@ export async function autoresearchCommand(args: string[]): Promise<void> {
       currentPaneId,
       repoRoot,
       missionDir: result.missionDir,
-      codexArgs: [],
+      geminiArgs: [],
     })) {
       return;
     }
@@ -427,7 +427,7 @@ export async function autoresearchCommand(args: string[]): Promise<void> {
     await assertModeStartAllowed('autoresearch', repoRoot);
     const manifest = await loadAutoresearchRunManifest(repoRoot, parsed.runId);
     const runtime = await resumeAutoresearchRuntime(repoRoot, parsed.runId);
-    await runAutoresearchLoop(parsed.codexArgs, runtime, manifest.mission_dir);
+    await runAutoresearchLoop(parsed.geminiArgs, runtime, manifest.mission_dir);
     return;
   }
 
@@ -438,11 +438,11 @@ export async function autoresearchCommand(args: string[]): Promise<void> {
       currentPaneId,
       repoRoot,
       missionDir: parsed.missionDir as string,
-      codexArgs: parsed.codexArgs,
+      geminiArgs: parsed.geminiArgs,
     })) {
       return;
     }
   }
 
-  await executeAutoresearchMissionRun(parsed.missionDir as string, parsed.codexArgs);
+  await executeAutoresearchMissionRun(parsed.missionDir as string, parsed.geminiArgs);
 }

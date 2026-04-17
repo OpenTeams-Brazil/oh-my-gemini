@@ -33,14 +33,14 @@ async function readTeamStateRootFromJson(path) {
 }
 
 export async function resolveTeamStateDirForWorker(cwd, parsedTeamWorker) {
-  const explicitStateRoot = safeString(process.env.OMX_TEAM_STATE_ROOT || '').trim();
+  const explicitStateRoot = safeString(process.env.OMG_TEAM_STATE_ROOT || '').trim();
   if (explicitStateRoot) {
     return resolvePath(cwd, explicitStateRoot);
   }
 
   const teamName = parsedTeamWorker.teamName;
   const workerName = parsedTeamWorker.workerName;
-  const leaderCwd = safeString(process.env.OMX_TEAM_LEADER_CWD || '').trim();
+  const leaderCwd = safeString(process.env.OMG_TEAM_LEADER_CWD || '').trim();
 
   const candidateStateDirs = [];
   if (leaderCwd) {
@@ -77,14 +77,14 @@ export function parseTeamWorkerEnv(rawValue) {
 }
 
 export function resolveWorkerIdleNotifyEnabled() {
-  const raw = safeString(process.env.OMX_TEAM_WORKER_IDLE_NOTIFY || '').trim().toLowerCase();
+  const raw = safeString(process.env.OMG_TEAM_WORKER_IDLE_NOTIFY || '').trim().toLowerCase();
   // Default: enabled. Disable with "false", "0", or "off".
   if (raw === 'false' || raw === '0' || raw === 'off') return false;
   return true;
 }
 
 export function resolveWorkerIdleCooldownMs() {
-  const raw = safeString(process.env.OMX_TEAM_WORKER_IDLE_COOLDOWN_MS || '');
+  const raw = safeString(process.env.OMG_TEAM_WORKER_IDLE_COOLDOWN_MS || '');
   const parsed = asNumber(raw);
   // Default: 30 seconds. Guard against unreasonable values.
   if (parsed !== null && parsed >= 5_000 && parsed <= 10 * 60_000) return parsed;
@@ -92,7 +92,7 @@ export function resolveWorkerIdleCooldownMs() {
 }
 
 export function resolveAllWorkersIdleCooldownMs() {
-  const raw = safeString(process.env.OMX_TEAM_ALL_IDLE_COOLDOWN_MS || '');
+  const raw = safeString(process.env.OMG_TEAM_ALL_IDLE_COOLDOWN_MS || '');
   const parsed = asNumber(raw);
   // Default: 60 seconds. Guard against unreasonable values.
   if (parsed !== null && parsed >= 5_000 && parsed <= 10 * 60_000) return parsed;
@@ -100,14 +100,14 @@ export function resolveAllWorkersIdleCooldownMs() {
 }
 
 export function resolveStatusStaleMs() {
-  const raw = safeString(process.env.OMX_TEAM_STATUS_STALE_MS || '');
+  const raw = safeString(process.env.OMG_TEAM_STATUS_STALE_MS || '');
   const parsed = asNumber(raw);
   if (parsed !== null && parsed >= 5_000 && parsed <= 60 * 60_000) return parsed;
   return 120_000;
 }
 
 export function resolveHeartbeatStaleMs() {
-  const raw = safeString(process.env.OMX_TEAM_HEARTBEAT_STALE_MS || '');
+  const raw = safeString(process.env.OMG_TEAM_HEARTBEAT_STALE_MS || '');
   const parsed = asNumber(raw);
   if (parsed !== null && parsed >= 5_000 && parsed <= 60 * 60_000) return parsed;
   return 180_000;

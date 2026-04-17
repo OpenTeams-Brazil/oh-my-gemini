@@ -15,8 +15,8 @@ export function geminiHome(): string {
   return process.env.GEMINI_HOME || join(homedir(), ".gemini");
 }
 
-export const OMX_ENTRY_PATH_ENV = "OMX_ENTRY_PATH";
-export const OMX_STARTUP_CWD_ENV = "OMX_STARTUP_CWD";
+export const OMG_ENTRY_PATH_ENV = "OMG_ENTRY_PATH";
+export const OMG_STARTUP_CWD_ENV = "OMG_STARTUP_CWD";
 
 function resolveLauncherPath(rawPath: string, baseCwd: string): string {
   const absolutePath = isAbsolute(rawPath) ? rawPath : resolve(baseCwd, rawPath);
@@ -54,13 +54,13 @@ export function resolveOmxEntryPath(
   } = {},
 ): string | null {
   const { argv1 = process.argv[1], cwd = process.cwd(), env = process.env } = options;
-  const fromEnv = String(env[OMX_ENTRY_PATH_ENV] ?? "").trim();
+  const fromEnv = String(env[OMG_ENTRY_PATH_ENV] ?? "").trim();
   if (fromEnv !== "") return fromEnv;
 
   const rawPath = typeof argv1 === "string" ? argv1.trim() : "";
   if (rawPath === "") return null;
 
-  const startupCwd = String(env[OMX_STARTUP_CWD_ENV] ?? "").trim() || cwd;
+  const startupCwd = String(env[OMG_STARTUP_CWD_ENV] ?? "").trim() || cwd;
   return resolveLauncherPath(rawPath, startupCwd);
 }
 
@@ -94,10 +94,10 @@ export function rememberOmxLaunchContext(
   } = {},
 ): void {
   const { cwd = process.cwd(), env = process.env } = options;
-  if (String(env[OMX_STARTUP_CWD_ENV] ?? "").trim() === "") {
-    env[OMX_STARTUP_CWD_ENV] = cwd;
+  if (String(env[OMG_STARTUP_CWD_ENV] ?? "").trim() === "") {
+    env[OMG_STARTUP_CWD_ENV] = cwd;
   }
-  if (String(env[OMX_ENTRY_PATH_ENV] ?? "").trim() !== "") return;
+  if (String(env[OMG_ENTRY_PATH_ENV] ?? "").trim() !== "") return;
 
   const resolved = resolveOmxEntryPath({
     argv1: options.argv1,
@@ -105,7 +105,7 @@ export function rememberOmxLaunchContext(
     env,
   });
   if (resolved) {
-    env[OMX_ENTRY_PATH_ENV] = resolved;
+    env[OMG_ENTRY_PATH_ENV] = resolved;
   }
 }
 

@@ -18,7 +18,7 @@ import {
   resolveCachedNativeBinaryCandidatePaths,
 } from './native-assets.js';
 
-const OMX_SPARKSHELL_BIN_ENV = SPARKSHELL_BIN_ENV_SHARED;
+const OMG_SPARKSHELL_BIN_ENV = SPARKSHELL_BIN_ENV_SHARED;
 
 export const SPARKSHELL_USAGE = [
   'Usage: omg sparkshell <command> [args...]',
@@ -109,7 +109,7 @@ export function resolveSparkShellBinaryPath(options: ResolveSparkShellBinaryPath
     exists = existsSync,
   } = options;
 
-  const override = env[OMX_SPARKSHELL_BIN_ENV]?.trim();
+  const override = env[OMG_SPARKSHELL_BIN_ENV]?.trim();
   if (override) {
     return isAbsolute(override) ? override : resolve(cwd, override);
   }
@@ -127,7 +127,7 @@ export function resolveSparkShellBinaryPath(options: ResolveSparkShellBinaryPath
   const packagedCandidates = packagedSparkShellBinaryCandidatePaths(packageRoot, platform, arch, env, linuxLibcPreference);
   throw new Error(
     `[sparkshell] native binary not found. Checked ${packagedCandidates.join(', ')}, ${repoLocal}, and ${nestedRepoLocal}. `
-      + `Set ${OMX_SPARKSHELL_BIN_ENV} to override the path.`
+      + `Set ${OMG_SPARKSHELL_BIN_ENV} to override the path.`
   );
 }
 
@@ -144,7 +144,7 @@ export async function resolveSparkShellBinaryPathWithHydration(
     exists = existsSync,
   } = options;
 
-  const override = env[OMX_SPARKSHELL_BIN_ENV]?.trim();
+  const override = env[OMG_SPARKSHELL_BIN_ENV]?.trim();
   if (override) {
     return isAbsolute(override) ? override : resolve(cwd, override);
   }
@@ -173,7 +173,7 @@ export async function resolveSparkShellBinaryPathWithHydration(
 
   throw new Error(
     `[sparkshell] native binary not found. Checked cached/native candidates under ${packageRoot}, ${repoLocal}, and ${nestedRepoLocal}. `
-      + `Reconnect to the network so OMX can fetch the release asset, or set ${OMX_SPARKSHELL_BIN_ENV} to override the path.`
+      + `Reconnect to the network so OMX can fetch the release asset, or set ${OMG_SPARKSHELL_BIN_ENV} to override the path.`
   );
 }
 
@@ -321,8 +321,8 @@ export async function sparkshellCommand(args: string[]): Promise<void> {
     throw new Error(`Missing command to run.\n${SPARKSHELL_USAGE}`);
   }
 
-  const hasExplicitOverride = typeof process.env[OMX_SPARKSHELL_BIN_ENV] === 'string'
-    && process.env[OMX_SPARKSHELL_BIN_ENV]!.trim().length > 0;
+  const hasExplicitOverride = typeof process.env[OMG_SPARKSHELL_BIN_ENV] === 'string'
+    && process.env[OMG_SPARKSHELL_BIN_ENV]!.trim().length > 0;
   let binaryPath: string;
   try {
     binaryPath = await resolveSparkShellBinaryPathWithHydration();

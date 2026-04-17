@@ -214,8 +214,8 @@ describe("omg setup scope behavior", () => {
       assert.match(configToml, /^max_threads = 6$/m);
       assert.match(configToml, /^max_depth = 2$/m);
       assert.match(configToml, /^\[env\]$/m);
-      assert.match(configToml, /^USE_OMX_EXPLORE_CMD = "1"$/m);
-      assert.match(configToml, /^codex_hooks = true$/m);
+      assert.match(configToml, /^USE_OMG_EXPLORE_CMD = "1"$/m);
+      assert.match(configToml, /^gemini_hooks = true$/m);
       const hooksJson = JSON.parse(await readFile(localHooks, "utf-8")) as {
         hooks?: Record<string, unknown>;
       };
@@ -239,11 +239,11 @@ describe("omg setup scope behavior", () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-scope-"));
     try {
       const home = join(wd, "home");
-      const codexDir = join(wd, ".gemini");
+      const geminiDir = join(wd, ".gemini");
       await mkdir(home, { recursive: true });
-      await mkdir(codexDir, { recursive: true });
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, "hooks.json"),
+        join(geminiDir, "hooks.json"),
         JSON.stringify(
           {
             hooks: {
@@ -252,7 +252,7 @@ describe("omg setup scope behavior", () => {
                   hooks: [
                     {
                       type: "command",
-                      command: 'node "/old/dist/scripts/codex-native-hook.js"',
+                      command: 'node "/old/dist/scripts/gemini-native-hook.js"',
                     },
                     { type: "command", command: "echo keep-me" },
                   ],
@@ -263,7 +263,7 @@ describe("omg setup scope behavior", () => {
                   hooks: [
                     {
                       type: "command",
-                      command: 'node "/old/dist/scripts/codex-native-hook.js"',
+                      command: 'node "/old/dist/scripts/gemini-native-hook.js"',
                     },
                   ],
                 },
@@ -280,7 +280,7 @@ describe("omg setup scope behavior", () => {
       assert.equal(res.status, 0, res.stderr || res.stdout);
 
       const hooksJson = JSON.parse(
-        await readFile(join(codexDir, "hooks.json"), "utf-8"),
+        await readFile(join(geminiDir, "hooks.json"), "utf-8"),
       ) as {
         hooks: Record<string, Array<{ hooks?: Array<{ command?: string }> }>>;
       };
@@ -291,20 +291,20 @@ describe("omg setup scope behavior", () => {
 
       assert.equal(
         sessionStartHooks.filter((hook) =>
-          String(hook.command ?? "").includes("codex-native-hook.js")
+          String(hook.command ?? "").includes("gemini-native-hook.js")
         ).length,
         1,
       );
       assert.equal(
         stopHooks.filter((hook) =>
-          String(hook.command ?? "").includes("codex-native-hook.js")
+          String(hook.command ?? "").includes("gemini-native-hook.js")
         ).length,
         1,
       );
       assert.match(JSON.stringify(sessionStartHooks), /echo keep-me/);
       assert.doesNotMatch(
         JSON.stringify(hooksJson),
-        /\/old\/dist\/scripts\/codex-native-hook\.js/,
+        /\/old\/dist\/scripts\/gemini-native-hook\.js/,
       );
     } finally {
       await rm(wd, { recursive: true, force: true });

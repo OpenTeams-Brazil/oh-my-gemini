@@ -88,11 +88,11 @@ describe('state paths', () => {
     assert.throws(() => resolveWorkingDirectoryForState('bad\0path'), /NUL byte/);
   });
 
-  it('enforces OMX_MCP_WORKDIR_ROOTS allowlist when configured', async () => {
+  it('enforces OMG_MCP_WORKDIR_ROOTS allowlist when configured', async () => {
     const allowedRoot = await mkdtemp(join(tmpdir(), 'omg-allowed-root-'));
     const disallowedRoot = await mkdtemp(join(tmpdir(), 'omg-disallowed-root-'));
-    const prev = process.env.OMX_MCP_WORKDIR_ROOTS;
-    process.env.OMX_MCP_WORKDIR_ROOTS = allowedRoot;
+    const prev = process.env.OMG_MCP_WORKDIR_ROOTS;
+    process.env.OMG_MCP_WORKDIR_ROOTS = allowedRoot;
     try {
       assert.equal(
         resolveWorkingDirectoryForState(join(allowedRoot, 'nested')),
@@ -100,11 +100,11 @@ describe('state paths', () => {
       );
       assert.throws(
         () => resolveWorkingDirectoryForState(disallowedRoot),
-        /outside allowed roots \(OMX_MCP_WORKDIR_ROOTS\)/,
+        /outside allowed roots \(OMG_MCP_WORKDIR_ROOTS\)/,
       );
     } finally {
-      if (typeof prev === 'string') process.env.OMX_MCP_WORKDIR_ROOTS = prev;
-      else delete process.env.OMX_MCP_WORKDIR_ROOTS;
+      if (typeof prev === 'string') process.env.OMG_MCP_WORKDIR_ROOTS = prev;
+      else delete process.env.OMG_MCP_WORKDIR_ROOTS;
       await rm(allowedRoot, { recursive: true, force: true });
       await rm(disallowedRoot, { recursive: true, force: true });
     }
@@ -227,9 +227,9 @@ describe('state paths', () => {
     }
   });
 
-  it('prefers OMX_SESSION_ID over stale session.json when resolving current session id', async () => {
+  it('prefers OMG_SESSION_ID over stale session.json when resolving current session id', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-paths-'));
-    const previousSessionId = process.env.OMX_SESSION_ID;
+    const previousSessionId = process.env.OMG_SESSION_ID;
     try {
       const stateDir = getBaseStateDir(wd);
       await mkdir(stateDir, { recursive: true });
@@ -238,12 +238,12 @@ describe('state paths', () => {
         session_id: 'sess-stale',
         cwd: join(wd, '..', 'other-worktree'),
       }));
-      process.env.OMX_SESSION_ID = 'sess-env';
+      process.env.OMG_SESSION_ID = 'sess-env';
 
       assert.equal(await readCurrentSessionId(wd), 'sess-env');
     } finally {
-      if (typeof previousSessionId === 'string') process.env.OMX_SESSION_ID = previousSessionId;
-      else delete process.env.OMX_SESSION_ID;
+      if (typeof previousSessionId === 'string') process.env.OMG_SESSION_ID = previousSessionId;
+      else delete process.env.OMG_SESSION_ID;
       await rm(wd, { recursive: true, force: true });
     }
   });

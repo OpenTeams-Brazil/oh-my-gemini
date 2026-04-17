@@ -43,7 +43,7 @@ interface CliInput {
   pollIntervalMs?: number;
 }
 
-type TeamWorkerProvider = 'codex' | 'claude' | 'gemini';
+type TeamWorkerProvider = 'gemini' | 'claude' | 'gemini';
 
 interface TaskResult {
   taskId: string;
@@ -77,7 +77,7 @@ async function writePanesFile(
   paneIds: string[],
   leaderPaneId: string,
 ): Promise<void> {
-  const omgJobsDir = process.env.OMX_JOBS_DIR;
+  const omgJobsDir = process.env.OMG_JOBS_DIR;
   if (!jobId || !omgJobsDir) return;
 
   const panesPath = join(omgJobsDir, `${jobId}-panes.json`);
@@ -188,9 +188,9 @@ export function buildTerminalCliResult(
 
 export function normalizeAgentTypes(raw: string[], workerCount: number): TeamWorkerProvider[] {
   const providers = raw.map((entry) => String(entry || '').trim().toLowerCase());
-  const invalid = providers.filter((entry) => entry !== 'codex' && entry !== 'claude' && entry !== 'gemini');
+  const invalid = providers.filter((entry) => entry !== 'gemini' && entry !== 'claude' && entry !== 'gemini');
   if (invalid.length > 0) {
-    throw new Error(`Invalid agentTypes entries: ${invalid.join(', ')}. Expected codex|claude|gemini.`);
+    throw new Error(`Invalid agentTypes entries: ${invalid.join(', ')}. Expected gemini|claude|gemini.`);
   }
   if (providers.length !== 1 && providers.length !== workerCount) {
     throw new Error(`agentTypes length must be 1 or ${workerCount}; received ${providers.length}.`);
@@ -304,9 +304,9 @@ async function main(): Promise<void> {
   const agentType = 'executor';
   try {
     const providers = normalizeAgentTypes(agentTypes, workerCount);
-    const previousCliMap = process.env.OMX_TEAM_WORKER_CLI_MAP;
+    const previousCliMap = process.env.OMG_TEAM_WORKER_CLI_MAP;
     try {
-      process.env.OMX_TEAM_WORKER_CLI_MAP = providers.join(',');
+      process.env.OMG_TEAM_WORKER_CLI_MAP = providers.join(',');
       runtime = await startTeam(
         teamName,
         tasks.map(t => t.subject).join('; '),
@@ -317,8 +317,8 @@ async function main(): Promise<void> {
         { confirmStaleCleanup: promptStaleCleanup },
       );
     } finally {
-      if (typeof previousCliMap === 'string') process.env.OMX_TEAM_WORKER_CLI_MAP = previousCliMap;
-      else delete process.env.OMX_TEAM_WORKER_CLI_MAP;
+      if (typeof previousCliMap === 'string') process.env.OMG_TEAM_WORKER_CLI_MAP = previousCliMap;
+      else delete process.env.OMG_TEAM_WORKER_CLI_MAP;
     }
   } catch (err) {
     process.stderr.write(`[runtime-cli] startTeam failed: ${err}\n`);
@@ -326,7 +326,7 @@ async function main(): Promise<void> {
   }
 
   // Persist pane IDs when a background launcher provides an OMX job ID.
-  const jobId = process.env.OMX_JOB_ID;
+  const jobId = process.env.OMG_JOB_ID;
   try {
     const livePanes = await loadLivePaneState(teamName, cwd);
     if (livePanes) {
@@ -406,7 +406,7 @@ async function main(): Promise<void> {
   }
 }
 
-const shouldAutoStart = process.env.OMX_RUNTIME_CLI_DISABLE_AUTO_START !== '1';
+const shouldAutoStart = process.env.OMG_RUNTIME_CLI_DISABLE_AUTO_START !== '1';
 
 if (shouldAutoStart) {
   main().catch(err => {

@@ -40,19 +40,19 @@ function shouldSkipForSpawnPermissions(err: string): boolean {
 }
 
 describe('omg launch fallback when tmux is unavailable', () => {
-  it('launches codex directly without tmux ENOENT noise', async () => {
+  it('launches gemini directly without tmux ENOENT noise', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-launch-fallback-'));
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
         fakeGeminiPath,
-        '#!/bin/sh\nprintf \'fake-codex:%s\\n\' \"$*\"\n',
+        '#!/bin/sh\nprintf \'fake-gemini:%s\\n\' \"$*\"\n',
       );
       await chmod(fakeGeminiPath, 0o755);
       await writeFile(fakePsPath, '#!/bin/sh\nexit 0\n');
@@ -64,17 +64,17 @@ describe('omg launch fallback when tmux is unavailable', () => {
         {
           HOME: home,
           PATH: `${fakeBin}:/usr/bin:/bin`,
-          OMX_AUTO_UPDATE: '0',
-          OMX_NOTIFY_FALLBACK: '0',
-          OMX_HOOK_DERIVED_SIGNALS: '0',
+          OMG_AUTO_UPDATE: '0',
+          OMG_NOTIFY_FALLBACK: '0',
+          OMG_HOOK_DERIVED_SIGNALS: '0',
         },
       );
 
       if (shouldSkipForSpawnPermissions(result.error)) return;
 
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
-      assert.match(result.stdout, /fake-codex:.*--dangerously-bypass-approvals-and-sandbox/);
-      assert.match(result.stdout, /fake-codex:.*model_reasoning_effort="xhigh"/);
+      assert.match(result.stdout, /fake-gemini:.*--dangerously-bypass-approvals-and-sandbox/);
+      assert.match(result.stdout, /fake-gemini:.*model_reasoning_effort="xhigh"/);
       assert.doesNotMatch(result.stderr, /spawnSync tmux ENOENT/);
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -88,7 +88,7 @@ describe('omg launcher when tmux is available', () => {
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
       const fakeTmuxPath = join(fakeBin, 'tmux');
       const tmuxLogPath = join(wd, 'tmux.log');
@@ -97,7 +97,7 @@ describe('omg launcher when tmux is available', () => {
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
         fakeGeminiPath,
-        '#!/bin/sh\nprintf \'fake-codex:%s\\n\' \"$*\"\n',
+        '#!/bin/sh\nprintf \'fake-gemini:%s\\n\' \"$*\"\n',
       );
       await chmod(fakeGeminiPath, 0o755);
       await writeFile(fakePsPath, '#!/bin/sh\nexit 0\n');
@@ -146,9 +146,9 @@ exit 0
         {
           HOME: home,
           PATH: `${fakeBin}:/usr/bin:/bin`,
-          OMX_AUTO_UPDATE: '0',
-          OMX_NOTIFY_FALLBACK: '0',
-          OMX_HOOK_DERIVED_SIGNALS: '0',
+          OMG_AUTO_UPDATE: '0',
+          OMG_NOTIFY_FALLBACK: '0',
+          OMG_HOOK_DERIVED_SIGNALS: '0',
           TMUX: '',
           TMUX_PANE: '',
         },
@@ -170,11 +170,11 @@ exit 0
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
       const fakeTmuxPath = join(fakeBin, 'tmux');
       const tmuxLogPath = join(wd, 'tmux.log');
-      const codexLogPath = join(wd, 'codex.log');
+      const geminiLogPath = join(wd, 'gemini.log');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
@@ -184,8 +184,8 @@ exit 0
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-printf 'codex:%s\\n' "$*" >> "${codexLogPath}"
-printf 'codex-pwd:%s\\n' "$(pwd)" >> "${codexLogPath}"
+printf 'gemini:%s\\n' "$*" >> "${geminiLogPath}"
+printf 'gemini-pwd:%s\\n' "$(pwd)" >> "${geminiLogPath}"
 exit 0
 `,
       );
@@ -243,9 +243,9 @@ exit 0
           HOME: home,
           SHELL: '/definitely/missing-shell',
           PATH: `${fakeBin}:/usr/bin:/bin`,
-          OMX_AUTO_UPDATE: '0',
-          OMX_NOTIFY_FALLBACK: '0',
-          OMX_HOOK_DERIVED_SIGNALS: '0',
+          OMG_AUTO_UPDATE: '0',
+          OMG_NOTIFY_FALLBACK: '0',
+          OMG_HOOK_DERIVED_SIGNALS: '0',
           TMUX: '',
           TMUX_PANE: '',
         },
@@ -253,9 +253,9 @@ exit 0
 
       if (shouldSkipForSpawnPermissions(result.error)) return;
 
-      const codexLog = await readFile(codexLogPath, 'utf-8');
-      assert.match(codexLog, /codex:.*--dangerously-bypass-approvals-and-sandbox/);
-      assert.match(codexLog, new RegExp(`codex-pwd:${wd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+      const geminiLog = await readFile(geminiLogPath, 'utf-8');
+      assert.match(geminiLog, /gemini:.*--dangerously-bypass-approvals-and-sandbox/);
+      assert.match(geminiLog, new RegExp(`gemini-pwd:${wd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -267,11 +267,11 @@ exit 0
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
       const fakeTmuxPath = join(fakeBin, 'tmux');
       const tmuxLogPath = join(wd, 'tmux.log');
-      const codexLogPath = join(wd, 'codex.log');
+      const geminiLogPath = join(wd, 'gemini.log');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
@@ -279,8 +279,8 @@ exit 0
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-printf 'codex:%s\\n' "$*" >> "${codexLogPath}"
-printf 'codex-pwd:%s\\n' "$(pwd)" >> "${codexLogPath}"
+printf 'gemini:%s\\n' "$*" >> "${geminiLogPath}"
+printf 'gemini-pwd:%s\\n' "$(pwd)" >> "${geminiLogPath}"
 exit 0
 `,
       );
@@ -338,9 +338,9 @@ exit 0
           HOME: home,
           SHELL: '/bin/not-a-real-shell',
           PATH: `${fakeBin}:/usr/bin:/bin`,
-          OMX_AUTO_UPDATE: '0',
-          OMX_NOTIFY_FALLBACK: '0',
-          OMX_HOOK_DERIVED_SIGNALS: '0',
+          OMG_AUTO_UPDATE: '0',
+          OMG_NOTIFY_FALLBACK: '0',
+          OMG_HOOK_DERIVED_SIGNALS: '0',
           TMUX: '',
           TMUX_PANE: '',
         },
@@ -349,11 +349,11 @@ exit 0
       if (shouldSkipForSpawnPermissions(result.error)) return;
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      const codexLog = await readFile(codexLogPath, 'utf-8');
+      const geminiLog = await readFile(geminiLogPath, 'utf-8');
       assert.match(tmuxLog, /\/bin\/sh/);
       assert.doesNotMatch(tmuxLog, /not-a-real-shell/);
-      assert.match(codexLog, /codex:.*--dangerously-bypass-approvals-and-sandbox/);
-      assert.match(codexLog, new RegExp(`codex-pwd:${wd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+      assert.match(geminiLog, /gemini:.*--dangerously-bypass-approvals-and-sandbox/);
+      assert.match(geminiLog, new RegExp(`gemini-pwd:${wd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
     } finally {
       await rm(wd, { recursive: true, force: true });

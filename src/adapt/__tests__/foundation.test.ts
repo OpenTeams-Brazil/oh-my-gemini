@@ -22,9 +22,9 @@ beforeEach(async () => {
 	tempDir = await mkdtemp(join(tmpdir(), "omg-adapt-foundation-"));
 	process.env.HOME = tempDir;
 	process.env.GEMINI_HOME = join(tempDir, ".gemini");
-	delete process.env.OMX_OPENCLAW;
-	delete process.env.OMX_OPENCLAW_CONFIG;
-	delete process.env.OMX_OPENCLAW_COMMAND;
+	delete process.env.OMG_OPENCLAW;
+	delete process.env.OMG_OPENCLAW_CONFIG;
+	delete process.env.OMG_OPENCLAW_COMMAND;
 });
 
 afterEach(async () => {
@@ -127,7 +127,7 @@ describe("adapt foundation", () => {
 	});
 
 	it("writes OpenClaw adapter artifacts only under adapter-owned paths", async () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		await writeOpenClawOmxConfig({
 			notifications: {
 				openclaw: {
@@ -186,7 +186,7 @@ describe("adapt foundation", () => {
 	});
 
 	it("OpenClaw status degrades gracefully when config is absent", () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		const status = buildAdaptStatusReport(
 			tempDir,
 			"openclaw",
@@ -201,7 +201,7 @@ describe("adapt foundation", () => {
 	});
 
 	it("OpenClaw status reports local command-gateway blocking without over-claiming health", async () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		await writeOpenClawOmxConfig({
 			notifications: {
 				openclaw: {
@@ -243,7 +243,7 @@ describe("adapt foundation", () => {
 			new Date("2026-04-14T00:00:00.000Z"),
 		);
 		assert.equal(doctor.issues[0]?.code, "adapter_not_initialized");
-		assert.match(doctor.nextSteps.join("\n"), /OMX_OPENCLAW=1/i);
+		assert.match(doctor.nextSteps.join("\n"), /OMG_OPENCLAW=1/i);
 		assert.match(doctor.nextSteps.join("\n"), /init --write/i);
 	});
 

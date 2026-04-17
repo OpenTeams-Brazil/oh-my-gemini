@@ -12,7 +12,7 @@ function expectPatterns(path: string, patterns: RegExp[]): void {
 describe('explore + sparkshell guidance contract', () => {
   it('keeps AGENTS root and template aligned on conditional explore routing and opt-in sparkshell guidance', () => {
     const patterns = [
-      /USE_OMX_EXPLORE_CMD/i,
+      /USE_OMG_EXPLORE_CMD/i,
       /SHOULD treat `omg explore`|strongly prefer `omg explore`/i,
       /--prompt/i,
       /shell-only, allowlisted, read-only path|shell-only allowlisted read-only path/i,
@@ -29,7 +29,7 @@ describe('explore + sparkshell guidance contract', () => {
 
   it('keeps explore surfaces explicit about richer-path fallback', () => {
     expectPatterns('prompts/explore.md', [
-      /USE_OMX_EXPLORE_CMD/i,
+      /USE_OMG_EXPLORE_CMD/i,
       /preferred low-cost path/i,
       /continue on this richer normal path/i,
     ]);
@@ -53,7 +53,7 @@ describe('explore + sparkshell guidance contract', () => {
       'skills/team/SKILL.md',
     ]) {
       expectPatterns(surface, [
-        /USE_OMX_EXPLORE_CMD/i,
+        /USE_OMG_EXPLORE_CMD/i,
         /prefer `omg explore`|use `omg explore` FIRST/i,
         /fall back normally|fallback normally|graceful fallback|richer normal explore path/i,
       ]);

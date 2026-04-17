@@ -13,7 +13,7 @@
 
 > **[官方網站](https://yeachan-heo.github.io/oh-my-gemini-website/)** | **[說明文件](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html)** | **[CLI 參考手冊](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#cli-reference)** | **[工作流程](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#workflows)** | **[OpenClaw 整合指南](../openclaw-integration.zh-TW.md)** | **[GitHub](https://github.com/Yeachan-Heo/oh-my-gemini)** | **[npm](https://www.npmjs.com/package/oh-my-gemini)**
 
-[OpenAI Gemini CLI](https://github.com/openai/codex) 的多智能體編排層。
+[OpenAI Gemini CLI](https://github.com/openai/gemini) 的多智能體編排層。
 
 ## v0.9.0 新功能 — Spark Initiative
 
@@ -98,7 +98,7 @@ omg ask gemini --agent-prompt=planner --prompt "draft a rollout plan"
 非 tmux 團隊啟動（進階）：
 
 ```bash
-OMX_TEAM_WORKER_LAUNCH_MODE=prompt omg team 2:executor "task"
+OMG_TEAM_WORKER_LAUNCH_MODE=prompt omg team 2:executor "task"
 ```
 
 ## Hooks 擴充（附加介面）
@@ -108,7 +108,7 @@ OMX 現已包含 `omg hooks`，用於插件鷹架建立與驗證。
 - `omg tmux-hook` 持續受支援，行為不變。
 - `omg hooks` 屬於附加功能，不會取代 tmux-hook 工作流程。
 - 插件檔案位於 `.omg/hooks/*.mjs`。
-- 插件預設關閉；使用 `OMX_HOOK_PLUGINS=1` 啟用。
+- 插件預設關閉；使用 `OMG_HOOK_PLUGINS=1` 啟用。
 
 完整的擴充工作流程與事件模型，請參閱 `docs/hooks-extension.md`。
 
@@ -134,7 +134,7 @@ OMX 現已包含 `omg hooks`，用於插件鷹架建立與驗證。
 若要限制此行為，請設定允許的根目錄清單：
 
 ```bash
-export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
+export OMG_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 ```
 
 設定後，超出這些根目錄的 `workingDirectory` 值將被拒絕。
@@ -147,14 +147,14 @@ export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 -c model_instructions_file="<cwd>/GEMINI.md"
 ```
 
-這會將 `CODEX_HOME` 中的 `GEMINI.md` 與專案的 `GEMINI.md`（若存在）合併，然後再附加執行期 overlay。
+這會將 `GEMINI_HOME` 中的 `GEMINI.md` 與專案的 `GEMINI.md`（若存在）合併，然後再附加執行期 overlay。
 此舉擴充了 Gemini 的行為，但不會取代或繞過 Gemini 核心系統策略。
 
 控制方式：
 
 ```bash
-OMX_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # 停用 GEMINI.md 注入
-OMX_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
+OMG_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # 停用 GEMINI.md 注入
+OMG_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
 ```
 
 ## 團隊模式
@@ -186,16 +186,16 @@ omg team shutdown <team-name>
 團隊工作進程的 Worker CLI 選擇：
 
 ```bash
-OMX_TEAM_WORKER_CLI=auto    # 預設；當 worker --model 包含 "claude" 時使用 claude
-OMX_TEAM_WORKER_CLI=codex   # 強制使用 Gemini CLI 工作進程
-OMX_TEAM_WORKER_CLI=claude  # 強制使用 Claude CLI 工作進程
-OMX_TEAM_WORKER_CLI_MAP=codex,codex,claude,claude  # 每個工作進程的 CLI 混合（長度為 1 或等於工作進程數量）
-OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # 選用：停用自適應 queue->resend 回退機制
+OMG_TEAM_WORKER_CLI=auto    # 預設；當 worker --model 包含 "claude" 時使用 claude
+OMG_TEAM_WORKER_CLI=gemini   # 強制使用 Gemini CLI 工作進程
+OMG_TEAM_WORKER_CLI=claude  # 強制使用 Claude CLI 工作進程
+OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,claude,claude  # 每個工作進程的 CLI 混合（長度為 1 或等於工作進程數量）
+OMG_TEAM_AUTO_INTERRUPT_RETRY=0  # 選用：停用自適應 queue->resend 回退機制
 ```
 
 注意事項：
-- 工作進程啟動參數仍透過 `OMX_TEAM_WORKER_LAUNCH_ARGS` 共享。
-- `OMX_TEAM_WORKER_CLI_MAP` 會覆寫 `OMX_TEAM_WORKER_CLI`，以實現每個工作進程的個別選擇。
+- 工作進程啟動參數仍透過 `OMG_TEAM_WORKER_LAUNCH_ARGS` 共享。
+- `OMG_TEAM_WORKER_CLI_MAP` 會覆寫 `OMG_TEAM_WORKER_CLI`，以實現每個工作進程的個別選擇。
 - 觸發提交預設使用自適應重試（queue/submit，必要時採用安全的清除行 + 重傳回退）。
 - 在 Claude 工作進程模式下，OMX 以純 `claude` 啟動工作進程（無額外啟動參數），並忽略明確的 `--model` / `--config` / `--effort` 覆寫，讓 Claude 使用預設的 `settings.json`。
 
@@ -205,8 +205,8 @@ OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # 選用：停用自適應 queue->resend 回退
 - 依範圍的安裝內容：
   - `user`：`~/.gemini/prompts/`、`~/.gemini/skills/`、`~/.gemini/config.toml`、`~/.omg/agents/`、`~/.gemini/GEMINI.md`
   - `project`：`./.gemini/prompts/`、`./.gemini/skills/`、`./.gemini/config.toml`、`./.omg/agents/`、`./GEMINI.md`
-- 啟動行為：若持久化範圍為 `project`，`omg` 啟動時自動使用 `CODEX_HOME=./.gemini`（除非已設定 `CODEX_HOME`）。
-- 啟動指令會合併 `~/.gemini/GEMINI.md`（或覆寫後的 `CODEX_HOME/GEMINI.md`）與專案 `./GEMINI.md`，然後再附加執行期 overlay。
+- 啟動行為：若持久化範圍為 `project`，`omg` 啟動時自動使用 `GEMINI_HOME=./.gemini`（除非已設定 `GEMINI_HOME`）。
+- 啟動指令會合併 `~/.gemini/GEMINI.md`（或覆寫後的 `GEMINI_HOME/GEMINI.md`）與專案 `./GEMINI.md`，然後再附加執行期 overlay。
 - 現有的 `GEMINI.md` 檔案絕不會被靜默覆寫：互動式 TTY 執行時 setup 會先詢問；非互動執行時若沒有 `--force` 就會跳過替換（仍適用活動會話安全檢查）。
 - `config.toml` 更新（兩種範圍均適用）：
   - `notify = ["node", "..."]`

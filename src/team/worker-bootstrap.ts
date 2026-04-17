@@ -91,7 +91,7 @@ This file is generated for a live OMX team worker run and is disposable.
 
    \`omg team api send-message --input "{\"team_name\":\"${options.teamName}\",\"from_worker\":\"${options.workerName}\",\"to_worker\":\"leader-fixed\",\"body\":\"ACK: ${options.workerName} initialized\"}" --json\`
 
-4. Resolve canonical team state root in this order: \`OMX_TEAM_STATE_ROOT\` env -> worker identity \`team_state_root\` -> config/manifest \`team_state_root\` -> local cwd fallback.
+4. Resolve canonical team state root in this order: \`OMG_TEAM_STATE_ROOT\` env -> worker identity \`team_state_root\` -> config/manifest \`team_state_root\` -> local cwd fallback.
 5. Read task files from \`${options.teamStateRoot}/team/${options.teamName}/tasks/task-<id>.json\` using bare \`task_id\` values in APIs.
 6. Use claim-safe lifecycle APIs only:
    - \`omg team api claim-task --json\`
@@ -304,7 +304,7 @@ You are a team worker in team "${teamName}". Your identity and assigned tasks ar
    - \`<leader_cwd>/skills/worker/SKILL.md\` (repo fallback)
 3. Send an ACK to the lead using CLI interop \`omg team api send-message --json\` (to_worker="leader-fixed") once initialized
 4. Resolve canonical team state root in this order:
-   - OMX_TEAM_STATE_ROOT env
+   - OMG_TEAM_STATE_ROOT env
    - worker identity team_state_root
    - team config/manifest team_state_root
    - local cwd fallback (.omg/state)
@@ -693,7 +693,7 @@ ${taskList}
    \`omg team api send-message --input "{\"team_name\":\"${teamName}\",\"from_worker\":\"${workerName}\",\"to_worker\":\"leader-fixed\",\"body\":\"ACK: ${workerName} initialized\"}" --json\`
 
 3. Start with the first non-blocked task
-4. Resolve canonical team state root in this order: \`OMX_TEAM_STATE_ROOT\` env -> worker identity \`team_state_root\` -> config/manifest \`team_state_root\` -> local cwd fallback.
+4. Resolve canonical team state root in this order: \`OMG_TEAM_STATE_ROOT\` env -> worker identity \`team_state_root\` -> config/manifest \`team_state_root\` -> local cwd fallback.
 5. Read the task file for your selected task id at \`${teamStateRoot}/team/${teamName}/tasks/task-<id>.json\` (example: \`task-1.json\`)
 6. Task id format:
    - State/MCP APIs use \`task_id: "<id>"\` (example: \`"1"\`), not \`"task-1"\`.

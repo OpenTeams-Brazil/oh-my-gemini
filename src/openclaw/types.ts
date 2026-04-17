@@ -5,7 +5,7 @@
  * Each hook event can be mapped to a gateway with a pre-defined instruction.
  *
  * NOTE: Gemini CLI only supports a limited set of hook events.
- * pre-tool-use, post-tool-use, and keyword-detector are OMC-specific
+ * pre-tool-use, post-tool-use, and keyword-detector are OMG-specific
  * and are NOT available in Gemini CLI — excluded here intentionally.
  */
 
@@ -40,7 +40,7 @@ export interface OpenClawCommandGatewayConfig {
   command: string;
   /**
    * Per-command timeout in ms.
-   * Precedence: gateway timeout > OMX_OPENCLAW_COMMAND_TIMEOUT_MS > default (5000ms).
+   * Precedence: gateway timeout > OMG_OPENCLAW_COMMAND_TIMEOUT_MS > default (5000ms).
    * Runtime clamps to safe bounds.
    */
   timeout?: number;

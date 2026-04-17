@@ -1,8 +1,8 @@
 /**
  * Pipeline stage interfaces for oh-my-gemini
  *
- * Shared stage contracts that align with OMC pipeline design (#1130).
- * The pipeline sequences: RALPLAN -> teams (codex workers) -> ralph verification.
+ * Shared stage contracts that align with OMG pipeline design (#1130).
+ * The pipeline sequences: RALPLAN -> teams (gemini workers) -> ralph verification.
  */
 
 // ---------------------------------------------------------------------------

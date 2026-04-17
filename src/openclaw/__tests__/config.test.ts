@@ -39,8 +39,8 @@ describe("getOpenClawConfig", () => {
 		// Reset cache between tests (dynamic import to allow resetting)
 	});
 
-	it("returns null when OMX_OPENCLAW is not set", async () => {
-		delete process.env.OMX_OPENCLAW;
+	it("returns null when OMG_OPENCLAW is not set", async () => {
+		delete process.env.OMG_OPENCLAW;
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -49,8 +49,8 @@ describe("getOpenClawConfig", () => {
 		assert.equal(result, null);
 	});
 
-	it("returns null when OMX_OPENCLAW !== '1'", async () => {
-		process.env.OMX_OPENCLAW = "0";
+	it("returns null when OMG_OPENCLAW !== '1'", async () => {
+		process.env.OMG_OPENCLAW = "0";
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -59,9 +59,9 @@ describe("getOpenClawConfig", () => {
 		assert.equal(result, null);
 	});
 
-	it("returns null when OMX_OPENCLAW_CONFIG file does not exist", async () => {
-		process.env.OMX_OPENCLAW = "1";
-		process.env.OMX_OPENCLAW_CONFIG = join(tmpDir, "nonexistent.json");
+	it("returns null when OMG_OPENCLAW_CONFIG file does not exist", async () => {
+		process.env.OMG_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW_CONFIG = join(tmpDir, "nonexistent.json");
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -70,8 +70,8 @@ describe("getOpenClawConfig", () => {
 		assert.equal(result, null);
 	});
 
-	it("reads config from OMX_OPENCLAW_CONFIG override file", async () => {
-		process.env.OMX_OPENCLAW = "1";
+	it("reads config from OMG_OPENCLAW_CONFIG override file", async () => {
+		process.env.OMG_OPENCLAW = "1";
 		const configPath = join(tmpDir, "openclaw.json");
 		const config = {
 			enabled: true,
@@ -87,7 +87,7 @@ describe("getOpenClawConfig", () => {
 			},
 		};
 		writeFileSync(configPath, JSON.stringify(config));
-		process.env.OMX_OPENCLAW_CONFIG = configPath;
+		process.env.OMG_OPENCLAW_CONFIG = configPath;
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -99,13 +99,13 @@ describe("getOpenClawConfig", () => {
 	});
 
 	it("returns null when config has enabled: false", async () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		const configPath = join(tmpDir, "openclaw.json");
 		writeFileSync(
 			configPath,
 			JSON.stringify({ enabled: false, gateways: {}, hooks: {} }),
 		);
-		process.env.OMX_OPENCLAW_CONFIG = configPath;
+		process.env.OMG_OPENCLAW_CONFIG = configPath;
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -115,10 +115,10 @@ describe("getOpenClawConfig", () => {
 	});
 
 	it("returns null for invalid JSON", async () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		const configPath = join(tmpDir, "openclaw.json");
 		writeFileSync(configPath, "not-valid-json{{{");
-		process.env.OMX_OPENCLAW_CONFIG = configPath;
+		process.env.OMG_OPENCLAW_CONFIG = configPath;
 		const { getOpenClawConfig, resetOpenClawConfigCache } = await import(
 			"../config.js"
 		);
@@ -227,10 +227,10 @@ describe("getOpenClawConfig generic alias normalization", () => {
 		originalEnv = { ...process.env };
 		tmpDir = join(tmpdir(), `omg-openclaw-alias-test-${Date.now()}`);
 		mkdirSync(tmpDir, { recursive: true });
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		process.env.HOME = tmpDir;
 		process.env.GEMINI_HOME = join(tmpDir, ".gemini");
-		delete process.env.OMX_OPENCLAW_CONFIG;
+		delete process.env.OMG_OPENCLAW_CONFIG;
 	});
 
 	afterEach(() => {
@@ -331,8 +331,8 @@ describe("inspectOpenClawConfig", () => {
 		mkdirSync(tmpDir, { recursive: true });
 		process.env.HOME = tmpDir;
 		process.env.GEMINI_HOME = join(tmpDir, ".gemini");
-		delete process.env.OMX_OPENCLAW_CONFIG;
-		delete process.env.OMX_OPENCLAW_COMMAND;
+		delete process.env.OMG_OPENCLAW_CONFIG;
+		delete process.env.OMG_OPENCLAW_COMMAND;
 	});
 
 	afterEach(() => {
@@ -349,8 +349,8 @@ describe("inspectOpenClawConfig", () => {
 		}
 	});
 
-	it("reports disabled state when OMX_OPENCLAW is not enabled", async () => {
-		delete process.env.OMX_OPENCLAW;
+	it("reports disabled state when OMG_OPENCLAW is not enabled", async () => {
+		delete process.env.OMG_OPENCLAW;
 		const { inspectOpenClawConfig } = await import("../config.js");
 		const result = inspectOpenClawConfig();
 		assert.equal(result.state, "disabled");
@@ -358,7 +358,7 @@ describe("inspectOpenClawConfig", () => {
 	});
 
 	it("reports explicit config overriding aliases", async () => {
-		process.env.OMX_OPENCLAW = "1";
+		process.env.OMG_OPENCLAW = "1";
 		const omgConfigPath = join(tmpDir, ".gemini", ".omg-config.json");
 		mkdirSync(join(tmpDir, ".gemini"), { recursive: true });
 		writeFileSync(

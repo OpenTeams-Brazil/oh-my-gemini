@@ -87,7 +87,7 @@ function hookCommands(entries: HookRegistration[] | undefined): string[] {
 }
 
 function countManagedHooks(entries: HookRegistration[] | undefined): number {
-  return hookCommands(entries).filter((command) => command.includes("codex-native-hook.js")).length;
+  return hookCommands(entries).filter((command) => command.includes("gemini-native-hook.js")).length;
 }
 
 function cloneRegistration(entry: HookRegistration): HookRegistration {
@@ -99,11 +99,11 @@ describe("omg setup/uninstall shared ownership for native hooks", () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-hooks-existing-user-file-"));
     try {
       const home = join(wd, "home");
-      const codexDir = join(wd, ".gemini");
+      const geminiDir = join(wd, ".gemini");
       await mkdir(home, { recursive: true });
-      await mkdir(codexDir, { recursive: true });
+      await mkdir(geminiDir, { recursive: true });
 
-      const hooksPath = join(codexDir, "hooks.json");
+      const hooksPath = join(geminiDir, "hooks.json");
       await writeHooksJson(hooksPath, {
         hooks: {
           SessionStart: [
@@ -164,7 +164,7 @@ describe("omg setup/uninstall shared ownership for native hooks", () => {
 
       const staleManagedSessionStart = cloneRegistration(generatedSessionStart[0]!);
       if (staleManagedSessionStart.hooks?.[0]) {
-        staleManagedSessionStart.hooks[0].command = 'node "/tmp/old/codex-native-hook.js"';
+        staleManagedSessionStart.hooks[0].command = 'node "/tmp/old/gemini-native-hook.js"';
         staleManagedSessionStart.hooks[0].statusMessage = "stale omg wrapper";
       }
 
@@ -211,7 +211,7 @@ describe("omg setup/uninstall shared ownership for native hooks", () => {
         "setup should keep the managed PostToolUse wrapper alongside user hooks",
       );
       assert.ok(
-        hookCommands(refreshed.hooks?.UserPromptSubmit).some((command) => command.includes("codex-native-hook.js")),
+        hookCommands(refreshed.hooks?.UserPromptSubmit).some((command) => command.includes("gemini-native-hook.js")),
         "setup should still register managed UserPromptSubmit hooks",
       );
     } finally {
@@ -258,7 +258,7 @@ describe("omg setup/uninstall shared ownership for native hooks", () => {
       assert.ok(allCommands.includes('node "/custom/session-start.js"'));
       assert.ok(allCommands.includes('node "/custom/post-tool.js"'));
       assert.equal(
-        allCommands.some((command) => command.includes("codex-native-hook.js")),
+        allCommands.some((command) => command.includes("gemini-native-hook.js")),
         false,
         "uninstall should strip only OMX-managed wrappers",
       );

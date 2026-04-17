@@ -278,14 +278,14 @@ describe('notify-hook/auto-nudge – detectStallPattern', () => {
 
   it('ignores prior OMX injection lines so injected text cannot self-trigger detection', async () => {
     const { detectStallPattern, DEFAULT_STALL_PATTERNS } = await loadModule('notify-hook/auto-nudge.js');
-    const text = 'Completed the change.\nyes, proceed [OMX_TMUX_INJECT]\nkeep going [OMX_TMUX_INJECT]';
+    const text = 'Completed the change.\nyes, proceed [OMG_TMUX_INJECT]\nkeep going [OMG_TMUX_INJECT]';
     assert.equal(detectStallPattern(text, DEFAULT_STALL_PATTERNS), false);
   });
 
   it('ignores orchestration intent tags when normalizing stall text', async () => {
     const { normalizeAutoNudgeSignatureText } = await loadModule('notify-hook/auto-nudge.js');
     assert.equal(
-      normalizeAutoNudgeSignatureText('Team alpha: 1 msg(s) for leader. [OMX_INTENT:pending-mailbox-review]'),
+      normalizeAutoNudgeSignatureText('Team alpha: 1 msg(s) for leader. [OMG_INTENT:pending-mailbox-review]'),
       'team alpha 1 msg s for leader',
     );
   });
@@ -417,7 +417,7 @@ describe('notify-hook/auto-nudge – inferSkillPhaseFromText', () => {
 describe('notify-hook/auto-nudge – blocked deep-interview auto approvals', () => {
   it('normalizes injected approval text before matching blocked inputs', async () => {
     const { normalizeBlockedAutoApprovalInput } = await loadModule('notify-hook/auto-nudge.js');
-    assert.equal(normalizeBlockedAutoApprovalInput(' yes, proceed [OMX_TMUX_INJECT] '), 'yes proceed');
+    assert.equal(normalizeBlockedAutoApprovalInput(' yes, proceed [OMG_TMUX_INJECT] '), 'yes proceed');
   });
 
   it('matches each blocked approval keyword or phrase', async () => {
@@ -483,7 +483,7 @@ describe('notify-hook/orchestration-intent – taxonomy helpers', () => {
   it('appends and strips orchestration intent tags', async () => {
     const { appendOrchestrationIntentTag, stripOrchestrationIntentTags } = await loadModule('notify-hook/orchestration-intent.js');
     const tagged = appendOrchestrationIntentTag('Team alpha: 1 msg(s) for leader.', 'pending-mailbox-review');
-    assert.equal(tagged, 'Team alpha: 1 msg(s) for leader. [OMX_INTENT:pending-mailbox-review]');
+    assert.equal(tagged, 'Team alpha: 1 msg(s) for leader. [OMG_INTENT:pending-mailbox-review]');
     assert.equal(stripOrchestrationIntentTags(tagged).trim(), 'Team alpha: 1 msg(s) for leader.');
   });
 
@@ -593,15 +593,15 @@ describe('notify-hook/payload-parser – language reminder injection', () => {
 
   it('injects language reminder for non-Latin input', async () => {
     const { injectLanguageReminder, LANGUAGE_REMINDER_MARKER } = await loadModule('notify-hook/payload-parser.js');
-    const prompt = injectLanguageReminder('Continue from current mode state. [OMX_TMUX_INJECT]', '帮我修复这个问题');
-    assert.match(prompt, /\[OMX_LANG_REMINDER\]/);
+    const prompt = injectLanguageReminder('Continue from current mode state. [OMG_TMUX_INJECT]', '帮我修复这个问题');
+    assert.match(prompt, /\[OMG_LANG_REMINDER\]/);
     assert.match(prompt, /Continue in the user's language\./);
     assert.match(prompt, new RegExp(LANGUAGE_REMINDER_MARKER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   });
 
   it('does not inject reminder for Latin-only text', async () => {
     const { injectLanguageReminder } = await loadModule('notify-hook/payload-parser.js');
-    const prompt = injectLanguageReminder('Continue [OMX_TMUX_INJECT]', 'Please fix issue 253');
-    assert.equal(prompt, 'Continue [OMX_TMUX_INJECT]');
+    const prompt = injectLanguageReminder('Continue [OMG_TMUX_INJECT]', 'Please fix issue 253');
+    assert.equal(prompt, 'Continue [OMG_TMUX_INJECT]');
   });
 });

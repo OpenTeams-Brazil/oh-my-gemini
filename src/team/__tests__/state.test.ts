@@ -47,16 +47,16 @@ import {
 } from '../state.js';
 import { normalizeDispatchRequest } from '../state/dispatch.js';
 
-const ORIGINAL_OMX_TEAM_STATE_ROOT = process.env.OMX_TEAM_STATE_ROOT;
+const ORIGINAL_OMG_TEAM_STATE_ROOT = process.env.OMG_TEAM_STATE_ROOT;
 
 beforeEach(() => {
-  delete process.env.OMX_TEAM_STATE_ROOT;
+  delete process.env.OMG_TEAM_STATE_ROOT;
 });
 
 afterEach(() => {
   resetWriteAtomicRenameForTests();
-  if (typeof ORIGINAL_OMX_TEAM_STATE_ROOT === 'string') process.env.OMX_TEAM_STATE_ROOT = ORIGINAL_OMX_TEAM_STATE_ROOT;
-  else delete process.env.OMX_TEAM_STATE_ROOT;
+  if (typeof ORIGINAL_OMG_TEAM_STATE_ROOT === 'string') process.env.OMG_TEAM_STATE_ROOT = ORIGINAL_OMG_TEAM_STATE_ROOT;
+  else delete process.env.OMG_TEAM_STATE_ROOT;
 });
 
 async function writeCompatRuntimeFixture(runtimePath: string, runtimeLogPath: string): Promise<void> {
@@ -355,7 +355,7 @@ describe('team state', () => {
 
   it('dispatch bridge queue uses the same request id as the TS store', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-dispatch-bridge-sync-'));
-    const previousRuntimeBinary = process.env.OMX_RUNTIME_BINARY;
+    const previousRuntimeBinary = process.env.OMG_RUNTIME_BINARY;
     try {
       await initTeamState('team-dispatch-sync', 't', 'executor', 1, cwd);
       const fakeBinDir = join(cwd, 'fake-bin');
@@ -378,7 +378,7 @@ exit 1
 `,
       );
       await chmod(join(fakeBinDir, 'omg-runtime'), 0o755);
-      process.env.OMX_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
+      process.env.OMG_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
 
       const queued = await enqueueDispatchRequest(
         'team-dispatch-sync',
@@ -401,8 +401,8 @@ exit 1
       assert.equal(payload.request_id, queued.request.request_id);
       assert.equal(payload.metadata?.intent, 'followup-relaunch');
     } finally {
-      if (typeof previousRuntimeBinary === 'string') process.env.OMX_RUNTIME_BINARY = previousRuntimeBinary;
-      else delete process.env.OMX_RUNTIME_BINARY;
+      if (typeof previousRuntimeBinary === 'string') process.env.OMG_RUNTIME_BINARY = previousRuntimeBinary;
+      else delete process.env.OMG_RUNTIME_BINARY;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -454,14 +454,14 @@ exit 1
 
   it('prefers bridge-authored dispatch records without mutating the legacy requests file', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-dispatch-bridge-authority-'));
-    const previousRuntimeBinary = process.env.OMX_RUNTIME_BINARY;
+    const previousRuntimeBinary = process.env.OMG_RUNTIME_BINARY;
     try {
       await initTeamState('team-dispatch-bridge-authority', 't', 'executor', 1, cwd);
       const fakeBinDir = join(cwd, 'fake-bin');
       const runtimeLogPath = join(cwd, 'runtime.log');
       await mkdir(fakeBinDir, { recursive: true });
       await writeCompatRuntimeFixture(join(fakeBinDir, 'omg-runtime'), runtimeLogPath);
-      process.env.OMX_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
+      process.env.OMG_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
 
       const legacyPath = join(cwd, '.omg', 'state', 'team', 'team-dispatch-bridge-authority', 'dispatch', 'requests.json');
       const before = await readFile(legacyPath, 'utf8');
@@ -491,8 +491,8 @@ exit 1
       const after = await readFile(legacyPath, 'utf8');
       assert.deepEqual(JSON.parse(after), [], 'bridge-success path should not rewrite legacy dispatch requests.json');
     } finally {
-      if (typeof previousRuntimeBinary === 'string') process.env.OMX_RUNTIME_BINARY = previousRuntimeBinary;
-      else delete process.env.OMX_RUNTIME_BINARY;
+      if (typeof previousRuntimeBinary === 'string') process.env.OMG_RUNTIME_BINARY = previousRuntimeBinary;
+      else delete process.env.OMG_RUNTIME_BINARY;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -585,17 +585,17 @@ exit 1
     }
   });
 
-  it('resolves task/mailbox/approval paths under explicit OMX_TEAM_STATE_ROOT from a worker cwd (worker-env contamination regression)', async () => {
+  it('resolves task/mailbox/approval paths under explicit OMG_TEAM_STATE_ROOT from a worker cwd (worker-env contamination regression)', async () => {
     const root = await mkdtemp(join(tmpdir(), 'omg-team-explicit-root-'));
     const leaderCwd = join(root, 'leader');
     const workerCwd = join(root, 'worker-worktree');
     const explicitStateRoot = join(leaderCwd, '.omg', 'state');
-    const prevRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const prevRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
       await mkdir(leaderCwd, { recursive: true });
       await mkdir(workerCwd, { recursive: true });
       await initTeamState('team-explicit-root', 't', 'executor', 1, leaderCwd);
-      process.env.OMX_TEAM_STATE_ROOT = explicitStateRoot;
+      process.env.OMG_TEAM_STATE_ROOT = explicitStateRoot;
 
       const task = await createTask(
         'team-explicit-root',
@@ -629,8 +629,8 @@ exit 1
       assert.equal(existsSync(join(explicitTeamRoot, 'approvals', `task-${task.id}.json`)), true);
       assert.equal(existsSync(join(workerCwd, '.omg', 'state', 'team', 'team-explicit-root')), false);
     } finally {
-      if (typeof prevRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof prevRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(root, { recursive: true, force: true });
     }
   });
@@ -1206,14 +1206,14 @@ exit 1
 
   it('uses bridge-authored mailbox records while shadowing legacy mailbox bodies for recovery', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-mailbox-bridge-authority-'));
-    const previousRuntimeBinary = process.env.OMX_RUNTIME_BINARY;
+    const previousRuntimeBinary = process.env.OMG_RUNTIME_BINARY;
     try {
       await initTeamState('team-mailbox-bridge-authority', 't', 'executor', 2, cwd);
       const fakeBinDir = join(cwd, 'fake-bin');
       const runtimeLogPath = join(cwd, 'runtime.log');
       await mkdir(fakeBinDir, { recursive: true });
       await writeCompatRuntimeFixture(join(fakeBinDir, 'omg-runtime'), runtimeLogPath);
-      process.env.OMX_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
+      process.env.OMG_RUNTIME_BINARY = join(fakeBinDir, 'omg-runtime');
 
       const legacyPath = join(cwd, '.omg', 'state', 'team', 'team-mailbox-bridge-authority', 'mailbox', 'worker-2.json');
       assert.equal(existsSync(legacyPath), false);
@@ -1256,8 +1256,8 @@ exit 1
       assert.equal(recovered.length, 1);
       assert.equal(recovered[0]?.body, 'hello', 'legacy shadow mailbox should backfill blank compat bodies');
     } finally {
-      if (typeof previousRuntimeBinary === 'string') process.env.OMX_RUNTIME_BINARY = previousRuntimeBinary;
-      else delete process.env.OMX_RUNTIME_BINARY;
+      if (typeof previousRuntimeBinary === 'string') process.env.OMG_RUNTIME_BINARY = previousRuntimeBinary;
+      else delete process.env.OMG_RUNTIME_BINARY;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -1915,12 +1915,12 @@ exit 1
         DEFAULT_MAX_WORKERS,
         {
           ...process.env,
-          OMX_TEAM_DISPLAY_MODE: 'tmux',
-          OMX_TEAM_WORKER_LAUNCH_MODE: 'prompt',
-          CODEX_APPROVAL_MODE: 'on-request',
-          CODEX_SANDBOX_MODE: 'workspace-write',
-          CODEX_NETWORK_ACCESS: '0',
-          OMX_SESSION_ID: 'session-xyz',
+          OMG_TEAM_DISPLAY_MODE: 'tmux',
+          OMG_TEAM_WORKER_LAUNCH_MODE: 'prompt',
+          GEMINI_APPROVAL_MODE: 'on-request',
+          GEMINI_SANDBOX_MODE: 'workspace-write',
+          GEMINI_NETWORK_ACCESS: '0',
+          OMG_SESSION_ID: 'session-xyz',
         },
       );
 
@@ -1941,7 +1941,7 @@ exit 1
     }
   });
 
-  it('initTeamState rejects invalid OMX_TEAM_WORKER_LAUNCH_MODE values', async () => {
+  it('initTeamState rejects invalid OMG_TEAM_WORKER_LAUNCH_MODE values', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-state-'));
     try {
       await assert.rejects(
@@ -1954,10 +1954,10 @@ exit 1
           DEFAULT_MAX_WORKERS,
           {
             ...process.env,
-            OMX_TEAM_WORKER_LAUNCH_MODE: 'tmux',
+            OMG_TEAM_WORKER_LAUNCH_MODE: 'tmux',
           },
         ),
-        /Invalid OMX_TEAM_WORKER_LAUNCH_MODE value/i,
+        /Invalid OMG_TEAM_WORKER_LAUNCH_MODE value/i,
       );
     } finally {
       await rm(cwd, { recursive: true, force: true });
@@ -1978,20 +1978,20 @@ exit 1
 
   it('resolveDispatchLockTimeoutMs returns default when env not set', () => {
     assert.equal(resolveDispatchLockTimeoutMs({}), 15_000);
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '' }), 15_000);
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: 'not-a-number' }), 15_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '' }), 15_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: 'not-a-number' }), 15_000);
   });
 
   it('resolveDispatchLockTimeoutMs reads from env and clamps to bounds', () => {
     // Reads value from env
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '30000' }), 30_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '30000' }), 30_000);
     // Clamps to minimum
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '0' }), 1_000);
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '-500' }), 1_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '0' }), 1_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '-500' }), 1_000);
     // Clamps to maximum
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '999999' }), 120_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '999999' }), 120_000);
     // Floors non-integer
-    assert.equal(resolveDispatchLockTimeoutMs({ OMX_DISPATCH_LOCK_TIMEOUT_MS: '5000.9' }), 5_000);
+    assert.equal(resolveDispatchLockTimeoutMs({ OMG_DISPATCH_LOCK_TIMEOUT_MS: '5000.9' }), 5_000);
   });
 
   it('dispatch lock error message includes timeout hint', async () => {
@@ -2003,21 +2003,21 @@ exit 1
       await mkdir(lockDir, { recursive: true });
 
       // Use a very short timeout via env override so the test is fast
-      const origEnv = process.env.OMX_DISPATCH_LOCK_TIMEOUT_MS;
-      process.env.OMX_DISPATCH_LOCK_TIMEOUT_MS = '1000';
+      const origEnv = process.env.OMG_DISPATCH_LOCK_TIMEOUT_MS;
+      process.env.OMG_DISPATCH_LOCK_TIMEOUT_MS = '1000';
       try {
         await assert.rejects(
           () => enqueueDispatchRequest('team-lock-hint', { kind: 'inbox', to_worker: 'worker-1', trigger_message: 'test' }, cwd),
           (err: Error) => {
-            assert.ok(err.message.includes('OMX_DISPATCH_LOCK_TIMEOUT_MS'), `Expected hint in error, got: ${err.message}`);
+            assert.ok(err.message.includes('OMG_DISPATCH_LOCK_TIMEOUT_MS'), `Expected hint in error, got: ${err.message}`);
             return true;
           }
         );
       } finally {
         if (origEnv === undefined) {
-          delete process.env.OMX_DISPATCH_LOCK_TIMEOUT_MS;
+          delete process.env.OMG_DISPATCH_LOCK_TIMEOUT_MS;
         } else {
-          process.env.OMX_DISPATCH_LOCK_TIMEOUT_MS = origEnv;
+          process.env.OMG_DISPATCH_LOCK_TIMEOUT_MS = origEnv;
         }
         await rm(lockDir, { recursive: true, force: true });
       }

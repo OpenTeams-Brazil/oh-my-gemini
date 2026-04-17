@@ -93,7 +93,7 @@ re-inventing their own precedence rules:
   when legacy top-level metadata is non-authoritative
 - `src/hooks/agents-overlay.ts` — AGENTS overlay active-mode reporting must list
   every active approved member
-- `src/scripts/codex-native-hook.ts` — Stop/continuation logic must respect the
+- `src/scripts/gemini-native-hook.ts` — Stop/continuation logic must respect the
   combined state and stop blocking when the relevant member is cleared
 
 ## Scope behavior

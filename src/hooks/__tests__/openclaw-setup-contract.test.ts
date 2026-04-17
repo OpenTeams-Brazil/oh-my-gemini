@@ -58,7 +58,7 @@ describe("OpenClaw setup workflow contracts", () => {
 
   it("includes token check, URL reachability check, and command dual env gate guidance", () => {
     assert.ok(
-      openclawIntegrationDoc.includes("OMX_OPENCLAW_COMMAND=1"),
+      openclawIntegrationDoc.includes("OMG_OPENCLAW_COMMAND=1"),
       "openclaw integration doc should mention command dual gate",
     );
     assert.ok(
@@ -122,8 +122,8 @@ describe("OpenClaw setup workflow contracts", () => {
       "openclaw integration doc should document clawdbot agent workflow",
     );
     assert.ok(
-      openclawIntegrationDoc.includes("#omc-dev"),
-      "openclaw integration doc should include #omc-dev target example",
+      openclawIntegrationDoc.includes("#omg-dev"),
+      "openclaw integration doc should include #omg-dev target example",
     );
   });
 

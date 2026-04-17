@@ -10,12 +10,12 @@ Focused regression additions for the compiled recent-bug suite on this branch:
 Covered files:
 
 - `src/hooks/__tests__/keyword-detector.test.ts`
-- `src/scripts/__tests__/codex-native-hook.test.ts`
+- `src/scripts/__tests__/gemini-native-hook.test.ts`
 - `src/cli/__tests__/launch-fallback.test.ts`
 - `src/team/__tests__/runtime.test.ts`
 
 Verification target:
 
 - `npm run build`
-- `node --test dist/hooks/__tests__/keyword-detector.test.js dist/scripts/__tests__/codex-native-hook.test.js dist/cli/__tests__/launch-fallback.test.js dist/team/__tests__/runtime.test.js dist/team/__tests__/hardening-e2e.test.js`
+- `node --test dist/hooks/__tests__/keyword-detector.test.js dist/scripts/__tests__/gemini-native-hook.test.js dist/cli/__tests__/launch-fallback.test.js dist/team/__tests__/runtime.test.js dist/team/__tests__/hardening-e2e.test.js`
 - `npm run test:recent-bug-regressions:compiled`

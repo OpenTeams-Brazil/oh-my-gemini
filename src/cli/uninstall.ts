@@ -12,15 +12,15 @@ import {
   stripOmxFeatureFlags,
 } from "../config/generator.js";
 import {
-  parseCodexHooksConfig,
-  removeManagedCodexHooks,
-} from "../config/codex-hooks.js";
+  parseGeminiHooksConfig,
+  removeManagedGeminiHooks,
+} from "../config/gemini-hooks.js";
 import { getPackageRoot } from "../utils/package.js";
 import { AGENT_DEFINITIONS } from "../agents/definitions.js";
 import { detectLegacySkillRootOverlap } from "../utils/paths.js";
 import { resolveScopeDirectories, type SetupScope } from "./setup.js";
 import { readPersistedSetupScope } from "./index.js";
-import { isOmxGeneratedAgentsMd } from "../utils/agents-md.js";
+import { isOmgGeneratedAgentsMd } from "../utils/agents-md.js";
 
 export interface UninstallOptions {
   dryRun?: boolean;
@@ -46,7 +46,7 @@ interface UninstallSummary {
   legacySkillRootWarning: string | null;
 }
 
-const OMX_MCP_SERVERS = [
+const OMG_MCP_SERVERS = [
   "omg_state",
   "omg_memory",
   "omg_code_intel",
@@ -62,7 +62,7 @@ function detectOmxConfigArtifacts(config: string): {
   hasFeatureFlags: boolean;
   hasExploreRoutingEnv: boolean;
 } {
-  const hasMcpServers = OMX_MCP_SERVERS.filter((name) =>
+  const hasMcpServers = OMG_MCP_SERVERS.filter((name) =>
     new RegExp(`\\[mcp_servers\\.${name}\\]`).test(config),
   );
 
@@ -87,8 +87,8 @@ function detectOmxConfigArtifacts(config: string): {
   const hasFeatureFlags =
     /^\s*multi_agent\s*=\s*true/m.test(config) ||
     /^\s*child_agents_md\s*=\s*true/m.test(config) ||
-    /^\s*codex_hooks\s*=\s*true/m.test(config);
-  const hasExploreRoutingEnv = /^\s*USE_OMX_EXPLORE_CMD\s*=/m.test(config);
+    /^\s*gemini_hooks\s*=\s*true/m.test(config);
+  const hasExploreRoutingEnv = /^\s*USE_OMG_EXPLORE_CMD\s*=/m.test(config);
 
   return {
     hasMcpServers,
@@ -276,7 +276,7 @@ async function removeAgentsMd(
 
   try {
     const content = await readFile(agentsMdPath, "utf-8");
-    if (!isOmxGeneratedAgentsMd(content)) {
+    if (!isOmgGeneratedAgentsMd(content)) {
       if (options.verbose)
         console.log("  GEMINI.md is not OMX-generated, skipping.");
       return false;
@@ -300,8 +300,8 @@ async function removeHooksFile(
   if (!existsSync(hooksFilePath)) return false;
 
   const existing = await readFile(hooksFilePath, "utf-8");
-  const { nextContent, removedCount } = removeManagedCodexHooks(existing);
-  const parsed = parseCodexHooksConfig(existing);
+  const { nextContent, removedCount } = removeManagedGeminiHooks(existing);
+  const parsed = parseGeminiHooksConfig(existing);
   const emptyManagedArtifact =
     parsed !== null &&
     Object.keys(parsed.hooks).length === 0 &&
@@ -391,7 +391,7 @@ function printSummary(summary: UninstallSummary, dryRun: boolean): void {
       );
     }
     if (summary.featureFlagsRemoved) {
-      console.log("    Feature flags (multi_agent, child_agents_md, codex_hooks)");
+      console.log("    Feature flags (multi_agent, child_agents_md, gemini_hooks)");
     }
   } else if (!summary.configCleaned && summary.mcpServersRemoved.length === 0) {
     console.log("  config.toml: no OMX entries found (or --keep-config used)");

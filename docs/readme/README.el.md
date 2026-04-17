@@ -14,7 +14,7 @@
 **Ιστοσελίδα:** https://yeachan-heo.github.io/oh-my-gemini-website/  
 **Τεκμηρίωση:** [Ξεκινώντας](../getting-started.html) · [Agents](../agents.html) · [Skills](../skills.html) · [Ενσωματώσεις](../integrations.html) · [Demo](../../DEMO.md) · [Οδηγός OpenClaw](../openclaw-integration.md)
 
-Το OMX είναι ένα workflow layer για το [OpenAI Gemini CLI](https://github.com/openai/codex).
+Το OMX είναι ένα workflow layer για το [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 Διατηρεί το Gemini ως μηχανή εκτέλεσης και διευκολύνει τα εξής:
 - να ξεκινάτε μια πιο δυναμική συνεδρία Gemini από προεπιλογή
@@ -27,7 +27,7 @@
 Αν θέλετε την προεπιλεγμένη εμπειρία OMX, ξεκινήστε εδώ:
 
 ```bash
-npm install -g @openai/codex oh-my-gemini
+npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg --madmax --high
 ```
@@ -59,7 +59,7 @@ $team 3:executor "execute the approved plan in parallel"
 ### Απαιτήσεις
 
 - Node.js 20+
-- Εγκατεστημένο Gemini CLI: `npm install -g @openai/codex`
+- Εγκατεστημένο Gemini CLI: `npm install -g @openai/gemini`
 - Ρυθμισμένη αυθεντικοποίηση Gemini
 - `tmux` σε macOS/Linux αν θέλετε αργότερα τον ανθεκτικό team runtime
 - `psmux` σε native Windows αν θέλετε αργότερα τη λειτουργία team για Windows

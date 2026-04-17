@@ -22,7 +22,7 @@ function runNotifyHook(
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_TEAM_WORKER: '',
+      OMG_TEAM_WORKER: '',
       TMUX: '',
       TMUX_PANE: '',
       ...envOverrides,
@@ -69,7 +69,7 @@ case "$cmd" in
     fi
     case "$format" in
       '#{pane_current_command}') echo "node" ;;
-      '#{pane_start_command}') echo "codex" ;;
+      '#{pane_start_command}') echo "gemini" ;;
       '#S') echo "${sessionName}" ;;
       '#{pane_in_mode}') echo "0" ;;
       '#{pane_current_path}') echo "${cwd}" ;;
@@ -77,7 +77,7 @@ case "$cmd" in
     esac
     ;;
   list-panes)
-    echo "${currentPaneId}\t1\tcodex\tcodex"
+    echo "${currentPaneId}\t1\tgemini\tgemini"
     ;;
   capture-pane)
     printf "› ready\\n"
@@ -143,13 +143,13 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
         tmux_pane_id: '%42',
       });
 
       const result = runNotifyHook(
         buildPayload(wd, {
-          session_id: 'codex-session-1',
+          session_id: 'gemini-session-1',
           thread_id: 'thread-resume-1',
           turn_id: 'turn-resume-1',
         }),
@@ -161,7 +161,7 @@ describe('notify-hook Ralph session resume', () => {
       assert.equal(currentState.active, true);
       assert.equal(currentState.iteration, 5);
       assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-      assert.equal(currentState.owner_codex_session_id, 'codex-session-1');
+      assert.equal(currentState.owner_gemini_session_id, 'gemini-session-1');
       assert.equal(currentState.tmux_pane_id, currentPaneId);
 
       const priorState = JSON.parse(await readFile(join(priorSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
@@ -197,13 +197,13 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
         tmux_pane_id: '%42',
       });
 
       const result = runNotifyHook(
         buildPayload(wd, {
-          session_id: 'codex-session-1',
+          session_id: 'gemini-session-1',
           thread_id: 'thread-current-1',
           turn_id: 'turn-current-1',
         }),
@@ -214,7 +214,7 @@ describe('notify-hook Ralph session resume', () => {
       const currentState = JSON.parse(await readFile(join(currentSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
       assert.equal(currentState.active, true);
       assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-      assert.equal(currentState.owner_codex_session_id, 'codex-session-1');
+      assert.equal(currentState.owner_gemini_session_id, 'gemini-session-1');
       assert.equal(currentState.tmux_pane_id, currentPaneId);
       assert.ok(typeof currentState.tmux_pane_set_at === 'string' && currentState.tmux_pane_set_at.length > 0);
 
@@ -227,7 +227,7 @@ describe('notify-hook Ralph session resume', () => {
     }
   });
 
-  it('preserves current-session legacy owner_codex_thread_id until owner_codex_session_id is available', async () => {
+  it('preserves current-session legacy owner_gemini_thread_id until owner_gemini_session_id is available', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-notify-ralph-current-legacy-owner-'));
     try {
       const stateDir = join(wd, '.omg', 'state');
@@ -242,7 +242,7 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: currentOmxSessionId,
-        owner_codex_thread_id: 'thread-current-legacy-1',
+        owner_gemini_thread_id: 'thread-current-legacy-1',
         tmux_pane_id: '%42',
       });
 
@@ -258,8 +258,8 @@ describe('notify-hook Ralph session resume', () => {
       const currentState = JSON.parse(await readFile(join(currentSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
       assert.equal(currentState.active, true);
       assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-      assert.equal(currentState.owner_codex_session_id, undefined);
-      assert.equal(currentState.owner_codex_thread_id, 'thread-current-legacy-1');
+      assert.equal(currentState.owner_gemini_session_id, undefined);
+      assert.equal(currentState.owner_gemini_thread_id, 'thread-current-legacy-1');
       assert.equal(currentState.tmux_pane_id, currentPaneId);
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -300,8 +300,8 @@ describe('notify-hook Ralph session resume', () => {
       ) as Record<string, unknown>;
       assert.equal(updatedPriorState.active, true);
       assert.equal(updatedPriorState.iteration, 5);
-      assert.equal(updatedPriorState.owner_codex_session_id, undefined);
-      assert.equal(updatedPriorState.owner_codex_thread_id, 'thread-turnover-1');
+      assert.equal(updatedPriorState.owner_gemini_session_id, undefined);
+      assert.equal(updatedPriorState.owner_gemini_thread_id, 'thread-turnover-1');
       assert.equal(updatedPriorState.tmux_pane_id, '%81');
 
       await writeJson(join(stateDir, 'session.json'), { session_id: currentOmxSessionId });
@@ -321,8 +321,8 @@ describe('notify-hook Ralph session resume', () => {
       assert.equal(currentState.active, true);
       assert.equal(currentState.iteration, 6);
       assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-      assert.equal(currentState.owner_codex_session_id, undefined);
-      assert.equal(currentState.owner_codex_thread_id, 'thread-turnover-1');
+      assert.equal(currentState.owner_gemini_session_id, undefined);
+      assert.equal(currentState.owner_gemini_thread_id, 'thread-turnover-1');
       assert.equal(currentState.tmux_pane_id, '%82');
 
       const priorState = JSON.parse(
@@ -340,12 +340,12 @@ describe('notify-hook Ralph session resume', () => {
     const scenarios = [
       {
         name: 'payload session id does not match',
-        payloadSessionId: 'codex-session-2',
+        payloadSessionId: 'gemini-session-2',
         priorSessions: ['sess-prior'],
       },
       {
-        name: 'multiple prior sessions match the same codex session',
-        payloadSessionId: 'codex-session-1',
+        name: 'multiple prior sessions match the same gemini session',
+        payloadSessionId: 'gemini-session-1',
         priorSessions: ['sess-prior-a', 'sess-prior-b'],
       },
     ];
@@ -368,7 +368,7 @@ describe('notify-hook Ralph session resume', () => {
               current_phase: 'executing',
               started_at: '2026-02-22T00:00:00.000Z',
               owner_omg_session_id: priorSessionId,
-              owner_codex_session_id: 'codex-session-1',
+              owner_gemini_session_id: 'gemini-session-1',
             });
           }
 
@@ -394,7 +394,7 @@ describe('notify-hook Ralph session resume', () => {
     }
   });
 
-  it('resumes a legacy prior Ralph that only tracks owner_codex_thread_id', async () => {
+  it('resumes a legacy prior Ralph that only tracks owner_gemini_thread_id', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-notify-ralph-thread-resume-'));
     try {
       const stateDir = join(wd, '.omg', 'state');
@@ -411,13 +411,13 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_thread_id: 'thread-legacy-1',
+        owner_gemini_thread_id: 'thread-legacy-1',
         tmux_pane_id: '%42',
       });
 
       const result = runNotifyHook(
         buildPayload(wd, {
-          session_id: 'codex-session-1',
+          session_id: 'gemini-session-1',
           thread_id: 'thread-legacy-1',
           turn_id: 'turn-legacy-1',
         }),
@@ -429,8 +429,8 @@ describe('notify-hook Ralph session resume', () => {
       assert.equal(currentState.active, true);
       assert.equal(currentState.iteration, 5);
       assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-      assert.equal(currentState.owner_codex_session_id, 'codex-session-1');
-      assert.equal(currentState.owner_codex_thread_id, undefined);
+      assert.equal(currentState.owner_gemini_session_id, 'gemini-session-1');
+      assert.equal(currentState.owner_gemini_thread_id, undefined);
       assert.equal(currentState.tmux_pane_id, currentPaneId);
 
       const priorState = JSON.parse(await readFile(join(priorSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
@@ -442,7 +442,7 @@ describe('notify-hook Ralph session resume', () => {
     }
   });
 
-  it('does not fall back to owner_codex_thread_id when owner_codex_session_id is present and mismatched', async () => {
+  it('does not fall back to owner_gemini_thread_id when owner_gemini_session_id is present and mismatched', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-notify-ralph-session-precedence-'));
     try {
       const stateDir = join(wd, '.omg', 'state');
@@ -459,12 +459,12 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-other',
-        owner_codex_thread_id: 'thread-shared-1',
+        owner_gemini_session_id: 'gemini-session-other',
+        owner_gemini_thread_id: 'thread-shared-1',
       });
 
       const result = runNotifyHook(buildPayload(wd, {
-        session_id: 'codex-session-1',
+        session_id: 'gemini-session-1',
         thread_id: 'thread-shared-1',
         turn_id: 'turn-session-precedence-1',
       }));
@@ -500,7 +500,7 @@ describe('notify-hook Ralph session resume', () => {
       });
 
       const result = runNotifyHook(buildPayload(wd, {
-        session_id: 'codex-session-1',
+        session_id: 'gemini-session-1',
         turn_id: 'turn-empty-thread-1',
       }));
       assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -540,11 +540,11 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
       });
 
       const result = runNotifyHook(buildPayload(wd, {
-        session_id: 'codex-session-1',
+        session_id: 'gemini-session-1',
         thread_id: 'thread-inactive-current-1',
         turn_id: 'turn-inactive-current-1',
       }));
@@ -582,11 +582,11 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
       });
 
       const result = runNotifyHook(buildPayload(wd, {
-        session_id: 'codex-session-1',
+        session_id: 'gemini-session-1',
         thread_id: 'thread-unreadable-current-1',
         turn_id: 'turn-unreadable-current-1',
       }));
@@ -620,7 +620,7 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
         tmux_pane_id: '%42',
       });
 
@@ -637,7 +637,7 @@ describe('notify-hook Ralph session resume', () => {
 
         const firstResume = reconcileRalphSessionResume({
           stateDir,
-          payloadSessionId: 'codex-session-1',
+          payloadSessionId: 'gemini-session-1',
           payloadThreadId: 'thread-concurrent-1',
           env: { ...process.env, TMUX_PANE: '%55' },
           hooks: {
@@ -654,7 +654,7 @@ describe('notify-hook Ralph session resume', () => {
 
         const secondResume = reconcileRalphSessionResume({
           stateDir,
-          payloadSessionId: 'codex-session-1',
+          payloadSessionId: 'gemini-session-1',
           payloadThreadId: 'thread-concurrent-1',
           env: { ...process.env, TMUX_PANE: '%56' },
         });
@@ -669,7 +669,7 @@ describe('notify-hook Ralph session resume', () => {
         const currentState = JSON.parse(await readFile(join(currentSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
         assert.equal(currentState.active, true);
         assert.equal(currentState.owner_omg_session_id, currentOmxSessionId);
-        assert.equal(currentState.owner_codex_session_id, 'codex-session-1');
+        assert.equal(currentState.owner_gemini_session_id, 'gemini-session-1');
         assert.equal(currentState.tmux_pane_id, '%56');
 
         const priorState = JSON.parse(await readFile(join(priorSessionDir, 'ralph-state.json'), 'utf-8')) as Record<string, unknown>;
@@ -698,14 +698,14 @@ describe('notify-hook Ralph session resume', () => {
         current_phase: 'executing',
         started_at: '2026-02-22T00:00:00.000Z',
         owner_omg_session_id: priorOmxSessionId,
-        owner_codex_session_id: 'codex-session-1',
+        owner_gemini_session_id: 'gemini-session-1',
         tmux_pane_id: '%42',
       });
 
       await assert.rejects(
         () => reconcileRalphSessionResume({
           stateDir,
-          payloadSessionId: 'codex-session-1',
+          payloadSessionId: 'gemini-session-1',
           payloadThreadId: 'thread-rollback-1',
           env: { ...process.env, TMUX_PANE: '%57' },
           hooks: {

@@ -46,9 +46,9 @@ export interface DiscordNotificationConfig {
 /** Discord Bot API configuration (bot token + channel ID) */
 export interface DiscordBotNotificationConfig {
   enabled: boolean;
-  /** Discord bot token (or env var: OMX_DISCORD_NOTIFIER_BOT_TOKEN) */
+  /** Discord bot token (or env var: OMG_DISCORD_NOTIFIER_BOT_TOKEN) */
   botToken?: string;
-  /** Channel ID to send messages to (or env var: OMX_DISCORD_NOTIFIER_CHANNEL) */
+  /** Channel ID to send messages to (or env var: OMG_DISCORD_NOTIFIER_CHANNEL) */
   channelId?: string;
   /** Optional mention to prepend to messages (e.g. "<@123456>" for user, "<@&789>" for role) */
   mention?: string;

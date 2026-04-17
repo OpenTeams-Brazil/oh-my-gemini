@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js >= 20
-- [Gemini CLI](https://github.com/openai/codex) installed (`npm install -g @openai/codex`)
+- [Gemini CLI](https://github.com/openai/gemini) installed (`npm install -g @openai/gemini`)
 - OpenAI API key configured
 
 ## Setup (< 2 minutes)
@@ -183,7 +183,7 @@ This demo showcases the **tmux-based multi-agent orchestration** system that spa
 │                    tmux Session "omg-team"                   │
 │  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
 │  │   Leader     │  │ Worker 1 │  │ Worker 2 │  │ Worker N │ │
-│  │  (main pane) │  │ (codex)  │  │ (codex)  │  │ (claude) │ │
+│  │  (main pane) │  │ (gemini)  │  │ (gemini)  │  │ (claude) │ │
 │  └──────────────┘  └──────────┘  └──────────┘  └──────────┘ │
 │         │               │              │              │     │
 │         └───────────────┴──────────────┴──────────────┘     │
@@ -209,10 +209,10 @@ Use a deterministic task slug so the team name is predictable:
 export TEAM_TASK="e2e team demo"
 export TEAM_NAME="e2e-team-demo"   # slugified from TEAM_TASK
 
-# Mixed worker CLIs (5+ workers, codex + claude)
-export OMX_TEAM_WORKER_CLI=auto
-export OMX_TEAM_WORKER_CLI_MAP=codex,codex,codex,claude,claude,claude
-export OMX_TEAM_WORKER_LAUNCH_ARGS='-c model_reasoning_effort="low"'
+# Mixed worker CLIs (5+ workers, gemini + claude)
+export OMG_TEAM_WORKER_CLI=auto
+export OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,gemini,claude,claude,claude
+export OMG_TEAM_WORKER_LAUNCH_ARGS='-c model_reasoning_effort="low"'
 
 # 5-worker baseline
 omg team 5:executor "parallel team smoke"
@@ -320,7 +320,7 @@ Optional overrides:
 TEAM_TASK="e2e team demo" \
 TEAM_NAME="e2e-team-demo" \
 WORKER_COUNT=6 \
-OMX_TEAM_WORKER_LAUNCH_MODE=prompt \
+OMG_TEAM_WORKER_LAUNCH_MODE=prompt \
 ./scripts/demo-team-e2e.sh
 ```
 
@@ -331,11 +331,11 @@ set -euo pipefail
 
 export TEAM_TASK="e2e team demo"
 export TEAM_NAME="e2e-team-demo"
-export OMX_TEAM_WORKER_CLI=auto
-export OMX_TEAM_WORKER_CLI_MAP=codex,codex,codex,claude,claude,claude
-export OMX_TEAM_WORKER_LAUNCH_ARGS='-c model_reasoning_effort="low"'
+export OMG_TEAM_WORKER_CLI=auto
+export OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,gemini,claude,claude,claude
+export OMG_TEAM_WORKER_LAUNCH_ARGS='-c model_reasoning_effort="low"'
 
-echo "[1/8] start team (6 workers mixed codex/claude)"
+echo "[1/8] start team (6 workers mixed gemini/claude)"
 omg team 6:executor "$TEAM_TASK"
 
 echo "[2/8] lifecycle status"
@@ -387,7 +387,7 @@ Expected:
 
 ## Troubleshooting
 
-**Gemini CLI not found:** Install with `npm install -g @openai/codex`
+**Gemini CLI not found:** Install with `npm install -g @openai/gemini`
 
 **Slash commands not appearing:** Run `omg setup --force` to reinstall prompts
 
@@ -439,9 +439,9 @@ The bundled E2E demo script provides a complete, automated test of the tmux clau
 | `WORKER_COUNT` | `6` | Number of workers to spawn (minimum: 5) |
 | `TEAM_TASK` | `e2e team demo <timestamp>` | Task description for the team |
 | `TEAM_NAME` | (slugified from TEAM_TASK) | Unique team identifier |
-| `OMX_TEAM_WORKER_CLI` | `auto` | Worker CLI selection mode |
-| `OMX_TEAM_WORKER_CLI_MAP` | (auto-generated) | Comma-separated CLI assignments per worker |
-| `OMX_TEAM_WORKER_LAUNCH_ARGS` | `-c model_reasoning_effort="low"` | Arguments passed to worker CLIs (worker model falls back to `OMX_DEFAULT_SPARK_MODEL`) |
+| `OMG_TEAM_WORKER_CLI` | `auto` | Worker CLI selection mode |
+| `OMG_TEAM_WORKER_CLI_MAP` | (auto-generated) | Comma-separated CLI assignments per worker |
+| `OMG_TEAM_WORKER_LAUNCH_ARGS` | `-c model_reasoning_effort="low"` | Arguments passed to worker CLIs (worker model falls back to `OMG_DEFAULT_SPARK_MODEL`) |
 
 #### Demo Flow
 
@@ -470,6 +470,6 @@ The bundled E2E demo script provides a complete, automated test of the tmux clau
 # Run with 8 workers and custom task
 WORKER_COUNT=8 \
 TEAM_TASK="load test $(date +%s)" \
-OMX_TEAM_WORKER_CLI_MAP=codex,codex,codex,codex,claude,claude,claude,claude \
+OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,gemini,gemini,claude,claude,claude,claude \
 ./scripts/demo-team-e2e.sh
 ```

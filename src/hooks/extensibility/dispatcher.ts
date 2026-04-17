@@ -27,7 +27,7 @@ interface RunnerResult {
 	error?: string;
 }
 
-const RESULT_PREFIX = "__OMX_PLUGIN_RESULT__ ";
+const RESULT_PREFIX = "__OMG_PLUGIN_RESULT__ ";
 const RUNNER_SIGKILL_GRACE_MS = 250;
 
 function hooksLogPath(cwd: string): string {
@@ -53,7 +53,7 @@ async function appendHooksLog(
 
 function isTeamWorker(env: NodeJS.ProcessEnv): boolean {
 	return (
-		typeof env.OMX_TEAM_WORKER === "string" && env.OMX_TEAM_WORKER.trim() !== ""
+		typeof env.OMG_TEAM_WORKER === "string" && env.OMG_TEAM_WORKER.trim() !== ""
 	);
 }
 

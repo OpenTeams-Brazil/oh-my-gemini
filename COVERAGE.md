@@ -5,7 +5,7 @@
 
 ## Coverage Summary
 
-| Category | OMC Features | OMX Implemented | Coverage |
+| Category | OMG Features | OMX Implemented | Coverage |
 |----------|-------------|-----------------|----------|
 | Agent Definitions | 29 | 29 | 100% |
 | Skills/Commands | 30 | 30 | 100% |
@@ -31,7 +31,7 @@
 
 ### Agent Definitions / Role Catalog (29/29 = 100%)
 
-| OMC Agent | OMX Status | Mechanism |
+| OMG Agent | OMX Status | Mechanism |
 |-----------|-----------|-----------|
 | analyst | DONE | prompts/analyst.md |
 | api-reviewer | DONE | prompts/api-reviewer.md |
@@ -67,7 +67,7 @@
 
 ### Skills (30/30 = 100%)
 
-| OMC Skill | OMX Status | Mechanism |
+| OMG Skill | OMX Status | Mechanism |
 |-----------|-----------|-----------|
 | autopilot | DONE | ~/.gemini/skills/autopilot/SKILL.md |
 | ralph | DONE | ~/.gemini/skills/ralph/SKILL.md |
@@ -115,7 +115,7 @@
 
 ### Hook Pipeline (6 full + 3 partial out of 9 = ~89%)
 
-| OMC Hook Event | OMX Equivalent | Capability |
+| OMG Hook Event | OMX Equivalent | Capability |
 |---------------|---------------|------------|
 | SessionStart | GEMINI.md native + runtime overlay (preLaunch) | FULL+ |
 | PreToolUse | GEMINI.md inline guidance | PARTIAL (no interception) |
@@ -131,7 +131,7 @@
 
 ### Infrastructure
 
-| Component | OMC | OMX Status |
+| Component | OMG | OMX Status |
 |-----------|-----|-----------|
 | CLI (setup) | DONE | DONE |
 | CLI (doctor) | DONE | DONE |
@@ -162,7 +162,7 @@
 ## Upstream Contribution Path
 
 To achieve 100% hook parity, these changes need to be contributed to Gemini CLI:
-1. Add `BeforeToolUse` hook event to `codex-rs/hooks/`
+1. Add `BeforeToolUse` hook event to `gemini-rs/hooks/`
 2. Add `UserPromptSubmit` hook event
 3. Add external hook configuration in `config.toml` (currently only `notify`)
 4. Add hook context injection (hook stdout -> system message)

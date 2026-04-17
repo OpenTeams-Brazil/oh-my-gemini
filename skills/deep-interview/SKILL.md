@@ -5,7 +5,7 @@ argument-hint: "[--quick|--standard|--deep] [--autoresearch] <idea or vague desc
 ---
 
 <Purpose>
-Deep Interview is an intent-first Socratic clarification loop before planning or implementation. It turns vague ideas into execution-ready specifications by asking targeted questions about why the user wants a change, how far it should go, what should stay out of scope, and what OMX may decide without confirmation.
+Deep Interview is an intent-first Socratic clarification loop before planning or implementation. It turns vague ideas into execution-ready specifications by asking targeted questions about why the user wants a change, how far it should go, what should stay out of scope, and what OMG may decide without confirmation.
 </Purpose>
 
 <Use_When>
@@ -47,7 +47,7 @@ If no flag is provided, use **Standard**.
 - Do not rotate to a new clarity dimension just for coverage when the current answer is still vague; stay on the same thread until one layer deeper, one assumption clearer, or one boundary tighter
 - Before crystallizing, complete at least one explicit pressure pass that revisits an earlier answer with a deeper, assumption-focused, or tradeoff-focused follow-up
 - Gather codebase facts via `explore` before asking user about internals
-- When session guidance enables `USE_OMX_EXPLORE_CMD`, prefer `omg explore` for simple read-only brownfield fact gathering; keep prompts narrow and concrete, and keep ambiguous or non-shell-only investigation on the richer normal path and fall back normally if `omg explore` is unavailable.
+- When session guidance enables `USE_OMG_EXPLORE_CMD`, prefer `omg explore` for simple read-only brownfield fact gathering; keep prompts narrow and concrete, and keep ambiguous or non-shell-only investigation on the richer normal path and fall back normally if `omg explore` is unavailable.
 - Always run a preflight context intake before the first interview question
 - Reduce user effort: ask only the highest-leverage unresolved question, and never ask the user for codebase facts that can be discovered directly
 - For brownfield work, prefer evidence-backed confirmation questions such as "I found X in Y. Should this change follow that pattern?"
@@ -206,7 +206,7 @@ Spec should include:
 - Desired Outcome
 - In-Scope
 - Out-of-Scope / Non-goals
-- Decision Boundaries (what OMX may decide without confirmation)
+- Decision Boundaries (what OMG may decide without confirmation)
 - Constraints
 - Testable acceptance criteria
 - Assumptions exposed + resolutions

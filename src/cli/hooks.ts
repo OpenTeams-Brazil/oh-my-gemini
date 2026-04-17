@@ -16,7 +16,7 @@ Usage:
 
 Notes:
   - This command is additive. Existing \`omg tmux-hook\` behavior is unchanged.
-  - Plugins are enabled by default. Disable with OMX_HOOK_PLUGINS=0.
+  - Plugins are enabled by default. Disable with OMG_HOOK_PLUGINS=0.
 `;
 
 const SAMPLE_PLUGIN = `export async function onHookEvent(event, sdk) {
@@ -100,7 +100,7 @@ async function initHooks(): Promise<void> {
 
   await writeFile(samplePath, SAMPLE_PLUGIN);
   console.log(`Created ${samplePath}`);
-  console.log('Plugins are enabled by default. Disable with OMX_HOOK_PLUGINS=0.');
+  console.log('Plugins are enabled by default. Disable with OMG_HOOK_PLUGINS=0.');
 }
 
 async function statusHooks(): Promise<void> {
@@ -112,7 +112,7 @@ async function statusHooks(): Promise<void> {
   console.log('-----------');
   console.log(`Directory: ${dir}`);
   console.log(
-    `Plugins enabled: ${isHookPluginsEnabled(process.env) ? 'yes' : 'no (disabled with OMX_HOOK_PLUGINS=0)'}`,
+    `Plugins enabled: ${isHookPluginsEnabled(process.env) ? 'yes' : 'no (disabled with OMG_HOOK_PLUGINS=0)'}`,
   );
   console.log(`Discovered plugins: ${plugins.length}`);
   for (const plugin of plugins) {
@@ -198,7 +198,7 @@ async function testHooks(): Promise<void> {
     event,
     env: {
       ...process.env,
-      OMX_HOOK_PLUGINS: '1',
+      OMG_HOOK_PLUGINS: '1',
     },
     allowInTeamWorker: false,
   } as never);

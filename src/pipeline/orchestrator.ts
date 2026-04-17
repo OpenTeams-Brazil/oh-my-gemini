@@ -4,7 +4,7 @@
  * Sequences configurable stages (RALPLAN -> teams -> ralph verification)
  * and persists state through the ModeState system.
  *
- * Mirrors OMC #1130 pipeline design with OMX-specific adaptations:
+ * Mirrors OMG #1130 pipeline design with OMX-specific adaptations:
  * - Execution backend is always teams (Gemini CLI workers)
  * - Ralph iteration count is configurable
  * - Integrates with existing team mode infrastructure
@@ -271,7 +271,7 @@ function validateConfig(config: PipelineConfig): void {
  * Create the default autopilot pipeline configuration.
  *
  * Sequences: RALPLAN -> team-exec -> ralph-verify
- * This is the canonical OMX pipeline matching the OMC #1130 design.
+ * This is the canonical OMX pipeline matching the OMG #1130 design.
  */
 export function createAutopilotPipelineConfig(
   task: string,

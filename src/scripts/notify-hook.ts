@@ -173,7 +173,7 @@ async function main() {
   const isTurnComplete = isTurnCompletePayload(payload);
 
   // Team worker detection via environment variable
-  const teamWorkerEnv = process.env.OMX_TEAM_WORKER; // e.g., "fix-ts/worker-1"
+  const teamWorkerEnv = process.env.OMG_TEAM_WORKER; // e.g., "fix-ts/worker-1"
   const parsedTeamWorker = parseTeamWorkerEnv(teamWorkerEnv);
   const isTeamWorker = !!parsedTeamWorker;
 
@@ -273,7 +273,7 @@ async function main() {
           type: 'ralph_session_resume',
           reason: resumeResult.reason,
           current_omg_session_id: resumeResult.currentOmxSessionId || null,
-          payload_codex_session_id: payloadSessionId || null,
+          payload_gemini_session_id: payloadSessionId || null,
           source_path: resumeResult.sourcePath || null,
           target_path: resumeResult.targetPath || null,
           owner_updated: resumeResult.updatedCurrentOwner,
@@ -285,7 +285,7 @@ async function main() {
         timestamp: new Date().toISOString(),
         level: 'warn',
         type: 'ralph_session_resume_failure',
-        payload_codex_session_id: payloadSessionId || null,
+        payload_gemini_session_id: payloadSessionId || null,
         error: error instanceof Error ? error.message : String(error),
       });
     }

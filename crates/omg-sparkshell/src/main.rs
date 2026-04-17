@@ -1,4 +1,4 @@
-mod codex_bridge;
+mod gemini_bridge;
 mod error;
 mod exec;
 mod prompt;
@@ -6,7 +6,7 @@ mod prompt;
 mod test_support;
 mod threshold;
 
-use crate::codex_bridge::summarize_output;
+use crate::gemini_bridge::summarize_output;
 use crate::error::SparkshellError;
 use crate::exec::execute_command;
 use crate::threshold::{combined_visible_lines, read_line_threshold};

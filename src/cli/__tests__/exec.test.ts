@@ -20,10 +20,10 @@ function runOmx(
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_MODEL_INSTRUCTIONS_FILE: '',
-      OMX_TEAM_WORKER: '',
-      OMX_TEAM_STATE_ROOT: '',
-      OMX_TEAM_LEADER_CWD: '',
+      OMG_MODEL_INSTRUCTIONS_FILE: '',
+      OMG_TEAM_WORKER: '',
+      OMG_TEAM_STATE_ROOT: '',
+      OMG_TEAM_LEADER_CWD: '',
       ...envOverrides,
     },
   });
@@ -36,12 +36,12 @@ function runOmx(
 }
 
 describe('omg exec', () => {
-  it('runs codex exec with session-scoped instructions that preserve AGENTS and overlay content', async () => {
+  it('runs gemini exec with session-scoped instructions that preserve AGENTS and overlay content', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-exec-cli-'));
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
 
       await mkdir(join(home, '.gemini'), { recursive: true });
@@ -52,7 +52,7 @@ describe('omg exec', () => {
         fakeGeminiPath,
         [
           '#!/bin/sh',
-          'printf \'fake-codex:%s\\n\' "$*"',
+          'printf \'fake-gemini:%s\\n\' "$*"',
           'for arg in "$@"; do',
           '  case "$arg" in',
           '    model_instructions_file=*)',
@@ -74,13 +74,13 @@ describe('omg exec', () => {
         HOME: home,
         NODE_OPTIONS: '',
         PATH: `${fakeBin}:/usr/bin:/bin`,
-        OMX_AUTO_UPDATE: '0',
-        OMX_NOTIFY_FALLBACK: '0',
-        OMX_HOOK_DERIVED_SIGNALS: '0',
+        OMG_AUTO_UPDATE: '0',
+        OMG_NOTIFY_FALLBACK: '0',
+        OMG_HOOK_DERIVED_SIGNALS: '0',
       });
 
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
-      assert.match(result.stdout, /fake-codex:exec --model gpt-5 say hi /);
+      assert.match(result.stdout, /fake-gemini:exec --model gpt-5 say hi /);
       assert.match(result.stdout, /instructions-path:.*\/\.omg\/state\/sessions\/omg-.*\/AGENTS\.md/);
       assert.match(result.stdout, /# User Instructions/);
       assert.match(result.stdout, /# Project Instructions/);
@@ -97,17 +97,17 @@ describe('omg exec', () => {
     }
   });
 
-  it('passes exec --help through to codex exec', async () => {
+  it('passes exec --help through to gemini exec', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-exec-help-'));
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
-      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-codex:%s\\n\' \"$*\"\n');
+      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-gemini:%s\\n\' \"$*\"\n');
       await chmod(fakeGeminiPath, 0o755);
       await writeFile(fakePsPath, '#!/bin/sh\nexit 0\n');
       await chmod(fakePsPath, 0o755);
@@ -116,13 +116,13 @@ describe('omg exec', () => {
         HOME: home,
         NODE_OPTIONS: '',
         PATH: `${fakeBin}:/usr/bin:/bin`,
-        OMX_AUTO_UPDATE: '0',
-        OMX_NOTIFY_FALLBACK: '0',
-        OMX_HOOK_DERIVED_SIGNALS: '0',
+        OMG_AUTO_UPDATE: '0',
+        OMG_NOTIFY_FALLBACK: '0',
+        OMG_HOOK_DERIVED_SIGNALS: '0',
       });
 
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
-      assert.match(result.stdout, /fake-codex:exec --help\b/);
+      assert.match(result.stdout, /fake-gemini:exec --help\b/);
       assert.doesNotMatch(result.stdout, /oh-my-gemini \(omg\) - Multi-agent orchestration for Gemini CLI/i);
     } finally {
       await rm(wd, { recursive: true, force: true });

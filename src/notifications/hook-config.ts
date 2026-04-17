@@ -3,7 +3,7 @@
  *
  * Reads hookTemplates from .omg-config.json for user-customizable message templates.
  * Config is stored under the notifications.hookTemplates key in geminiHome()/.omg-config.json.
- * Env var OMX_HOOK_CONFIG overrides to a separate file path.
+ * Env var OMG_HOOK_CONFIG overrides to a separate file path.
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -23,7 +23,7 @@ let cachedConfig: HookNotificationConfig | null | undefined;
  * Read and cache the hook notification config.
  *
  * Primary source: notifications.hookTemplates key in geminiHome()/.omg-config.json
- * Env var override: OMX_HOOK_CONFIG points to a separate file containing the
+ * Env var override: OMG_HOOK_CONFIG points to a separate file containing the
  *   HookNotificationConfig JSON directly (used for testing and advanced overrides).
  *
  * - Returns null when config does not exist (no error)
@@ -33,7 +33,7 @@ let cachedConfig: HookNotificationConfig | null | undefined;
 export function getHookConfig(): HookNotificationConfig | null {
   if (cachedConfig !== undefined) return cachedConfig;
 
-  const envOverridePath = process.env.OMX_HOOK_CONFIG;
+  const envOverridePath = process.env.OMG_HOOK_CONFIG;
 
   if (envOverridePath) {
     // Env var: read HookNotificationConfig directly from separate file
@@ -56,14 +56,14 @@ export function getHookConfig(): HookNotificationConfig | null {
   }
 
   // Primary: read from notifications.hookTemplates in .omg-config.json
-  const OMX_CONFIG_PATH = join(geminiHome(), ".omg-config.json");
-  if (!existsSync(OMX_CONFIG_PATH)) {
+  const OMG_CONFIG_PATH = join(geminiHome(), ".omg-config.json");
+  if (!existsSync(OMG_CONFIG_PATH)) {
     cachedConfig = null;
     return null;
   }
 
   try {
-    const raw = JSON.parse(readFileSync(OMX_CONFIG_PATH, "utf-8"));
+    const raw = JSON.parse(readFileSync(OMG_CONFIG_PATH, "utf-8"));
     if (!raw || typeof raw !== "object") {
       cachedConfig = null;
       return null;

@@ -2,7 +2,7 @@
 
 Date: **2026-03-19**  
 Baseline commit: **`8106d67`**  
-Execution surface: active OMX team worker pane (`worker-3`) with local verification run from repository root after clearing `OMX_TEAM_*` env vars.
+Execution surface: active OMX team worker pane (`worker-3`) with local verification run from repository root after clearing `OMG_TEAM_*` env vars.
 
 ## Scope
 
@@ -13,7 +13,7 @@ This note captures the remaining local full-suite drift observed after the earli
 Command sequence used from the repository root:
 
 ```bash
-unset OMX_TEAM_STATE_ROOT OMX_TEAM_WORKER OMX_TEAM_LEADER_CWD
+unset OMG_TEAM_STATE_ROOT OMG_TEAM_WORKER OMG_TEAM_LEADER_CWD
 npm run build
 npm run lint
 npm test
@@ -35,7 +35,7 @@ Observed status:
 
 Failing test:
 
-- `runs codex exec with session-scoped instructions that preserve AGENTS and overlay content`
+- `runs gemini exec with session-scoped instructions that preserve AGENTS and overlay content`
 
 Observed mismatch:
 
@@ -52,7 +52,7 @@ Evidence excerpt:
 
 ```text
 expected: /instructions-path:.*\/\.omg\/state\/sessions\/omg-.*\/AGENTS\.md/
-actual: fake-codex:exec --model gpt-5 say hi -c model_instructions_file="/home/.../.omg/team/continue-from-clean-commit-810/worktrees/worker-3/GEMINI.md"
+actual: fake-gemini:exec --model gpt-5 say hi -c model_instructions_file="/home/.../.omg/team/continue-from-clean-commit-810/worktrees/worker-3/GEMINI.md"
 ```
 
 ### 2. `dist/hooks/__tests__/codebase-map.test.js`

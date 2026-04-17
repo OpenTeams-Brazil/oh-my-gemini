@@ -40,7 +40,7 @@ function summarizeObservedState(
 		case "degraded":
 			return "OpenClaw local adapter evidence is partial; config is present but at least one mapped hook is locally blocked.";
 		case "disabled":
-			return "OpenClaw is disabled locally because OMX_OPENCLAW=1 is not set.";
+			return "OpenClaw is disabled locally because OMG_OPENCLAW=1 is not set.";
 		case "missing-config":
 			return "OpenClaw is enabled, but no usable local config file was found.";
 		case "invalid-config":
@@ -110,7 +110,7 @@ function observeOpenClaw(
 					gatewayType,
 					status: "blocked",
 					detail:
-						"Mapped to a command gateway, but OMX_OPENCLAW_COMMAND=1 is not set.",
+						"Mapped to a command gateway, but OMG_OPENCLAW_COMMAND=1 is not set.",
 				});
 				continue;
 			}
@@ -189,7 +189,7 @@ export function buildOpenClawEnvelope(
 		constraints: [
 			"Status reflects local OMX/OpenClaw adapter evidence only; it does not claim downstream OpenClaw acknowledgement.",
 			"Bootstrap output stays under .omg/adapters/openclaw/... and does not mutate .omg/state or upstream OpenClaw config.",
-			"Command gateways remain gated by OMX_OPENCLAW_COMMAND=1 even when OMX_OPENCLAW=1 is enabled.",
+			"Command gateways remain gated by OMG_OPENCLAW_COMMAND=1 even when OMG_OPENCLAW=1 is enabled.",
 		],
 		openclaw,
 	};
@@ -286,7 +286,7 @@ export function buildOpenClawDoctorReport(
 		issues.push({
 			code: "openclaw_disabled",
 			message:
-				"OMX_OPENCLAW=1 is required before OpenClaw local config can be observed.",
+				"OMG_OPENCLAW=1 is required before OpenClaw local config can be observed.",
 		});
 	} else if (
 		openclaw.observedState === "missing-config" ||
@@ -330,8 +330,8 @@ export function buildOpenClawDoctorReport(
 		issues,
 		nextSteps: [
 			"Run omg adapt openclaw init --write.",
-			"Set OMX_OPENCLAW=1 and configure notifications.openclaw or compatible aliases in ~/.gemini/.omg-config.json.",
-			"If command gateways are configured, also set OMX_OPENCLAW_COMMAND=1 before expecting command mappings to be locally ready.",
+			"Set OMG_OPENCLAW=1 and configure notifications.openclaw or compatible aliases in ~/.gemini/.omg-config.json.",
+			"If command gateways are configured, also set OMG_OPENCLAW_COMMAND=1 before expecting command mappings to be locally ready.",
 		],
 	};
 }

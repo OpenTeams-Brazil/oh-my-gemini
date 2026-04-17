@@ -5,12 +5,12 @@ description: Configurable pipeline orchestrator for sequencing stages
 
 # Pipeline Skill
 
-`$pipeline` is the configurable pipeline orchestrator for OMX. It sequences stages
+`$pipeline` is the configurable pipeline orchestrator for OMG. It sequences stages
 through a uniform `PipelineStage` interface, with state persistence and resume support.
 
 ## Default Autopilot Pipeline
 
-The canonical OMX pipeline sequences:
+The canonical OMG pipeline sequences:
 
 ```
 RALPLAN (consensus planning) -> team-exec (Gemini CLI workers) -> ralph-verify (architect verification)
@@ -44,7 +44,7 @@ return a `StageResult` with status, artifacts, and duration.
 ## Built-in Stages
 
 - **ralplan**: Consensus planning (planner + architect + critic). Skips only when both `prd-*.md` and `test-spec-*.md` planning artifacts already exist, and carries any `deep-interview-*.md` spec paths forward for traceability.
-- **team-exec**: Team execution via Gemini CLI workers. Always the OMX execution backend.
+- **team-exec**: Team execution via Gemini CLI workers. Always the OMG execution backend.
 - **ralph-verify**: Ralph verification loop with configurable iteration count.
 
 ## State Management

@@ -16,7 +16,7 @@ function runNotifyHook(payload: Record<string, unknown>) {
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_TEAM_WORKER: '',
+      OMG_TEAM_WORKER: '',
       TMUX: '',
       TMUX_PANE: '',
     },
@@ -196,7 +196,7 @@ describe('notify-hook session-scoped iteration updates', () => {
     try {
       const stateDir = join(wd, '.omg', 'state');
       const canonicalSessionId = 'omg-canonical-session';
-      const nativeSessionId = 'codex-native-session';
+      const nativeSessionId = 'gemini-native-session';
       const canonicalDir = join(stateDir, 'sessions', canonicalSessionId);
       await mkdir(canonicalDir, { recursive: true });
       await writeFile(join(stateDir, 'session.json'), JSON.stringify({

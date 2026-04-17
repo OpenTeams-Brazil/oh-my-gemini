@@ -6,19 +6,12 @@ export interface ToolMapping {
   native: string;
 }
 
-const TOOL_MAPPINGS: Record<string, string> = {
-  "ReplaceText": "replace",
-  "ReadFile": "read_file",
-  "WriteFile": "write_file",
-  "ListDirectory": "list_directory",
-  "GrepSearch": "grep_search",
-  "RunShellCommand": "run_shell_command",
-  "AskUser": "ask_user",
-  "SaveMemory": "save_memory",
-};
+const TOOL_MAPPINGS: Record<string, string> = {};
 
 export function translateToolName(legacyName: string): string {
-  return TOOL_MAPPINGS[legacyName] || legacyName;
+  // Clean break: native names only. 
+  // Legacy names are no longer translated.
+  return legacyName;
 }
 
 export function logToolCall(

@@ -27,7 +27,7 @@ describe('notify-hook managed tmux windows fallback', () => {
   const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
   const originalTmux = process.env.TMUX;
   const originalTmuxPane = process.env.TMUX_PANE;
-  const originalTeamWorker = process.env.OMX_TEAM_WORKER;
+  const originalTeamWorker = process.env.OMG_TEAM_WORKER;
 
   afterEach(() => {
     if (originalPlatform) Object.defineProperty(process, 'platform', originalPlatform);
@@ -35,8 +35,8 @@ describe('notify-hook managed tmux windows fallback', () => {
     else delete process.env.TMUX;
     if (originalTmuxPane !== undefined) process.env.TMUX_PANE = originalTmuxPane;
     else delete process.env.TMUX_PANE;
-    if (originalTeamWorker !== undefined) process.env.OMX_TEAM_WORKER = originalTeamWorker;
-    else delete process.env.OMX_TEAM_WORKER;
+    if (originalTeamWorker !== undefined) process.env.OMG_TEAM_WORKER = originalTeamWorker;
+    else delete process.env.OMG_TEAM_WORKER;
   });
 
   it('does not rely on ps ancestry checks on native Windows', async () => {
@@ -56,7 +56,7 @@ describe('notify-hook managed tmux windows fallback', () => {
       Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
       delete process.env.TMUX;
       delete process.env.TMUX_PANE;
-      process.env.OMX_TEAM_WORKER = '';
+      process.env.OMG_TEAM_WORKER = '';
 
       const result = await resolveManagedSessionContext(cwd, { session_id: sessionId }, { allowTeamWorker: false });
       assert.equal(result.managed, false);
@@ -75,18 +75,18 @@ describe('notify-hook managed tmux windows fallback', () => {
       const current = JSON.parse(await readFile(join(stateDir, 'session.json'), 'utf-8'));
       await writeFile(join(stateDir, 'session.json'), JSON.stringify({
         ...current,
-        native_session_id: 'codex-native-session',
+        native_session_id: 'gemini-native-session',
       }, null, 2));
 
       delete process.env.TMUX;
       delete process.env.TMUX_PANE;
-      process.env.OMX_TEAM_WORKER = '';
+      process.env.OMG_TEAM_WORKER = '';
 
-      const result = await resolveManagedSessionContext(cwd, { session_id: 'codex-native-session' }, { allowTeamWorker: false });
+      const result = await resolveManagedSessionContext(cwd, { session_id: 'gemini-native-session' }, { allowTeamWorker: false });
       assert.equal(result.managed, true);
-      assert.equal(result.invocationSessionId, 'codex-native-session');
+      assert.equal(result.invocationSessionId, 'gemini-native-session');
       assert.equal(result.canonicalSessionId, 'omg-canonical-session');
-      assert.equal(result.nativeSessionId, 'codex-native-session');
+      assert.equal(result.nativeSessionId, 'gemini-native-session');
       assert.match(result.expectedTmuxSessionName, /omg-canonical-session|canonical-session/);
     } finally {
       await rm(cwd, { recursive: true, force: true });
@@ -102,7 +102,7 @@ describe('notify-hook managed tmux windows fallback', () => {
 
       delete process.env.TMUX;
       delete process.env.TMUX_PANE;
-      process.env.OMX_TEAM_WORKER = '';
+      process.env.OMG_TEAM_WORKER = '';
 
       const result = await resolveManagedSessionContext(aliasCwd, { session_id: 'omg-alias-session' }, { allowTeamWorker: false });
       assert.equal(result.managed, true);
@@ -125,7 +125,7 @@ describe('notify-hook managed tmux windows fallback', () => {
 
       delete process.env.TMUX;
       delete process.env.TMUX_PANE;
-      process.env.OMX_TEAM_WORKER = '';
+      process.env.OMG_TEAM_WORKER = '';
 
       const managedSessionName = buildTmuxSessionName(cwd, sessionId);
       await withFakeTmux(cwd, `#!/usr/bin/env bash

@@ -9,16 +9,16 @@ import { resetOpenClawConfigCache } from '../../openclaw/config.js';
 
 const ENV_KEYS = [
   'GEMINI_HOME',
-  'OMX_NOTIFY_TEMP',
-  'OMX_NOTIFY_TEMP_CONTRACT',
-  'OMX_NOTIFY_PROFILE',
-  'OMX_DISCORD_WEBHOOK_URL',
-  'OMX_DISCORD_NOTIFIER_BOT_TOKEN',
-  'OMX_DISCORD_NOTIFIER_CHANNEL',
-  'OMX_TELEGRAM_BOT_TOKEN',
-  'OMX_TELEGRAM_CHAT_ID',
-  'OMX_SLACK_WEBHOOK_URL',
-  'OMX_OPENCLAW',
+  'OMG_NOTIFY_TEMP',
+  'OMG_NOTIFY_TEMP_CONTRACT',
+  'OMG_NOTIFY_PROFILE',
+  'OMG_DISCORD_WEBHOOK_URL',
+  'OMG_DISCORD_NOTIFIER_BOT_TOKEN',
+  'OMG_DISCORD_NOTIFIER_CHANNEL',
+  'OMG_TELEGRAM_BOT_TOKEN',
+  'OMG_TELEGRAM_CHAT_ID',
+  'OMG_SLACK_WEBHOOK_URL',
+  'OMG_OPENCLAW',
 ] as const;
 
 let tempGeminiHome: string;
@@ -63,9 +63,9 @@ describe('notification temp mode', () => {
         },
       },
     });
-    process.env.OMX_NOTIFY_PROFILE = 'file-profile';
-    process.env.OMX_SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/temp-only';
-    process.env.OMX_NOTIFY_TEMP_CONTRACT = JSON.stringify({
+    process.env.OMG_NOTIFY_PROFILE = 'file-profile';
+    process.env.OMG_SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/temp-only';
+    process.env.OMG_NOTIFY_TEMP_CONTRACT = JSON.stringify({
       active: true,
       selectors: ['slack'],
       canonicalSelectors: ['slack'],
@@ -81,7 +81,7 @@ describe('notification temp mode', () => {
   });
 
   it('temp contract with no valid configured provider disables dispatch config', () => {
-    process.env.OMX_NOTIFY_TEMP_CONTRACT = JSON.stringify({
+    process.env.OMG_NOTIFY_TEMP_CONTRACT = JSON.stringify({
       active: true,
       selectors: ['telegram'],
       canonicalSelectors: ['telegram'],
@@ -106,8 +106,8 @@ describe('notification temp mode', () => {
         },
       },
     });
-    process.env.OMX_OPENCLAW = '1';
-    process.env.OMX_NOTIFY_TEMP_CONTRACT = JSON.stringify({
+    process.env.OMG_OPENCLAW = '1';
+    process.env.OMG_NOTIFY_TEMP_CONTRACT = JSON.stringify({
       active: true,
       selectors: ['discord'],
       canonicalSelectors: ['discord'],
@@ -121,8 +121,8 @@ describe('notification temp mode', () => {
   });
 
   it('temp mode enables openclaw config only when explicitly selected', () => {
-    process.env.OMX_OPENCLAW = '1';
-    process.env.OMX_NOTIFY_TEMP_CONTRACT = JSON.stringify({
+    process.env.OMG_OPENCLAW = '1';
+    process.env.OMG_NOTIFY_TEMP_CONTRACT = JSON.stringify({
       active: true,
       selectors: ['openclaw:gateway-main'],
       canonicalSelectors: ['openclaw:gateway-main'],
@@ -137,7 +137,7 @@ describe('notification temp mode', () => {
   });
 
   it('shouldDispatchOpenClaw enforces temp-mode explicit selection and gateway matching', async () => {
-    process.env.OMX_OPENCLAW = '1';
+    process.env.OMG_OPENCLAW = '1';
     await writeGeminiConfig({
       notifications: {
         enabled: true,
@@ -201,7 +201,7 @@ describe('notification temp mode', () => {
       true,
     );
     assert.equal(
-      await shouldDispatchOpenClaw('session-end', activeWithOpenClaw, { OMX_OPENCLAW: '0', GEMINI_HOME: tempGeminiHome }),
+      await shouldDispatchOpenClaw('session-end', activeWithOpenClaw, { OMG_OPENCLAW: '0', GEMINI_HOME: tempGeminiHome }),
       false,
     );
   });

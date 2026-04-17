@@ -115,8 +115,8 @@ export function parseTeamWorkerLaunchArgs(args: string[]): ParsedTeamWorkerLaunc
   };
 }
 
-export function collectInheritableTeamWorkerArgs(codexArgs: string[]): string[] {
-  const parsed = parseTeamWorkerLaunchArgs(codexArgs);
+export function collectInheritableTeamWorkerArgs(geminiArgs: string[]): string[] {
+  const parsed = parseTeamWorkerLaunchArgs(geminiArgs);
 
   const inherited: string[] = [];
   if (parsed.reasoningOverride) inherited.push(CONFIG_FLAG, parsed.reasoningOverride);

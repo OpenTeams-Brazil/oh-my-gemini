@@ -3,9 +3,9 @@ name: help
 description: Guide on using oh-my-gemini plugin
 ---
 
-# How OMX Works
+# How OMG Works
 
-**You don't need to learn any commands!** OMX enhances Gemini CLI with intelligent behaviors that activate automatically.
+**You don't need to learn any commands!** OMG enhances Gemini CLI with intelligent behaviors that activate automatically.
 
 ## What Happens Automatically
 
@@ -41,7 +41,7 @@ I'll figure out what to stop based on context.
 
 ## First Time Setup
 
-If you haven't configured OMX yet:
+If you haven't configured OMG yet:
 
 ```
 /omg-setup
@@ -69,7 +69,7 @@ But now you don't NEED them - everything is automatic.
 
 Analyze your oh-my-gemini usage and get tailored recommendations to improve your workflow.
 
-> Note: This replaces the former `/learn-about-omc` skill.
+> Note: This replaces the former `/learn-about-omg` skill.
 
 ### What It Does
 
@@ -87,7 +87,7 @@ TOKEN_FILE="$HOME/.omg/state/token-tracking.jsonl"
 SESSION_FILE=".omg/state/session-history.json"
 CONFIG_FILE="$HOME/.gemini/.omg-config.json"
 
-echo "Analyzing OMX Usage..."
+echo "Analyzing OMG Usage..."
 echo ""
 
 # Check what data is available
@@ -155,7 +155,7 @@ Format a summary with:
 ### Example Output
 
 ```
-📊 Your OMX Usage Analysis
+📊 Your OMG Usage Analysis
 
 TOKEN SUMMARY:
 - Total records: 1,234
@@ -185,9 +185,9 @@ If no data found:
 
 No token tracking found. To enable tracking:
 1. Ensure ~/.omg/state/ directory exists
-2. Run any OMX command to start tracking
+2. Run any OMG command to start tracking
 
-Tip: Run /omg-setup to configure OMX properly.
+Tip: Run /omg-setup to configure OMG properly.
 ```
 
 ## Need More Help?

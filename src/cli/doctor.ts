@@ -19,9 +19,9 @@ import {
 } from './explore.js';
 import { getPackageRoot } from '../utils/package.js';
 import { hasLegacyOmxTeamRunTable } from '../config/generator.js';
-import { getMissingManagedCodexHookEvents } from '../config/codex-hooks.js';
+import { getMissingManagedGeminiHookEvents } from '../config/gemini-hooks.js';
 import { getDefaultBridge, isBridgeEnabled } from '../runtime/bridge.js';
-import { OMX_EXPLORE_CMD_ENV, isExploreCommandRoutingEnabled } from '../hooks/explore-routing.js';
+import { OMG_EXPLORE_CMD_ENV, isExploreCommandRoutingEnabled } from '../hooks/explore-routing.js';
 import { isLeaderRuntimeStale } from '../team/leader-activity.js';
 
 interface DoctorOptions {
@@ -276,7 +276,7 @@ async function checkNativeHooks(configPath: string): Promise<Check> {
   if (!existsSync(configPath)) return { name: 'Native hooks', status: 'fail', message: 'config missing' };
   try {
     const content = await readFile(configPath, 'utf-8');
-    const missingEvents = getMissingManagedCodexHookEvents(content);
+    const missingEvents = getMissingManagedGeminiHookEvents(content);
     if (!missingEvents || missingEvents.length === 0) {
       return { name: 'Native hooks', status: 'pass', message: 'fully configured' };
     }

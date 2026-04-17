@@ -15,7 +15,7 @@ import type {
 import { appendHookPluginLog } from './logging.js';
 import { hookPluginTmuxStatePath } from './paths.js';
 
-const INJECTION_MARKER = '[OMX_TMUX_INJECT]';
+const INJECTION_MARKER = '[OMG_TMUX_INJECT]';
 const DEFAULT_COOLDOWN_MS = 15_000;
 const DEFAULT_DEDUPE_WINDOW_MS = 60_000;
 
@@ -93,7 +93,7 @@ function resolveSessionPaneTarget(sessionName: string): HookPluginSendKeysResult
   if (rows.length === 0) return { ok: false, reason: 'target_missing' };
 
   const nonHudRows = rows.filter((row) => !isHudStartCommand(row.startCommand));
-  const canonicalRows = nonHudRows.filter((row) => /\bcodex\b/i.test(row.startCommand));
+  const canonicalRows = nonHudRows.filter((row) => /\bgemini\b/i.test(row.startCommand));
   const resolved = canonicalRows.find((row) => row.active)
     || canonicalRows[0]
     || nonHudRows.find((row) => row.active)
@@ -135,7 +135,7 @@ async function sendTmuxKeys(
     return { ok: false, reason: 'invalid_text' };
   }
 
-  const marker = process.env.OMX_HOOK_PLUGIN_LOOP_MARKER || '[OMX_HOOK_PLUGIN]';
+  const marker = process.env.OMG_HOOK_PLUGIN_LOOP_MARKER || '[OMG_HOOK_PLUGIN]';
   if (marker && text.includes(marker)) {
     return { ok: false, reason: 'loop_guard_input_marker' };
   }
@@ -155,8 +155,8 @@ async function sendTmuxKeys(
   const now = Date.now();
   const cooldownMs = typeof options.cooldownMs === 'number'
     ? Math.max(0, options.cooldownMs)
-    : asPositiveNumber(process.env.OMX_HOOK_PLUGIN_COOLDOWN_MS, DEFAULT_COOLDOWN_MS);
-  const dedupeWindowMs = asPositiveNumber(process.env.OMX_HOOK_PLUGIN_DEDUPE_MS, DEFAULT_DEDUPE_WINDOW_MS);
+    : asPositiveNumber(process.env.OMG_HOOK_PLUGIN_COOLDOWN_MS, DEFAULT_COOLDOWN_MS);
+  const dedupeWindowMs = asPositiveNumber(process.env.OMG_HOOK_PLUGIN_DEDUPE_MS, DEFAULT_DEDUPE_WINDOW_MS);
   const minTs = now - dedupeWindowMs;
 
   tmuxState.recent_keys = Object.fromEntries(

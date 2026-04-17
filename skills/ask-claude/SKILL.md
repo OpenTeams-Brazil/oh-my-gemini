@@ -16,7 +16,7 @@ Use the locally installed Claude CLI as a direct external advisor for focused qu
 ## Routing
 
 ### Preferred: Local CLI execution
-Run Claude through the canonical OMX CLI command path (no MCP routing):
+Run Claude through the canonical OMG CLI command path (no MCP routing):
 
 ```bash
 omg ask claude "{{ARGUMENTS}}"

@@ -3,7 +3,7 @@ oh-my-gemini (omg) - Multi-agent orchestration for Gemini CLI
 
 Usage:
   omg           Launch Gemini CLI (HUD auto-attaches only when already inside tmux)
-  omg exec      Run codex exec non-interactively with OMX AGENTS/overlay injection
+  omg exec      Run gemini exec non-interactively with OMX AGENTS/overlay injection
   omg setup     Install skills, prompts, MCP servers, and scope-specific GEMINI.md
   omg uninstall Remove OMX configuration and clean up installed artifacts
   omg doctor    Check installation health

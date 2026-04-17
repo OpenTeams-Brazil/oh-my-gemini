@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://yeachan-heo.github.io/oh-my-gemini-website/omg-character-nobg.png" alt="oh-my-gemini character" width="280">
   <br>
-  <em>Tu codex no está solo.</em>
+  <em>Tu gemini no está solo.</em>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/oh-my-gemini)](https://www.npmjs.com/package/oh-my-gemini)
@@ -12,7 +12,7 @@
 
 > **[Website](https://yeachan-heo.github.io/oh-my-gemini-website/)** | **[Documentation](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html)** | **[CLI Reference](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#cli-reference)** | **[Workflows](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#workflows)** | **[Guía de integración de OpenClaw](../openclaw-integration.es.md)** | **[GitHub](https://github.com/Yeachan-Heo/oh-my-gemini)** | **[npm](https://www.npmjs.com/package/oh-my-gemini)**
 
-Capa de orquestación multiagente para [OpenAI Gemini CLI](https://github.com/openai/codex).
+Capa de orquestación multiagente para [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 ## Novedades en v0.9.0 — Spark Initiative
 
@@ -88,7 +88,7 @@ OMX ahora incluye `omg hooks` para scaffolding y validación de plugins.
 - `omg tmux-hook` sigue siendo compatible y no ha cambiado.
 - `omg hooks` es aditivo y no reemplaza los flujos de trabajo de tmux-hook.
 - Los archivos de plugins se encuentran en `.omg/hooks/*.mjs`.
-- Los plugins están desactivados por defecto; actívalos con `OMX_HOOK_PLUGINS=1`.
+- Los plugins están desactivados por defecto; actívalos con `OMG_HOOK_PLUGINS=1`.
 
 Consulta `docs/hooks-extension.md` para el flujo de trabajo completo de extensiones y el modelo de eventos.
 
@@ -114,7 +114,7 @@ Por defecto, las herramientas MCP de state/memory/trace aceptan el `workingDirec
 Para restringir esto, establece una lista de raíces permitidas:
 
 ```bash
-export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
+export OMG_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 ```
 
 Cuando se establece, los valores de `workingDirectory` fuera de estas raíces son rechazados.
@@ -127,14 +127,14 @@ Por defecto, OMX inyecta:
 -c model_instructions_file="<cwd>/GEMINI.md"
 ```
 
-Esto combina el `GEMINI.md` de `CODEX_HOME` con el `GEMINI.md` del proyecto (si existe) y luego añade la superposición de runtime.
+Esto combina el `GEMINI.md` de `GEMINI_HOME` con el `GEMINI.md` del proyecto (si existe) y luego añade la superposición de runtime.
 Extiende el comportamiento de Gemini, pero no reemplaza ni elude las políticas centrales del sistema Gemini.
 
 Controles:
 
 ```bash
-OMX_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # desactivar inyección de GEMINI.md
-OMX_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
+OMG_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # desactivar inyección de GEMINI.md
+OMG_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
 ```
 
 ## Modo equipo
@@ -166,16 +166,16 @@ Team cleanup now follows one standalone path; legacy linked-Ralph shutdown handl
 Selección de Worker CLI para los workers del equipo:
 
 ```bash
-OMX_TEAM_WORKER_CLI=auto    # predeterminado; usa claude cuando worker --model contiene "claude"
-OMX_TEAM_WORKER_CLI=codex   # forzar workers Gemini CLI
-OMX_TEAM_WORKER_CLI=claude  # forzar workers Claude CLI
-OMX_TEAM_WORKER_CLI_MAP=codex,codex,claude,claude  # mezcla de CLI por worker (longitud=1 o cantidad de workers)
-OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # opcional: desactivar fallback adaptativo queue->resend
+OMG_TEAM_WORKER_CLI=auto    # predeterminado; usa claude cuando worker --model contiene "claude"
+OMG_TEAM_WORKER_CLI=gemini   # forzar workers Gemini CLI
+OMG_TEAM_WORKER_CLI=claude  # forzar workers Claude CLI
+OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,claude,claude  # mezcla de CLI por worker (longitud=1 o cantidad de workers)
+OMG_TEAM_AUTO_INTERRUPT_RETRY=0  # opcional: desactivar fallback adaptativo queue->resend
 ```
 
 Notas:
-- Los argumentos de inicio de workers se comparten a través de `OMX_TEAM_WORKER_LAUNCH_ARGS`.
-- `OMX_TEAM_WORKER_CLI_MAP` anula `OMX_TEAM_WORKER_CLI` para selección por worker.
+- Los argumentos de inicio de workers se comparten a través de `OMG_TEAM_WORKER_LAUNCH_ARGS`.
+- `OMG_TEAM_WORKER_CLI_MAP` anula `OMG_TEAM_WORKER_CLI` para selección por worker.
 - El envío de triggers usa reintentos adaptativos por defecto (queue/submit, luego fallback seguro clear-line+resend cuando es necesario).
 - En modo Claude worker, OMX lanza workers como `claude` simple (sin argumentos de inicio extra) e ignora anulaciones explícitas de `--model` / `--config` / `--effort` para que Claude use el `settings.json` predeterminado.
 
@@ -185,8 +185,8 @@ Notas:
 - Instalaciones dependientes del alcance:
   - `user`: `~/.gemini/prompts/`, `~/.gemini/skills/`, `~/.gemini/config.toml`, `~/.omg/agents/`, `~/.gemini/GEMINI.md`
   - `project`: `./.gemini/prompts/`, `./.gemini/skills/`, `./.gemini/config.toml`, `./.omg/agents/`, `./GEMINI.md`
-- Comportamiento de inicio: si el alcance persistido es `project`, el lanzamiento de `omg` usa automáticamente `CODEX_HOME=./.gemini` (a menos que `CODEX_HOME` ya esté establecido).
-- Las instrucciones de inicio combinan `~/.gemini/GEMINI.md` (o `CODEX_HOME/GEMINI.md` si se sobrescribe) con `./GEMINI.md` del proyecto y luego añaden la superposición de runtime.
+- Comportamiento de inicio: si el alcance persistido es `project`, el lanzamiento de `omg` usa automáticamente `GEMINI_HOME=./.gemini` (a menos que `GEMINI_HOME` ya esté establecido).
+- Las instrucciones de inicio combinan `~/.gemini/GEMINI.md` (o `GEMINI_HOME/GEMINI.md` si se sobrescribe) con `./GEMINI.md` del proyecto y luego añaden la superposición de runtime.
 - Los archivos `GEMINI.md` existentes nunca se sobrescriben silenciosamente: en TTY interactivo se pregunta antes de reemplazar; en modo no interactivo se omite salvo que pases `--force` (las verificaciones de seguridad de sesiones activas siguen aplicándose).
 - Actualizaciones de `config.toml` (para ambos alcances):
   - `notify = ["node", "..."]`

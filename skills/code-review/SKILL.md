@@ -78,11 +78,11 @@ Output: Code review report with:
 
 ## External Model Consultation (Preferred)
 
-The code-reviewer agent SHOULD consult Codex for cross-validation.
+The code-reviewer agent SHOULD consult Gemini for cross-validation.
 
 ### Protocol
 1. **Form your OWN review FIRST** - Complete the review independently
-2. **Consult for validation** - Cross-check findings with Codex
+2. **Consult for validation** - Cross-check findings with Gemini
 3. **Critically evaluate** - Never blindly adopt external findings
 4. **Graceful fallback** - Never block if tools unavailable
 
@@ -100,10 +100,10 @@ The code-reviewer agent SHOULD consult Codex for cross-validation.
 
 ### Tool Usage
 Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools.
-Use `mcp__x__ask_codex` with `agent_role: "code-reviewer"`.
+Use `mcp__x__ask_gemini` with `agent_role: "code-reviewer"`.
 If ToolSearch finds no MCP tools, fall back to the `code-reviewer` agent.
 
-**Note:** Codex calls can take up to 1 hour. Consider the review timeline before consulting.
+**Note:** Gemini calls can take up to 1 hour. Consider the review timeline before consulting.
 
 ## Output Format
 

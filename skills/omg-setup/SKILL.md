@@ -3,9 +3,9 @@ name: omg-setup
 description: Setup and configure oh-my-gemini using current CLI behavior
 ---
 
-# OMX Setup
+# OMG Setup
 
-Use this skill when users want to install or refresh oh-my-gemini for the **current project plus user-level OMX directories**.
+Use this skill when users want to install or refresh oh-my-gemini for the **current project plus user-level OMG directories**.
 
 ## Command
 
@@ -44,9 +44,9 @@ Supported setup flags (current implementation):
 - Scope targets:
   - `user`: user directories (`~/.gemini`, `~/.gemini/skills`, `~/.omg/agents`)
   - `project`: local directories (`./.gemini`, `./.gemini/skills`, `./.omg/agents`)
-- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${CODEX_HOME:-~/.gemini}/skills`, current setup prints a cleanup hint. **Why the paths differ**: `${CODEX_HOME:-~/.gemini}/skills/` is the path current Gemini CLI natively loads as its skill root; `~/.agents/skills/` was the skill root in an older Gemini CLI release before `~/.gemini` became the standard home directory. OMX writes only to the canonical `${CODEX_HOME:-~/.gemini}/skills/` path. When both directories exist simultaneously, Gemini discovers skills from both trees and may show duplicate entries in Enable/Disable Skills. Archive or remove `~/.agents/skills/` to resolve this.
-- If persisted scope is `project`, `omg` launch automatically uses `CODEX_HOME=./.gemini` unless user explicitly overrides `CODEX_HOME`.
-- With `--force`, AGENTS overwrite may still be skipped if an active OMX session is detected (safety guard).
+- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${GEMINI_HOME:-~/.gemini}/skills`, current setup prints a cleanup hint. **Why the paths differ**: `${GEMINI_HOME:-~/.gemini}/skills/` is the path current Gemini CLI natively loads as its skill root; `~/.agents/skills/` was the skill root in an older Gemini CLI release before `~/.gemini` became the standard home directory. OMG writes only to the canonical `${GEMINI_HOME:-~/.gemini}/skills/` path. When both directories exist simultaneously, Gemini discovers skills from both trees and may show duplicate entries in Enable/Disable Skills. Archive or remove `~/.agents/skills/` to resolve this.
+- If persisted scope is `project`, `omg` launch automatically uses `GEMINI_HOME=./.gemini` unless user explicitly overrides `GEMINI_HOME`.
+- With `--force`, AGENTS overwrite may still be skipped if an active OMG session is detected (safety guard).
 - Legacy persisted scope values (`project-local`) are automatically migrated to `project` with a one-time warning.
 
 ## Recommended workflow
@@ -63,7 +63,7 @@ omg setup --force --verbose
 omg doctor
 ```
 
-3. Start Gemini with OMX in the target project directory.
+3. Start Gemini with OMG in the target project directory.
 
 ## Expected verification indicators
 
@@ -72,7 +72,7 @@ From `omg doctor`, expect:
 - Skills installed (scope-dependent: user or project)
 - GEMINI.md found in project root
 - `.omg/state` exists
-- OMX MCP servers configured in scope target `config.toml` (`~/.gemini/config.toml` or `./.gemini/config.toml`)
+- OMG MCP servers configured in scope target `config.toml` (`~/.gemini/config.toml` or `./.gemini/config.toml`)
 
 ## Troubleshooting
 
@@ -89,4 +89,4 @@ node bin/omg.js setup --force --verbose
 node bin/omg.js doctor
 ```
 
-- If GEMINI.md was not overwritten during `--force`, stop active OMX session and rerun setup.
+- If GEMINI.md was not overwritten during `--force`, stop active OMG session and rerun setup.

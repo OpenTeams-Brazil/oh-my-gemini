@@ -67,7 +67,7 @@ describe('normalizeRalphCliArgs', () => {
 });
 
 describe('filterRalphGeminiArgs', () => {
-  it('consumes --prd so it is not forwarded to codex', () => {
+  it('consumes --prd so it is not forwarded to gemini', () => {
     assert.deepEqual(filterRalphGeminiArgs(['--prd', 'build', 'todo', 'app']), ['build', 'todo', 'app']);
   });
   it('consumes --PRD case-insensitively', () => {
@@ -184,7 +184,7 @@ describe('assertRequiredRalphPrdJson', () => {
 });
 
 describe('ralph deslop launch wiring', () => {
-  it('consumes --no-deslop so it is not forwarded to codex', () => {
+  it('consumes --no-deslop so it is not forwarded to gemini', () => {
     assert.deepEqual(filterRalphGeminiArgs(['--no-deslop', '--model', 'gpt-5', 'fix', 'it']), ['--model', 'gpt-5', 'fix', 'it']);
   });
 

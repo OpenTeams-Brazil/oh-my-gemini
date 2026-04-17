@@ -31,11 +31,11 @@ describe('omg doctor invalid config detection', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-invalid-config-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
 
       await writeFile(
-        join(codexDir, 'config.toml'),
+        join(geminiDir, 'config.toml'),
         `
 model = "gpt-5.4"
 
@@ -49,7 +49,7 @@ theme = "base16-ocean-light"
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
 
       if (shouldSkipForSpawnPermissions(res.error)) return;

@@ -193,9 +193,9 @@ describe('createHookPluginSdk', () => {
 
     it('returns loop_guard_input_marker when text contains loop marker', async () => {
       const cwd = await mkdtemp(join(tmpdir(), 'omg-sdk-'));
-      const originalMarker = process.env.OMX_HOOK_PLUGIN_LOOP_MARKER;
+      const originalMarker = process.env.OMG_HOOK_PLUGIN_LOOP_MARKER;
       try {
-        process.env.OMX_HOOK_PLUGIN_LOOP_MARKER = '[TESTMARK]';
+        process.env.OMG_HOOK_PLUGIN_LOOP_MARKER = '[TESTMARK]';
         const sdk = createHookPluginSdk({
           cwd,
           pluginName: 'test',
@@ -207,16 +207,16 @@ describe('createHookPluginSdk', () => {
         assert.equal(result.reason, 'loop_guard_input_marker');
       } finally {
         if (originalMarker === undefined) {
-          delete process.env.OMX_HOOK_PLUGIN_LOOP_MARKER;
+          delete process.env.OMG_HOOK_PLUGIN_LOOP_MARKER;
         } else {
-          process.env.OMX_HOOK_PLUGIN_LOOP_MARKER = originalMarker;
+          process.env.OMG_HOOK_PLUGIN_LOOP_MARKER = originalMarker;
         }
         await rm(cwd, { recursive: true, force: true });
       }
     });
 
 
-    it('prefers non-HUD codex pane when targeting a tmux session', async () => {
+    it('prefers non-HUD gemini pane when targeting a tmux session', async () => {
       const cwd = await mkdtemp(join(tmpdir(), 'omg-sdk-'));
       const fakeBinDir = await mkdtemp(join(tmpdir(), 'omg-sdk-bin-'));
       const fakeTmuxPath = join(fakeBinDir, 'tmux');
@@ -228,7 +228,7 @@ cmd="$1"
 shift || true
 if [[ "$cmd" == "list-panes" ]]; then
   printf "%%2	1	node /pkg/dist/cli/omg.js hud --watch
-%%42	0	codex --model gpt-5
+%%42	0	gemini --model gpt-5
 "
   exit 0
 fi

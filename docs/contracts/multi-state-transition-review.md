@@ -18,7 +18,7 @@ Reviewed brownfield surfaces:
 - `src/mcp/state-server.ts`
 - `src/hud/state.ts`
 - `src/hooks/agents-overlay.ts`
-- `src/scripts/codex-native-hook.ts`
+- `src/scripts/gemini-native-hook.ts`
 
 ## Current branch snapshot
 
@@ -91,7 +91,7 @@ Primary gaps relative to the PRD/test-spec:
 - They still depend on upstream writers to keep the canonical state valid and to
   stop relying on top-level legacy fields as semantic truth.
 
-### `src/scripts/codex-native-hook.ts`
+### `src/scripts/gemini-native-hook.ts`
 
 - Stop handling already reads canonical skill-active state plus mode files.
 - It still needs the finalized transition contract so combined-state blocking and
@@ -115,7 +115,7 @@ Also clarified two adjacent operator-facing docs so the approved overlap is not
 misread as the old linked `team ralph` lifecycle:
 
 - `docs/contracts/ralph-state-contract.md`
-- `docs/codex-native-hooks.md`
+- `docs/gemini-native-hooks.md`
 
 Added concrete recovery examples to the compatibility contract so denial
 messages can point operators at exact parity surfaces instead of vague

@@ -3,7 +3,7 @@
  *
  * All semantic state mutations route through `execCommand()`.
  * All state queries read Rust-authored compatibility JSON files.
- * Set OMX_RUNTIME_BRIDGE=0 to disable bridge (fallback to TS-direct).
+ * Set OMG_RUNTIME_BRIDGE=0 to disable bridge (fallback to TS-direct).
  */
 
 import { execFileSync } from 'node:child_process';
@@ -118,7 +118,7 @@ export interface RuntimeBinaryDiscoveryOptions {
 
 export function resolveRuntimeBinaryPath(options: RuntimeBinaryDiscoveryOptions = {}): string {
   const exists = options.exists ?? existsSync;
-  const envOverride = process.env.OMX_RUNTIME_BINARY?.trim();
+  const envOverride = process.env.OMG_RUNTIME_BINARY?.trim();
   if (envOverride) return envOverride;
 
   const workspaceDebug = options.debugPath ?? resolve(__bridge_dirname, '../../target/debug/omg-runtime');
@@ -140,12 +140,12 @@ export class RuntimeBridge {
   private enabled: boolean;
 
   constructor(options: { stateDir?: string; binaryPath?: string } = {}) {
-    this.enabled = process.env.OMX_RUNTIME_BRIDGE !== '0';
+    this.enabled = process.env.OMG_RUNTIME_BRIDGE !== '0';
     this.stateDir = options.stateDir;
     this.binaryPath = options.binaryPath ?? resolveRuntimeBinaryPath();
   }
 
-  /** Whether the bridge is enabled (OMX_RUNTIME_BRIDGE != '0'). */
+  /** Whether the bridge is enabled (OMG_RUNTIME_BRIDGE != '0'). */
   isEnabled(): boolean {
     return this.enabled;
   }
@@ -282,5 +282,5 @@ export function getDefaultBridge(stateDir?: string): RuntimeBridge {
 }
 
 export function isBridgeEnabled(): boolean {
-  return process.env.OMX_RUNTIME_BRIDGE !== '0';
+  return process.env.OMG_RUNTIME_BRIDGE !== '0';
 }

@@ -10,13 +10,13 @@ import {
 } from "../mcp-registry.js";
 
 describe("unified MCP registry loader", () => {
-  it("prefers ~/.omg/mcp-registry.json over ~/.omc/mcp-registry.json", async () => {
+  it("prefers ~/.omg/mcp-registry.json over ~/.omg/mcp-registry.json", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-mcp-registry-"));
     try {
       const omgPath = join(wd, ".omg", "mcp-registry.json");
-      const omcPath = join(wd, ".omc", "mcp-registry.json");
+      const omgPath = join(wd, ".omg", "mcp-registry.json");
       await mkdir(join(wd, ".omg"), { recursive: true });
-      await mkdir(join(wd, ".omc"), { recursive: true });
+      await mkdir(join(wd, ".omg"), { recursive: true });
 
       await writeFile(
         omgPath,
@@ -25,7 +25,7 @@ describe("unified MCP registry loader", () => {
         }),
       );
       await writeFile(
-        omcPath,
+        omgPath,
         JSON.stringify({
           legacy_helper: { command: "legacy-helper", args: ["mcp"] },
         }),
@@ -43,17 +43,17 @@ describe("unified MCP registry loader", () => {
   it("loads a legacy registry when it is passed explicitly as a candidate", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-mcp-registry-"));
     try {
-      const omcPath = join(wd, ".omc", "mcp-registry.json");
-      await mkdir(join(wd, ".omc"), { recursive: true });
+      const omgPath = join(wd, ".omg", "mcp-registry.json");
+      await mkdir(join(wd, ".omg"), { recursive: true });
       await writeFile(
-        omcPath,
+        omgPath,
         JSON.stringify({
           legacy_helper: { command: "legacy-helper", args: ["mcp"], enabled: false },
         }),
       );
 
-      const result = await loadUnifiedMcpRegistry({ candidates: [omcPath] });
-      assert.equal(result.sourcePath, omcPath);
+      const result = await loadUnifiedMcpRegistry({ candidates: [omgPath] });
+      assert.equal(result.sourcePath, omgPath);
       assert.equal(result.servers.length, 1);
       assert.equal(result.servers[0].name, "legacy_helper");
       assert.equal(result.servers[0].enabled, false);

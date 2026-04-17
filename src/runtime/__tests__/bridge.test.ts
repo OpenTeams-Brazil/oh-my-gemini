@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { resolveRuntimeBinaryPath } from '../bridge.js';
 
 describe('resolveRuntimeBinaryPath', () => {
-  it('prefers explicit OMX_RUNTIME_BINARY override', () => {
-    const previous = process.env.OMX_RUNTIME_BINARY;
+  it('prefers explicit OMG_RUNTIME_BINARY override', () => {
+    const previous = process.env.OMG_RUNTIME_BINARY;
     try {
-      process.env.OMX_RUNTIME_BINARY = '/custom/runtime';
+      process.env.OMG_RUNTIME_BINARY = '/custom/runtime';
       const actual = resolveRuntimeBinaryPath({
         debugPath: '/debug/runtime',
         releasePath: '/release/runtime',
@@ -15,8 +15,8 @@ describe('resolveRuntimeBinaryPath', () => {
       });
       assert.equal(actual, '/custom/runtime');
     } finally {
-      if (typeof previous === 'string') process.env.OMX_RUNTIME_BINARY = previous;
-      else delete process.env.OMX_RUNTIME_BINARY;
+      if (typeof previous === 'string') process.env.OMG_RUNTIME_BINARY = previous;
+      else delete process.env.OMG_RUNTIME_BINARY;
     }
   });
 

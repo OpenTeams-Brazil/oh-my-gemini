@@ -33,9 +33,9 @@ function runOmx(
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_AUTO_UPDATE: '0',
-      OMX_NOTIFY_FALLBACK: '0',
-      OMX_HOOK_DERIVED_SIGNALS: '0',
+      OMG_AUTO_UPDATE: '0',
+      OMG_NOTIFY_FALLBACK: '0',
+      OMG_HOOK_DERIVED_SIGNALS: '0',
       ...envOverrides,
     },
   });
@@ -147,12 +147,12 @@ describe('omg autoresearch', () => {
     const runParsed = parseAutoresearchArgs(['run', 'missions/demo', '--model', 'gpt-5']);
     assert.equal(runParsed.runSubcommand, true);
     assert.equal(runParsed.missionDir, 'missions/demo');
-    assert.deepEqual(runParsed.codexArgs, ['--model', 'gpt-5']);
+    assert.deepEqual(runParsed.geminiArgs, ['--model', 'gpt-5']);
 
     const bareParsed = parseAutoresearchArgs(['missions/demo', '--model', 'gpt-5']);
     assert.equal(bareParsed.runSubcommand, undefined);
     assert.equal(bareParsed.missionDir, 'missions/demo');
-    assert.deepEqual(bareParsed.codexArgs, ['--model', 'gpt-5']);
+    assert.deepEqual(bareParsed.geminiArgs, ['--model', 'gpt-5']);
   });
 
 
@@ -160,12 +160,12 @@ describe('omg autoresearch', () => {
     const repo = await initRepo();
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-autoresearch-deep-interview-mtime-bin-'));
     try {
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
 if [ "$1" = "exec" ]; then
-  candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+  candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
   head_commit=$(git rev-parse HEAD)
   cat >"$candidate_file" <<'EOF'
 {
@@ -173,15 +173,15 @@ if [ "$1" = "exec" ]; then
   "candidate_commit": null,
   "base_commit": "HEAD_PLACEHOLDER",
   "description": "stop after guided handoff",
-  "notes": ["fake codex exec"],
+  "notes": ["fake gemini exec"],
   "created_at": "2026-03-18T00:00:00.000Z"
 }
 EOF
   perl -0pi -e "s/HEAD_PLACEHOLDER/$head_commit/g" "$candidate_file"
   exit 0
 fi
-mkdir -p "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch"
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md" <<'EOF'
+mkdir -p "$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch"
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md" <<'EOF'
 # Deep Interview Autoresearch Draft — test-launch
 
 ## Mission Draft
@@ -210,12 +210,12 @@ Launch-ready: yes
 - refine further
 - launch
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md" <<'EOF'
 # Mission
 
 Investigate flaky onboarding behavior
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md" <<'EOF'
 ---
 evaluator:
   command: node scripts/eval.js
@@ -223,7 +223,7 @@ evaluator:
   keep_policy: score_improvement
 ---
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json" <<'EOF'
 {
   "kind": "omg.autoresearch.deep-interview/v1",
   "compileTarget": {
@@ -240,10 +240,10 @@ cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json" <<'EO
   "blockedReasons": []
 }
 EOF
-touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md"
-touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md"
-touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md"
-touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json"
+touch -t 202603180000 "$OMG_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md"
+touch -t 202603180000 "$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md"
+touch -t 202603180000 "$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md"
+touch -t 202603180000 "$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json"
 `,
         'utf-8',
       );
@@ -252,7 +252,7 @@ touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/r
 
       const result = runOmx(repo, ['autoresearch', '--topic', 'Investigate flaky onboarding behavior', '--evaluator', 'node scripts/eval.js', '--slug', 'test-launch'], {
         PATH: `${fakeBin}:${process.env.PATH || ''}`,
-        OMX_TEST_REPO_ROOT: repo,
+        OMG_TEST_REPO_ROOT: repo,
       });
       assert.equal(result.status, 0, result.stderr || result.stdout);
 
@@ -270,15 +270,15 @@ touch -t 202603180000 "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/r
     const repo = await initRepo();
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-autoresearch-deep-interview-bin-'));
     try {
-      const codexLog = join(repo, 'codex-launch.log');
+      const geminiLog = join(repo, 'gemini-launch.log');
       const tmuxLog = join(repo, 'guided-tmux.log');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-printf '%s\n' "$*" >>"${codexLog}"
+printf '%s\n' "$*" >>"${geminiLog}"
 if [ "$1" = "exec" ]; then
-candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
 head_commit=$(git rev-parse HEAD)
 cat >"$candidate_file" <<'EOF'
 {
@@ -286,16 +286,16 @@ cat >"$candidate_file" <<'EOF'
   "candidate_commit": null,
   "base_commit": "HEAD_PLACEHOLDER",
   "description": "stop after guided handoff",
-  "notes": ["fake codex exec"],
+  "notes": ["fake gemini exec"],
   "created_at": "2026-03-18T00:00:00.000Z"
 }
 EOF
 perl -0pi -e "s/HEAD_PLACEHOLDER/$head_commit/g" "$candidate_file"
 exit 0
 fi
-mkdir -p "$OMX_TEST_REPO_ROOT/.omg/specs/deep-int"
-mkdir -p "$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch"
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md" <<'EOF'
+mkdir -p "$OMG_TEST_REPO_ROOT/.omg/specs/deep-int"
+mkdir -p "$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch"
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/deep-interview-autoresearch-test-launch.md" <<'EOF'
 # Deep Interview Autoresearch Draft — test-launch
 
 ## Mission Draft
@@ -324,12 +324,12 @@ Launch-ready: yes
 - refine further
 - launch
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/mission.md" <<'EOF'
 # Mission
 
 Investigate flaky onboarding behavior
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/sandbox.md" <<'EOF'
 ---
 evaluator:
   command: node scripts/eval.js
@@ -337,7 +337,7 @@ evaluator:
   keep_policy: score_improvement
 ---
 EOF
-cat >"$OMX_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json" <<'EOF'
+cat >"$OMG_TEST_REPO_ROOT/.omg/specs/autoresearch-test-launch/result.json" <<'EOF'
 {
   "kind": "omg.autoresearch.deep-interview/v1",
   "compileTarget": {
@@ -373,7 +373,7 @@ case "$1" in
   display-message)
     case "$*" in
       *"#{pane_id}"*) printf '%%42\n' ;;
-      *"#{pane_current_path}"*) printf '%s\n' "$OMX_TEST_REPO_ROOT" ;;
+      *"#{pane_current_path}"*) printf '%s\n' "$OMG_TEST_REPO_ROOT" ;;
       *"#S"*) printf 'devsession\n' ;;
       *) printf 'devsession\n' ;;
     esac
@@ -407,15 +407,15 @@ esac
 
       const result = runOmx(repo, ['autoresearch', '--topic', 'Investigate flaky onboarding behavior', '--evaluator', 'node scripts/eval.js', '--slug', 'test-launch'], {
         PATH: `${fakeBin}:${process.env.PATH || ''}`,
-        OMX_TEST_REPO_ROOT: repo,
+        OMG_TEST_REPO_ROOT: repo,
         TMUX: '/tmp/fake-tmux,12345,0',
         TMUX_PANE: '%42',
       });
       assert.equal(result.status, 0, result.stderr || result.stdout);
 
-      const codexArgs = await readFile(codexLog, 'utf-8');
+      const geminiArgs = await readFile(geminiLog, 'utf-8');
       const tmuxOutput = await readFile(tmuxLog, 'utf-8');
-      assert.match(codexArgs, /\$deep-interview --autoresearch/);
+      assert.match(geminiArgs, /\$deep-interview --autoresearch/);
       assert.match(tmuxOutput, /split-window -h -t %42 -d -P -F #\{pane_id\} -c/);
 
       const missionContent = await readFile(join(repo, 'missions', 'test-launch', 'mission.md'), 'utf-8');
@@ -446,11 +446,11 @@ esac
       execFileSync('git', ['add', '.'], { cwd: repo, stdio: 'ignore' });
       execFileSync('git', ['commit', '-m', 'add autoresearch mission'], { cwd: repo, stdio: 'ignore' });
 
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
 head_commit=$(git rev-parse HEAD)
 cat >"$candidate_file" <<'EOF'
 {
@@ -458,7 +458,7 @@ cat >"$candidate_file" <<'EOF'
   "candidate_commit": null,
   "base_commit": "HEAD_PLACEHOLDER",
   "description": "stop after split launch",
-  "notes": ["fake codex exec"],
+  "notes": ["fake gemini exec"],
   "created_at": "2026-03-18T00:00:00.000Z"
 }
 EOF
@@ -519,7 +519,7 @@ esac
 
       const result = runOmx(repo, ['autoresearch', 'run', missionDir, '--model', 'gpt-5'], {
         PATH: `${fakeBin}:${process.env.PATH || ''}`,
-        OMX_TEST_REPO_ROOT: repo,
+        OMG_TEST_REPO_ROOT: repo,
         TMUX: '/tmp/fake-tmux,12345,0',
         TMUX_PANE: '%9',
       });
@@ -552,11 +552,11 @@ esac
       execFileSync('git', ['add', '.'], { cwd: repo, stdio: 'ignore' });
       execFileSync('git', ['commit', '-m', 'add autoresearch mission'], { cwd: repo, stdio: 'ignore' });
 
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
 head_commit=$(git rev-parse HEAD)
 cat >"$candidate_file" <<'EOF'
 {
@@ -564,7 +564,7 @@ cat >"$candidate_file" <<'EOF'
   "candidate_commit": null,
   "base_commit": "HEAD_PLACEHOLDER",
   "description": "stop after foreground fallback",
-  "notes": ["fake codex exec"],
+  "notes": ["fake gemini exec"],
   "created_at": "2026-03-18T00:00:00.000Z"
 }
 EOF
@@ -614,7 +614,7 @@ esac
 
       const result = runOmx(repo, ['autoresearch', 'run', missionDir], {
         PATH: `${fakeBin}:${process.env.PATH || ''}`,
-        OMX_TEST_REPO_ROOT: repo,
+        OMG_TEST_REPO_ROOT: repo,
         TMUX: '/tmp/fake-tmux,12345,0',
         TMUX_PANE: '%9',
       });
@@ -728,7 +728,7 @@ esac
     }
   });
 
-  it('launches codex exec for autoresearch turns without shelling out to cat', async () => {
+  it('launches gemini exec for autoresearch turns without shelling out to cat', async () => {
     const repo = await initRepo();
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-autoresearch-fake-bin-'));
     try {
@@ -756,17 +756,17 @@ exit 97
       );
       execFileSync('chmod', ['+x', fakeCatPath], { stdio: 'ignore' });
 
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
-printf 'fake-codex:%s\\n' "$*" >&2
+printf 'fake-gemini:%s\\n' "$*" >&2
 while IFS= read -r _; do
   :
 done
-candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
 head_commit=$(git rev-parse HEAD)
-printf '{\\n  "status": "abort",\\n  "candidate_commit": null,\\n  "base_commit": "%s",\\n  "description": "stop after first exec",\\n  "notes": ["fake codex exec"],\\n  "created_at": "2026-03-15T00:00:00.000Z"\\n}\\n' "$head_commit" >"$candidate_file"
+printf '{\\n  "status": "abort",\\n  "candidate_commit": null,\\n  "base_commit": "%s",\\n  "description": "stop after first exec",\\n  "notes": ["fake gemini exec"],\\n  "created_at": "2026-03-15T00:00:00.000Z"\\n}\\n' "$head_commit" >"$candidate_file"
 `,
         'utf-8',
       );
@@ -776,11 +776,11 @@ printf '{\\n  "status": "abort",\\n  "candidate_commit": null,\\n  "base_commit"
       const result = runOmx(
         repo,
         ['autoresearch', missionDir, '--dangerously-bypass-approvals-and-sandbox'],
-        { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMX_TEST_REPO_ROOT: repo },
+        { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMG_TEST_REPO_ROOT: repo },
       );
 
       assert.equal(result.status, 0, result.stderr || result.stdout);
-      assert.match(result.stderr, /fake-codex:exec --dangerously-bypass-approvals-and-sandbox -/);
+      assert.match(result.stderr, /fake-gemini:exec --dangerously-bypass-approvals-and-sandbox -/);
     } finally {
       await rm(repo, { recursive: true, force: true });
       await rm(fakeBin, { recursive: true, force: true });
@@ -804,19 +804,19 @@ printf '{\\n  "status": "abort",\\n  "candidate_commit": null,\\n  "base_commit"
       execFileSync('git', ['add', '.'], { cwd: repo, stdio: 'ignore' });
       execFileSync('git', ['commit', '-m', 'add autoresearch noop mission'], { cwd: repo, stdio: 'ignore' });
 
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       await writeFile(
         fakeGeminiPath,
         `#!/bin/sh
 cat >/dev/null
-candidate_file=$(find "$OMX_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
+candidate_file=$(find "$OMG_TEST_REPO_ROOT/.omg/logs/autoresearch" -name candidate.json | head -n 1)
 head_commit=$(git rev-parse HEAD)
 cat >"$candidate_file" <<EOF
 {
   "status": "noop",
   "candidate_commit": null,
   "base_commit": "$head_commit",
-  "description": "noop from fake codex exec",
+  "description": "noop from fake gemini exec",
   "notes": ["fake noop"],
   "created_at": "2026-03-15T00:00:00.000Z"
 }
@@ -830,7 +830,7 @@ EOF
       const result = runOmx(
         repo,
         ['autoresearch', missionDir, '--dangerously-bypass-approvals-and-sandbox'],
-        { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMX_TEST_REPO_ROOT: repo },
+        { PATH: `${fakeBin}:${process.env.PATH || ''}`, OMG_TEST_REPO_ROOT: repo },
       );
 
       assert.equal(result.status, 0, result.stderr || result.stdout);

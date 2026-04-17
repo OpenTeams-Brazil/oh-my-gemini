@@ -79,7 +79,7 @@ exit 1
 
 describe('state-server directory initialization', () => {
   it('creates .omg/state for state tools without setup', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-test-'));
@@ -108,7 +108,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('bootstraps state-tool tmux-hook from the current tmux pane when available', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-test-live-'));
@@ -143,7 +143,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('writes and reads deep-interview state', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-test-'));
@@ -196,7 +196,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('creates session-scoped state directory when session_id is provided', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-test-'));
@@ -222,7 +222,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('serializes concurrent state_write calls per mode file and preserves merged fields', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-test-'));
@@ -254,7 +254,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('syncs canonical skill-active state for tracked mode writes and clears', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-canonical-'));
@@ -310,7 +310,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('allows approved overlaps and preserves the remaining canonical state on clear', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-overlap-'));
@@ -373,7 +373,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('denies unsupported overlaps without writing the requested mode state', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-deny-'));
@@ -418,7 +418,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('allows ultrawork when canonical session state is stricter than mode files', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-canonical-prevalidate-'));
@@ -475,7 +475,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('removes tracked workflows from canonical skill-active state on all_sessions clear', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-canonical-clear-all-'));
@@ -516,7 +516,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('propagates root clears into inherited session canonical copies', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-root-clear-propagate-'));
@@ -570,7 +570,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('preserves root-scoped team state when session-scoped ralph is added via state_write', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-team-ralph-'));
@@ -639,7 +639,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('rejects standalone overlaps without mutating canonical state', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-standalone-overlap-'));
@@ -697,7 +697,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('auto-completes deep-interview when starting ralplan and returns transition messaging', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-handoff-interview-'));
@@ -738,7 +738,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('rejects execution-to-planning rollback with clear-first guidance', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-rollback-'));
@@ -779,7 +779,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('does not auto-complete existing workflow state when tracked write validation fails', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-validate-before-transition-'));
@@ -819,7 +819,7 @@ describe('state-server directory initialization', () => {
   });
 
   it('allows ultrawork overlap with any tracked mode', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-server-ultrawork-any-'));

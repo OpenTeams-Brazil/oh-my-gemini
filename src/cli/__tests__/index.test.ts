@@ -78,7 +78,7 @@ afterEach(() => {
 });
 
 describe("normalizeGeminiLaunchArgs", () => {
-  it("maps --madmax to codex bypass flag", () => {
+  it("maps --madmax to gemini bypass flag", () => {
     assert.deepEqual(normalizeGeminiLaunchArgs(["--madmax"]), [
       "--dangerously-bypass-approvals-and-sandbox",
     ]);
@@ -147,7 +147,7 @@ describe("normalizeGeminiLaunchArgs", () => {
     ]);
   });
 
-  it("maps --xhigh --madmax to codex-native flags only", () => {
+  it("maps --xhigh --madmax to gemini-native flags only", () => {
     assert.deepEqual(normalizeGeminiLaunchArgs(["--xhigh", "--madmax"]), [
       "--dangerously-bypass-approvals-and-sandbox",
       "-c",
@@ -189,20 +189,20 @@ describe("normalizeGeminiLaunchArgs", () => {
     );
   });
 
-  it("strips detached worktree flag from leader codex args", () => {
+  it("strips detached worktree flag from leader gemini args", () => {
     assert.deepEqual(normalizeGeminiLaunchArgs(["--worktree", "--yolo"]), [
       "--yolo",
     ]);
   });
 
-  it("strips named worktree flag from leader codex args", () => {
+  it("strips named worktree flag from leader gemini args", () => {
     assert.deepEqual(
       normalizeGeminiLaunchArgs(["--worktree=feature/demo", "--model", "gpt-5"]),
       ["--model", "gpt-5"],
     );
   });
 
-  it("does not forward notify-temp flags/selectors to leader codex args", () => {
+  it("does not forward notify-temp flags/selectors to leader gemini args", () => {
     const parsed = resolveNotifyTempContract(
       [
         "--notify-temp",
@@ -221,13 +221,13 @@ describe("normalizeGeminiLaunchArgs", () => {
     ]);
   });
 
-  it("strips --tmux from leader codex args", () => {
+  it("strips --tmux from leader gemini args", () => {
     assert.deepEqual(normalizeGeminiLaunchArgs(["--tmux", "--yolo"]), [
       "--yolo",
     ]);
   });
 
-  it("preserves literal --tmux after -- in leader codex args", () => {
+  it("preserves literal --tmux after -- in leader gemini args", () => {
     assert.deepEqual(normalizeGeminiLaunchArgs(["--", "--tmux", "--yolo"]), [
       "--",
       "--tmux",
@@ -294,9 +294,9 @@ describe("resolveNotifyTempContract", () => {
     assert.equal(parsed.contract.warnings.length >= 1, true);
   });
 
-  it("activates from OMX_NOTIFY_TEMP=1 env parity", () => {
+  it("activates from OMG_NOTIFY_TEMP=1 env parity", () => {
     const parsed = resolveNotifyTempContract(["--model", "gpt-5"], {
-      OMX_NOTIFY_TEMP: "1",
+      OMG_NOTIFY_TEMP: "1",
     });
     assert.equal(parsed.contract.active, true);
     assert.equal(parsed.contract.source, "env");
@@ -307,7 +307,7 @@ describe("resolveNotifyTempContract", () => {
 describe("cleanupLaunchOrphanedMcpProcesses", () => {
   it("reaps only detached OMX MCP processes without a live Gemini ancestor", async () => {
     const processes: ProcessEntry[] = [
-      { pid: 700, ppid: 500, command: "codex" },
+      { pid: 700, ppid: 500, command: "gemini" },
       { pid: 701, ppid: 700, command: "node /repo/bin/omg.js" },
       {
         pid: 710,
@@ -327,7 +327,7 @@ describe("cleanupLaunchOrphanedMcpProcesses", () => {
       {
         pid: 820,
         ppid: 50,
-        command: "codex --model gpt-5",
+        command: "gemini --model gpt-5",
       },
       {
         pid: 821,
@@ -626,11 +626,11 @@ describe("watcher script path resolution", () => {
 describe("buildNotifyFallbackWatcherEnv", () => {
   it("enables watcher authority and propagates GEMINI_HOME override when requested", () => {
     const env = buildNotifyFallbackWatcherEnv(
-      { HOME: "/tmp/home", OMX_HUD_AUTHORITY: "0", TMUX: "sock,1,0", TMUX_PANE: "%2" },
-      { geminiHomeOverride: "/tmp/codex-home", enableAuthority: true },
+      { HOME: "/tmp/home", OMG_HUD_AUTHORITY: "0", TMUX: "sock,1,0", TMUX_PANE: "%2" },
+      { geminiHomeOverride: "/tmp/gemini-home", enableAuthority: true },
     );
-    assert.equal(env.OMX_HUD_AUTHORITY, "1");
-    assert.equal(env.GEMINI_HOME, "/tmp/codex-home");
+    assert.equal(env.OMG_HUD_AUTHORITY, "1");
+    assert.equal(env.GEMINI_HOME, "/tmp/gemini-home");
     assert.equal(env.HOME, "/tmp/home");
     assert.equal(env.TMUX, undefined);
     assert.equal(env.TMUX_PANE, undefined);
@@ -638,10 +638,10 @@ describe("buildNotifyFallbackWatcherEnv", () => {
 
   it("disables watcher authority explicitly when not requested", () => {
     const env = buildNotifyFallbackWatcherEnv(
-      { HOME: "/tmp/home", OMX_HUD_AUTHORITY: "1", TMUX: "sock,1,0", TMUX_PANE: "%3" },
+      { HOME: "/tmp/home", OMG_HUD_AUTHORITY: "1", TMUX: "sock,1,0", TMUX_PANE: "%3" },
       { enableAuthority: false },
     );
-    assert.equal(env.OMX_HUD_AUTHORITY, "0");
+    assert.equal(env.OMG_HUD_AUTHORITY, "0");
     assert.equal(env.HOME, "/tmp/home");
     assert.equal(env.TMUX, undefined);
     assert.equal(env.TMUX_PANE, undefined);
@@ -655,7 +655,7 @@ describe("shouldEnableNotifyFallbackWatcher", () => {
 
   it("disables notify fallback explicitly on non-Windows hosts", () => {
     assert.equal(
-      shouldEnableNotifyFallbackWatcher({ OMX_NOTIFY_FALLBACK: "0" }, "linux"),
+      shouldEnableNotifyFallbackWatcher({ OMG_NOTIFY_FALLBACK: "0" }, "linux"),
       false,
     );
   });
@@ -666,7 +666,7 @@ describe("shouldEnableNotifyFallbackWatcher", () => {
 
   it("allows explicit opt-in for notify fallback on win32", () => {
     assert.equal(
-      shouldEnableNotifyFallbackWatcher({ OMX_NOTIFY_FALLBACK: "1" }, "win32"),
+      shouldEnableNotifyFallbackWatcher({ OMG_NOTIFY_FALLBACK: "1" }, "win32"),
       true,
     );
   });
@@ -819,7 +819,7 @@ describe("resolveWorkerSparkModel", () => {
   });
 
   it("reads low-complexity team model from config when geminiHomeOverride is provided", async () => {
-    const geminiHome = await mkdtemp(join(tmpdir(), "omg-codex-home-"));
+    const geminiHome = await mkdtemp(join(tmpdir(), "omg-gemini-home-"));
     try {
       await writeFile(
         join(geminiHome, ".omg-config.json"),
@@ -1134,9 +1134,9 @@ describe("project launch scope helpers", () => {
       );
       assert.equal(
         resolveGeminiHomeForLaunch(wd, {
-          GEMINI_HOME: "/tmp/explicit-codex-home",
+          GEMINI_HOME: "/tmp/explicit-gemini-home",
         }),
-        "/tmp/explicit-codex-home",
+        "/tmp/explicit-gemini-home",
       );
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -1153,9 +1153,9 @@ describe("project launch scope helpers", () => {
       );
       assert.equal(
         resolveGeminiConfigPathForLaunch(wd, {
-          GEMINI_HOME: "/tmp/explicit-codex-home",
+          GEMINI_HOME: "/tmp/explicit-gemini-home",
         }),
-        "/tmp/explicit-codex-home/config.toml",
+        "/tmp/explicit-gemini-home/config.toml",
       );
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -1320,14 +1320,14 @@ describe("shouldDetachBackgroundHelper", () => {
 });
 
 describe("classifyGeminiExecFailure", () => {
-  it("classifies child process exit status as codex exit", () => {
-    const err = Object.assign(new Error("codex exited 9"), { status: 9 });
+  it("classifies child process exit status as gemini exit", () => {
+    const err = Object.assign(new Error("gemini exited 9"), { status: 9 });
     const classified = classifyGeminiExecFailure(err);
     assert.equal(classified.kind, "exit");
     assert.equal(classified.exitCode, 9);
   });
 
-  it("classifies signal termination as codex exit and maps to signal-based exit code", () => {
+  it("classifies signal termination as gemini exit and maps to signal-based exit code", () => {
     const err = Object.assign(new Error("terminated"), {
       status: null,
       signal: "SIGTERM" as NodeJS.Signals,
@@ -1339,7 +1339,7 @@ describe("classifyGeminiExecFailure", () => {
   });
 
   it("classifies ENOENT as launch error", () => {
-    const err = Object.assign(new Error("spawn codex ENOENT"), {
+    const err = Object.assign(new Error("spawn gemini ENOENT"), {
       code: "ENOENT",
     });
     const classified = classifyGeminiExecFailure(err);
@@ -1355,7 +1355,7 @@ describe("tmux HUD pane helpers", () => {
         "%1\tzsh\tzsh",
         "%2\tnode\tnode /tmp/bin/omg.js hud --watch",
         "%3\tnode\tnode /tmp/bin/omg.js hud --watch",
-        "%4\tcodex\tcodex --model gpt-5",
+        "%4\tgemini\tgemini --model gpt-5",
       ].join("\n"),
     );
     assert.deepEqual(findHudWatchPaneIds(panes, "%2"), ["%3"]);
@@ -1391,10 +1391,10 @@ describe("detached tmux new-session sequencing", () => {
     const steps = buildDetachedSessionBootstrapSteps(
       "omg-demo",
       "/tmp/project",
-      "'codex' '--model' 'gpt-5'",
+      "'gemini' '--model' 'gpt-5'",
       "'node' '/tmp/omg.js' 'hud' '--watch'",
       "--model gpt-5",
-      "/tmp/codex-home",
+      "/tmp/gemini-home",
       '{"active":true}',
     );
     assert.deepEqual(
@@ -1407,7 +1407,7 @@ describe("detached tmux new-session sequencing", () => {
     assert.equal(steps[1]?.args.includes("#{pane_id}"), true);
     assert.equal(steps[0]?.args.includes("-e"), true);
     assert.equal(
-      steps[0]?.args.includes('OMX_NOTIFY_TEMP_CONTRACT={\"active\":true}'),
+      steps[0]?.args.includes('OMG_NOTIFY_TEMP_CONTRACT={\"active\":true}'),
       true,
     );
   });
@@ -1416,7 +1416,7 @@ describe("detached tmux new-session sequencing", () => {
     const steps = buildDetachedSessionBootstrapSteps(
       "omg-demo",
       "/tmp/project",
-      "'codex' '--model' 'gpt-5'",
+      "'gemini' '--model' 'gpt-5'",
       "'node' '/tmp/omg.js' 'hud' '--watch'",
       null,
       undefined,
@@ -1427,17 +1427,17 @@ describe("detached tmux new-session sequencing", () => {
     assert.equal(
       newSession!.args.includes("-e") &&
         newSession!.args.some((arg) =>
-          arg.startsWith("OMX_NOTIFY_TEMP_CONTRACT="),
+          arg.startsWith("OMG_NOTIFY_TEMP_CONTRACT="),
         ),
       true,
     );
   });
 
-  it("buildDetachedSessionBootstrapSteps forwards OMX_SESSION_ID to detached tmux session", () => {
+  it("buildDetachedSessionBootstrapSteps forwards OMG_SESSION_ID to detached tmux session", () => {
     const steps = buildDetachedSessionBootstrapSteps(
       "omg-demo",
       "/tmp/project",
-      "'env' 'OMX_SESSION_ID=sess-detached-managed' 'codex' '--model' 'gpt-5'",
+      "'env' 'OMG_SESSION_ID=sess-detached-managed' 'gemini' '--model' 'gpt-5'",
       "'node' '/tmp/omg.js' 'hud' '--watch'",
       null,
       undefined,
@@ -1449,16 +1449,16 @@ describe("detached tmux new-session sequencing", () => {
     assert.ok(newSession);
     assert.equal(
       newSession!.args.includes("-e") &&
-        newSession!.args.some((arg) => arg === "OMX_SESSION_ID=sess-detached-managed"),
+        newSession!.args.some((arg) => arg === "OMG_SESSION_ID=sess-detached-managed"),
       true,
     );
   });
 
-  it("runGemini builds inside-tmux HUD command with OMX_SESSION_ID", async () => {
+  it("runGemini builds inside-tmux HUD command with OMG_SESSION_ID", async () => {
     const source = await readFile(join(repoRoot, 'src', 'cli', 'index.ts'), 'utf-8');
     assert.match(
       source,
-      /buildTmuxPaneCommand\("env", \[`OMX_SESSION_ID=\$\{sessionId\}`, "node", omgBin, "hud", "--watch"\]\)/,
+      /buildTmuxPaneCommand\("env", \[`OMG_SESSION_ID=\$\{sessionId\}`, "node", omgBin, "hud", "--watch"\]\)/,
     );
   });
 
@@ -1471,10 +1471,10 @@ describe("detached tmux new-session sequencing", () => {
     const steps = buildDetachedSessionBootstrapSteps(
       "omg-demo",
       "C:/project",
-      "'codex' '--dangerously-bypass-approvals-and-sandbox'",
+      "'gemini' '--dangerously-bypass-approvals-and-sandbox'",
       hudCmd,
       "--model gpt-5",
-      "C:/codex-home",
+      "C:/gemini-home",
       null,
       true,
     );
@@ -1500,7 +1500,7 @@ describe("detached tmux new-session sequencing", () => {
     const steps = buildDetachedSessionBootstrapSteps(
       "omg-demo",
       "/tmp/project",
-      "'codex' '--model' 'gpt-5'",
+      "'gemini' '--model' 'gpt-5'",
       "'node' '/tmp/omg.js' 'hud' '--watch'",
       null,
     );
@@ -1512,10 +1512,10 @@ describe("detached tmux new-session sequencing", () => {
     assert.match(leaderCmd!, /omg_detached_session_cleanup\(\)/);
     assert.match(leaderCmd!, /trap omg_detached_session_cleanup 0 INT TERM HUP;/);
     assert.match(leaderCmd!, /exec 3<&0;/);
-    assert.match(leaderCmd!, /omg_codex_pid=\$!;/);
+    assert.match(leaderCmd!, /omg_gemini_pid=\$!;/);
     assert.match(leaderCmd!, /<\&3 &/);
-    assert.match(leaderCmd!, /wait "\$omg_codex_pid";/);
-    assert.match(leaderCmd!, /kill -TERM "\$omg_codex_pid"/);
+    assert.match(leaderCmd!, /wait "\$omg_gemini_pid";/);
+    assert.match(leaderCmd!, /kill -TERM "\$omg_gemini_pid"/);
     assert.match(leaderCmd!, /releaseTmuxExtendedKeysLease/);
     assert.match(leaderCmd!, /if \[ "\$status" -lt 128 \]; then/);
     assert.match(leaderCmd!, /tmux kill-session -t/);
@@ -1531,7 +1531,7 @@ describe("detached tmux new-session sequencing", () => {
     try {
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
-        join(fakeBin, "codex"),
+        join(fakeBin, "gemini"),
         `#!/bin/sh
 if IFS= read -r line; then
   printf 'stdin:%s\n' "$line" > "${stdinLogPath}"
@@ -1540,7 +1540,7 @@ else
 fi
 `,
       );
-      await chmod(join(fakeBin, "codex"), 0o755);
+      await chmod(join(fakeBin, "gemini"), 0o755);
       await writeFile(
         join(fakeBin, "tmux"),
         `#!/bin/sh
@@ -1566,7 +1566,7 @@ exit 0
       const steps = buildDetachedSessionBootstrapSteps(
         "omg-demo",
         cwd,
-        buildTmuxPaneCommand("codex", [], "/bin/sh"),
+        buildTmuxPaneCommand("gemini", [], "/bin/sh"),
         "'node' '/tmp/omg.js' 'hud' '--watch'",
         null,
       );
@@ -1600,14 +1600,14 @@ exit 0
     try {
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
-        join(fakeBin, "codex"),
+        join(fakeBin, "gemini"),
         `#!/bin/sh
-printf 'codex:%s\\n' "$*" >> "${logPath}"
-printf 'codex-pwd:%s\\n' "$(pwd)" >> "${logPath}"
+printf 'gemini:%s\\n' "$*" >> "${logPath}"
+printf 'gemini-pwd:%s\\n' "$(pwd)" >> "${logPath}"
 exit 0
 `,
       );
-      await chmod(join(fakeBin, "codex"), 0o755);
+      await chmod(join(fakeBin, "gemini"), 0o755);
       await writeFile(join(cwd, ".profile"), "cd ..\n");
       await writeFile(
         join(fakeBin, "tmux"),
@@ -1636,7 +1636,7 @@ exit 0
         "omg-demo",
         cwd,
         buildTmuxPaneCommand(
-          "codex",
+          "gemini",
           ["--dangerously-bypass-approvals-and-sandbox"],
           "/bin/sh",
         ),
@@ -1657,10 +1657,10 @@ exit 0
       });
 
       const log = await readFile(logPath, "utf-8");
-      assert.match(log, /codex:--dangerously-bypass-approvals-and-sandbox/);
+      assert.match(log, /gemini:--dangerously-bypass-approvals-and-sandbox/);
       assert.match(
         log,
-        new RegExp(`codex-pwd:${cwd.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`),
+        new RegExp(`gemini-pwd:${cwd.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`),
       );
       assert.match(log, /tmux:display-message -p #\{socket_path\}/);
       assert.match(log, /tmux:show-options -sv extended-keys/);
@@ -1680,13 +1680,13 @@ exit 0
     try {
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
-        join(fakeBin, "codex"),
+        join(fakeBin, "gemini"),
         `#!/bin/sh
-printf 'codex:%s\\n' "$*" >> "${logPath}"
+printf 'gemini:%s\\n' "$*" >> "${logPath}"
 exit 143
 `,
       );
-      await chmod(join(fakeBin, "codex"), 0o755);
+      await chmod(join(fakeBin, "gemini"), 0o755);
       await writeFile(
         join(fakeBin, "tmux"),
         `#!/bin/sh
@@ -1714,7 +1714,7 @@ exit 0
         "omg-demo",
         cwd,
         buildTmuxPaneCommand(
-          "codex",
+          "gemini",
           ["--dangerously-bypass-approvals-and-sandbox"],
           "/bin/sh",
         ),
@@ -1736,7 +1736,7 @@ exit 0
 
       assert.equal(result.status, 143);
       const log = await readFile(logPath, "utf-8");
-      assert.match(log, /codex:--dangerously-bypass-approvals-and-sandbox/);
+      assert.match(log, /gemini:--dangerously-bypass-approvals-and-sandbox/);
       assert.match(log, /tmux:display-message -p #\{socket_path\}/);
       assert.match(log, /tmux:show-options -sv extended-keys/);
       assert.match(log, /tmux:set-option -sq extended-keys always/);
@@ -1747,21 +1747,21 @@ exit 0
     }
   });
 
-  it("detached leader command terminates codex child on external SIGHUP", async () => {
+  it("detached leader command terminates gemini child on external SIGHUP", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-detached-leader-hup-"));
     const fakeBin = join(cwd, "bin");
-    const pidFile = join(cwd, "codex.pid");
+    const pidFile = join(cwd, "gemini.pid");
     try {
       await mkdir(fakeBin, { recursive: true });
       await writeFile(
-        join(fakeBin, "codex"),
+        join(fakeBin, "gemini"),
         `#!/bin/sh
 echo $$ > "${pidFile}"
 trap '' HUP
 while true; do sleep 1; done
 `,
       );
-      await chmod(join(fakeBin, "codex"), 0o755);
+      await chmod(join(fakeBin, "gemini"), 0o755);
       await writeFile(
         join(fakeBin, "tmux"),
         `#!/bin/sh
@@ -1784,7 +1784,7 @@ exit 0
       const steps = buildDetachedSessionBootstrapSteps(
         "omg-demo",
         cwd,
-        buildTmuxPaneCommand("codex", [], "/bin/sh"),
+        buildTmuxPaneCommand("gemini", [], "/bin/sh"),
         "'node' '/tmp/omg.js' 'hud' '--watch'",
         null,
       );
@@ -1808,10 +1808,10 @@ exit 0
           if (existsSync(pidFile)) break;
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        assert.ok(existsSync(pidFile), "codex pid file not written");
-        const codexPid = Number.parseInt((await readFile(pidFile, "utf-8")).trim(), 10);
-        assert.ok(codexPid > 0, "codex pid must be positive");
-        assert.doesNotThrow(() => process.kill(codexPid, 0), "codex must be alive before signal");
+        assert.ok(existsSync(pidFile), "gemini pid file not written");
+        const geminiPid = Number.parseInt((await readFile(pidFile, "utf-8")).trim(), 10);
+        assert.ok(geminiPid > 0, "gemini pid must be positive");
+        assert.doesNotThrow(() => process.kill(geminiPid, 0), "gemini must be alive before signal");
 
         const leaderExit = once(child, "exit");
         process.kill(child.pid!, "SIGHUP");
@@ -1822,13 +1822,13 @@ exit 0
           ),
         ]);
         assert.throws(
-          () => process.kill(codexPid, 0),
+          () => process.kill(geminiPid, 0),
           (err: unknown) =>
             typeof err === "object" &&
             err !== null &&
             "code" in err &&
             (err as NodeJS.ErrnoException).code === "ESRCH",
-          "codex child must be terminated after leader SIGHUP",
+          "gemini child must be terminated after leader SIGHUP",
         );
       } finally {
         try {
@@ -1842,7 +1842,7 @@ exit 0
     }
   });
 
-  it("withTmuxExtendedKeys enables tmux extended keys during codex launch and restores them afterwards", async () => {
+  it("withTmuxExtendedKeys enables tmux extended keys during gemini launch and restores them afterwards", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-tmux-lease-wrapper-"));
     const calls: string[][] = [];
     const result = withTmuxExtendedKeys(
@@ -2083,12 +2083,12 @@ exit 0
 describe("buildTmuxShellCommand", () => {
   it("preserves quoted config values for tmux shell-command execution", () => {
     assert.equal(
-      buildTmuxShellCommand("codex", [
+      buildTmuxShellCommand("gemini", [
         "--dangerously-bypass-approvals-and-sandbox",
         "-c",
         'model_reasoning_effort="xhigh"',
       ]),
-      `'codex' '--dangerously-bypass-approvals-and-sandbox' '-c' 'model_reasoning_effort="xhigh"'`,
+      `'gemini' '--dangerously-bypass-approvals-and-sandbox' '-c' 'model_reasoning_effort="xhigh"'`,
     );
   });
 });
@@ -2096,7 +2096,7 @@ describe("buildTmuxShellCommand", () => {
 describe("buildTmuxPaneCommand", () => {
   it("wraps command with zsh profile sourcing while preserving tmux cwd", () => {
     const result = buildTmuxPaneCommand(
-      "codex",
+      "gemini",
       ["--model", "gpt-5"],
       "/usr/bin/zsh",
     );
@@ -2111,7 +2111,7 @@ describe("buildTmuxPaneCommand", () => {
 
   it("keeps Homebrew zsh instead of downgrading to /bin/sh", () => {
     const result = buildTmuxPaneCommand(
-      "codex",
+      "gemini",
       ["--model", "gpt-5"],
       "/opt/homebrew/bin/zsh",
     );
@@ -2127,7 +2127,7 @@ describe("buildTmuxPaneCommand", () => {
   });
 
   it("wraps command with bash profile sourcing while preserving tmux cwd", () => {
-    const result = buildTmuxPaneCommand("codex", [], "/bin/bash");
+    const result = buildTmuxPaneCommand("gemini", [], "/bin/bash");
     assert.ok(
       result.startsWith("'/bin/bash' -c "),
       "should start with bash non-login shell to preserve tmux cwd",
@@ -2138,7 +2138,7 @@ describe("buildTmuxPaneCommand", () => {
   });
 
   it("skips rc sourcing for unknown shells without using a login shell", () => {
-    const result = buildTmuxPaneCommand("codex", [], "/bin/fish");
+    const result = buildTmuxPaneCommand("gemini", [], "/bin/fish");
     assert.ok(
       result.startsWith("'/bin/fish' -c "),
       "should start with fish non-login shell",
@@ -2149,7 +2149,7 @@ describe("buildTmuxPaneCommand", () => {
   });
 
   it("falls back to /bin/sh without using a login shell when shell path is empty", () => {
-    const result = buildTmuxPaneCommand("codex", [], "");
+    const result = buildTmuxPaneCommand("gemini", [], "");
     assert.ok(
       result.startsWith("'/bin/sh' -c "),
       "should fall back to /bin/sh",
@@ -2160,7 +2160,7 @@ describe("buildTmuxPaneCommand", () => {
 
 describe("buildWindowsPromptCommand", () => {
   it("encodes detached Windows commands for safe PowerShell prompt injection", () => {
-    const result = buildWindowsPromptCommand("codex", [
+    const result = buildWindowsPromptCommand("gemini", [
       "--dangerously-bypass-approvals-and-sandbox",
       "-c",
       'model_reasoning_effort="high"',
@@ -2172,7 +2172,7 @@ describe("buildWindowsPromptCommand", () => {
     const decoded = Buffer.from(payload, "base64").toString("utf16le");
     assert.equal(
       decoded,
-      "$ErrorActionPreference = 'Stop'; & { & 'codex' '--dangerously-bypass-approvals-and-sandbox' '-c' 'model_reasoning_effort=\"high\"' 'it''s' }",
+      "$ErrorActionPreference = 'Stop'; & { & 'gemini' '--dangerously-bypass-approvals-and-sandbox' '-c' 'model_reasoning_effort=\"high\"' 'it''s' }",
     );
   });
 });
@@ -2336,8 +2336,8 @@ describe("team worker launch arg inheritance helpers", () => {
 
   it("collectInheritableTeamWorkerArgs supports --model=<value> syntax", () => {
     assert.deepEqual(
-      collectInheritableTeamWorkerArgs(["--model=gpt-5.3-codex"]),
-      ["--model", "gpt-5.3-codex"],
+      collectInheritableTeamWorkerArgs(["--model=gpt-5.3-gemini"]),
+      ["--model", "gpt-5.3-gemini"],
     );
   });
 
@@ -2377,10 +2377,10 @@ describe("team worker launch arg inheritance helpers", () => {
     assert.equal(
       resolveTeamWorkerLaunchArgsEnv(
         "--no-alt-screen",
-        ["--model=gpt-5.3-codex"],
+        ["--model=gpt-5.3-gemini"],
         true,
       ),
-      "--no-alt-screen --model gpt-5.3-codex",
+      "--no-alt-screen --model gpt-5.3-gemini",
     );
   });
 
@@ -2458,7 +2458,7 @@ describe("injectModelInstructionsBypassArgs", () => {
     const args = injectModelInstructionsBypassArgs(
       "/tmp/my-project",
       ["--model", "gpt-5"],
-      { OMX_BYPASS_DEFAULT_SYSTEM_PROMPT: "0" },
+      { OMG_BYPASS_DEFAULT_SYSTEM_PROMPT: "0" },
     );
     assert.deepEqual(args, ["--model", "gpt-5"]);
   });
@@ -2472,9 +2472,9 @@ describe("injectModelInstructionsBypassArgs", () => {
     assert.deepEqual(args, ["-c", 'model_instructions_file="/tmp/custom.md"']);
   });
 
-  it("respects OMX_MODEL_INSTRUCTIONS_FILE env override", () => {
+  it("respects OMG_MODEL_INSTRUCTIONS_FILE env override", () => {
     const args = injectModelInstructionsBypassArgs("/tmp/my-project", [], {
-      OMX_MODEL_INSTRUCTIONS_FILE: "/tmp/alt instructions.md",
+      OMG_MODEL_INSTRUCTIONS_FILE: "/tmp/alt instructions.md",
     });
     assert.deepEqual(args, [
       "-c",

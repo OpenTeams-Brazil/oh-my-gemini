@@ -7,16 +7,16 @@ import {
 } from '../explore-routing.js';
 
 describe('explore-routing', () => {
-  it('defaults USE_OMX_EXPLORE_CMD to enabled and only disables explicit opt-out values', () => {
+  it('defaults USE_OMG_EXPLORE_CMD to enabled and only disables explicit opt-out values', () => {
     assert.equal(isExploreCommandRoutingEnabled({}), true);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: '1' }), true);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'true' }), true);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'yes' }), true);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'on' }), true);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: '0' }), false);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'false' }), false);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'no' }), false);
-    assert.equal(isExploreCommandRoutingEnabled({ USE_OMX_EXPLORE_CMD: 'off' }), false);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: '1' }), true);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'true' }), true);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'yes' }), true);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'on' }), true);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: '0' }), false);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'false' }), false);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'no' }), false);
+    assert.equal(isExploreCommandRoutingEnabled({ USE_OMG_EXPLORE_CMD: 'off' }), false);
   });
 
   it('detects simple exploration prompts', () => {
@@ -36,7 +36,7 @@ describe('explore-routing', () => {
 
   it('builds advisory guidance whenever routing is not explicitly disabled', () => {
     const guidance = buildExploreRoutingGuidance({});
-    assert.match(guidance, /USE_OMX_EXPLORE_CMD/);
+    assert.match(guidance, /USE_OMG_EXPLORE_CMD/);
     assert.match(guidance, /default-on; opt out/i);
     assert.match(guidance, /agents SHOULD treat `omg explore` as the default first stop/i);
     assert.match(guidance, /use `omg explore` FIRST before attempting full code analysis/i);
@@ -45,6 +45,6 @@ describe('explore-routing', () => {
     assert.match(guidance, /--prompt-file/);
     assert.match(guidance, /shell-only allowlisted read-only path/i);
     assert.match(guidance, /gracefully fall back to the normal path/i);
-    assert.equal(buildExploreRoutingGuidance({ USE_OMX_EXPLORE_CMD: 'off' }), '');
+    assert.equal(buildExploreRoutingGuidance({ USE_OMG_EXPLORE_CMD: 'off' }), '');
   });
 });

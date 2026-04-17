@@ -67,12 +67,12 @@ function escapeRegex(value: string): string {
 }
 
 function defaultAutoNudgePattern(targetPane: string): RegExp {
-  return new RegExp(`send-keys -t ${escapeRegex(targetPane)} -l ${escapeRegex(DEFAULT_AUTO_NUDGE_RESPONSE)} \\[OMX_TMUX_INJECT\\]`);
+  return new RegExp(`send-keys -t ${escapeRegex(targetPane)} -l ${escapeRegex(DEFAULT_AUTO_NUDGE_RESPONSE)} \\[OMG_TMUX_INJECT\\]`);
 }
 
 /**
  * Build a fake tmux binary that logs all invocations and optionally returns
- * capture-pane content from OMX_TEST_CAPTURE_FILE.
+ * capture-pane content from OMG_TEST_CAPTURE_FILE.
  */
 function buildFakeTmux(tmuxLogPath: string, paneInMode: '0' | '1' = '0'): string {
   return `#!/usr/bin/env bash
@@ -81,8 +81,8 @@ echo "$@" >> "${tmuxLogPath}"
 cmd="\$1"
 shift || true
 if [[ "\$cmd" == "capture-pane" ]]; then
-  if [[ -n "\${OMX_TEST_CAPTURE_FILE:-}" && -f "\${OMX_TEST_CAPTURE_FILE}" ]]; then
-    cat "\${OMX_TEST_CAPTURE_FILE}"
+  if [[ -n "\${OMG_TEST_CAPTURE_FILE:-}" && -f "\${OMG_TEST_CAPTURE_FILE}" ]]; then
+    cat "\${OMG_TEST_CAPTURE_FILE}"
   fi
   exit 0
 fi
@@ -108,11 +108,11 @@ if [[ "\$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "\$format" == "#{pane_start_command}" && "\$target" == "%99" ]]; then
-    echo "codex --model gpt-5"
+    echo "gemini --model gpt-5"
     exit 0
   fi
   if [[ "\$format" == "#S" ]]; then
-    echo "${'${OMX_TEST_TMUX_SESSION_NAME:-devsess}'}"
+    echo "${'${OMG_TEST_TMUX_SESSION_NAME:-devsess}'}"
     exit 0
   fi
   exit 0
@@ -125,8 +125,8 @@ if [[ "\$cmd" == "list-panes" ]]; then
       *) shift ;;
     esac
   done
-  if [[ -n "\$target" && "\$target" == "${'${OMX_TEST_TMUX_SESSION_NAME:-devsess}'}" ]]; then
-    printf '%%99\tnode\tcodex --model gpt-5\n'
+  if [[ -n "\$target" && "\$target" == "${'${OMG_TEST_TMUX_SESSION_NAME:-devsess}'}" ]]; then
+    printf '%%99\tnode\tgemini --model gpt-5\n'
     exit 0
   fi
   echo "%1 12345"
@@ -143,7 +143,7 @@ function runNotifyHook(
   payloadOverrides: Record<string, unknown> = {},
   extraEnv: Record<string, string> = {},
 ): ReturnType<typeof spawnSync> {
-  if (extraEnv.OMX_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMX_TEAM_WORKER) {
+  if (extraEnv.OMG_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMG_TEAM_WORKER) {
     const sessionPath = join(cwd, '.omg', 'state', 'session.json');
     const sessionState = {
       session_id: 'sess-managed',
@@ -162,7 +162,7 @@ function runNotifyHook(
     type: 'agent-turn-complete',
     'thread-id': 'thread-test',
     'turn-id': `turn-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-    ...(extraEnv.OMX_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMX_TEAM_WORKER ? { 'session-id': 'sess-managed' } : {}),
+    ...(extraEnv.OMG_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMG_TEAM_WORKER ? { 'session-id': 'sess-managed' } : {}),
     'input-messages': ['test'],
     'last-assistant-message': 'done',
     ...payloadOverrides,
@@ -175,13 +175,13 @@ function runNotifyHook(
       ...process.env,
       PATH: `${fakeBinDir}:${process.env.PATH || ''}`,
       GEMINI_HOME: geminiHome,
-      ...(extraEnv.OMX_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMX_TEAM_WORKER ? { OMX_SESSION_ID: 'sess-managed' } : {}),
-      ...(extraEnv.OMX_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMX_TEAM_WORKER ? { OMX_TEST_TMUX_SESSION_NAME: buildTmuxSessionName(cwd, 'sess-managed') } : {}),
+      ...(extraEnv.OMG_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMG_TEAM_WORKER ? { OMG_SESSION_ID: 'sess-managed' } : {}),
+      ...(extraEnv.OMG_TEST_UNMANAGED_SESSION !== '1' && !extraEnv.OMG_TEAM_WORKER ? { OMG_TEST_TMUX_SESSION_NAME: buildTmuxSessionName(cwd, 'sess-managed') } : {}),
       TMUX_PANE: '%99',
       TMUX: '1',
-      OMX_TEAM_WORKER: '',
-      OMX_TEAM_LEADER_NUDGE_MS: '9999999',
-      OMX_TEAM_LEADER_STALE_MS: '9999999',
+      OMG_TEAM_WORKER: '',
+      OMG_TEAM_LEADER_NUDGE_MS: '9999999',
+      OMG_TEAM_LEADER_STALE_MS: '9999999',
       ...extraEnv,
     },
   });
@@ -194,7 +194,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -234,7 +234,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -271,7 +271,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -313,7 +313,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -349,7 +349,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -384,8 +384,8 @@ describe('notify-hook auto-nudge', () => {
         'session-id': 'sess-managed',
         'last-assistant-message': 'I analyzed the code. If you want me to make these changes, let me know.',
       }, {
-        OMX_SESSION_ID: 'sess-managed',
-        OMX_TEST_UNMANAGED_SESSION: '1',
+        OMG_SESSION_ID: 'sess-managed',
+        OMG_TEST_UNMANAGED_SESSION: '1',
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -399,7 +399,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -418,7 +418,7 @@ describe('notify-hook auto-nudge', () => {
       const result = runNotifyHook(cwd, fakeBinDir, geminiHome, {
         'last-assistant-message': 'I analyzed the code. If you want me to make these changes, let me know.',
       }, {
-        OMX_TEST_UNMANAGED_SESSION: '1',
+        OMG_TEST_UNMANAGED_SESSION: '1',
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -432,7 +432,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -455,8 +455,8 @@ describe('notify-hook auto-nudge', () => {
         'session-id': 'sess-other',
         'last-assistant-message': 'I analyzed the code. If you want me to make these changes, let me know.',
       }, {
-        OMX_SESSION_ID: 'sess-managed',
-        OMX_TEST_TMUX_SESSION_NAME: managedSessionName,
+        OMG_SESSION_ID: 'sess-managed',
+        OMG_TEST_TMUX_SESSION_NAME: managedSessionName,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -470,7 +470,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const expectedManagedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -494,8 +494,8 @@ describe('notify-hook auto-nudge', () => {
         'session-id': 'sess-managed',
         'last-assistant-message': 'I analyzed the code. If you want me to make these changes, let me know.',
       }, {
-        OMX_SESSION_ID: 'sess-managed',
-        OMX_TEST_TMUX_SESSION_NAME: mismatchedDetachedSessionName,
+        OMG_SESSION_ID: 'sess-managed',
+        OMG_TEST_TMUX_SESSION_NAME: mismatchedDetachedSessionName,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -514,7 +514,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const captureFile = join(cwd, 'capture-output.txt');
@@ -538,7 +538,7 @@ describe('notify-hook auto-nudge', () => {
       const result = runNotifyHook(cwd, fakeBinDir, geminiHome, {
         'last-assistant-message': 'clean output with no stall',
       }, {
-        OMX_TEST_CAPTURE_FILE: captureFile,
+        OMG_TEST_CAPTURE_FILE: captureFile,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -553,7 +553,7 @@ describe('notify-hook auto-nudge', () => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const captureFile = join(cwd, 'capture-output.txt');
@@ -583,7 +583,7 @@ describe('notify-hook auto-nudge', () => {
       const result = runNotifyHook(cwd, fakeBinDir, geminiHome, {
         'last-assistant-message': 'clean output with no stall',
       }, {
-        OMX_TEST_CAPTURE_FILE: captureFile,
+        OMG_TEST_CAPTURE_FILE: captureFile,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -593,12 +593,12 @@ describe('notify-hook auto-nudge', () => {
     });
   });
 
-  it('auto-nudges from active mode state by upgrading an anchored shell pane to the sibling codex pane', async () => {
+  it('auto-nudges from active mode state by upgrading an anchored shell pane to the sibling gemini pane', async () => {
     await withTempWorkingDir(async (cwd) => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -642,7 +642,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_start_command}" && "$target" == "%100" ]]; then
-    echo "codex --model gpt-5"
+    echo "gemini --model gpt-5"
     exit 0
   fi
   if [[ "$format" == "#{pane_in_mode}" && "$target" == "%100" ]]; then
@@ -664,7 +664,7 @@ if [[ "$cmd" == "list-panes" ]]; then
     esac
   done
   if [[ "$target" == "${managedSessionName}" ]]; then
-    printf "%%99\tsh\tbash\n%%100\tnode\tcodex --model gpt-5\n"
+    printf "%%99\tsh\tbash\n%%100\tnode\tgemini --model gpt-5\n"
     exit 0
   fi
   echo "%1 12345"
@@ -690,7 +690,7 @@ exit 0
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      assert.match(tmuxLog, defaultAutoNudgePattern('%100'), 'should upgrade anchored shell pane to sibling codex pane');
+      assert.match(tmuxLog, defaultAutoNudgePattern('%100'), 'should upgrade anchored shell pane to sibling gemini pane');
     });
   });
 
@@ -698,7 +698,7 @@ exit 0
     await withTempWorkingDir(async (cwd) => {
       const workerStateRoot = join(cwd, 'leader-state-root');
       const logsDir = join(cwd, '.omg', 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -718,8 +718,8 @@ exit 0
       const result = runNotifyHook(cwd, fakeBinDir, geminiHome, {
         'last-assistant-message': 'I can continue with the worker follow-up from here.',
       }, {
-        OMX_TEAM_WORKER: 'auto-nudge/worker-1',
-        OMX_TEAM_STATE_ROOT: workerStateRoot,
+        OMG_TEAM_WORKER: 'auto-nudge/worker-1',
+        OMG_TEAM_STATE_ROOT: workerStateRoot,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -736,7 +736,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -772,7 +772,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -834,12 +834,12 @@ exit 0
     });
   });
 
-  it('falls back to the sibling codex pane when TMUX_PANE is a managed non-agent shell pane', async () => {
+  it('falls back to the sibling gemini pane when TMUX_PANE is a managed non-agent shell pane', async () => {
     await withTempWorkingDir(async (cwd) => {
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -910,7 +910,7 @@ if [[ "$cmd" == "list-panes" ]]; then
     esac
   done
   if [[ "$target" == "${managedSessionName}" ]]; then
-    printf "%%99\t1\tsh\\n%%100\t0\tcodex --model gpt-5\\n"
+    printf "%%99\t1\tsh\\n%%100\t0\tgemini --model gpt-5\\n"
     exit 0
   fi
   echo "%1 12345"
@@ -938,7 +938,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const managedSessionName = buildTmuxSessionName(cwd, 'sess-managed');
@@ -971,7 +971,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const captureFile = join(cwd, 'capture-output.txt');
@@ -1000,7 +1000,7 @@ exit 0
       const result = runNotifyHook(cwd, fakeBinDir, geminiHome, {
         'last-assistant-message': 'Would you like me to continue with the next step?',
       }, {
-        OMX_TEST_CAPTURE_FILE: captureFile,
+        OMG_TEST_CAPTURE_FILE: captureFile,
       });
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
@@ -1016,7 +1016,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1050,7 +1050,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1096,7 +1096,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1157,7 +1157,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const lastTurnAt = '2026-03-01T00:00:00.000Z';
@@ -1216,7 +1216,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
       const lastMessage = 'Keep going and finish the cleanup from here.';
@@ -1266,7 +1266,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1288,7 +1288,7 @@ exit 0
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      assert.match(tmuxLog, /send-keys -t %99 -l continue now \[OMX_TMUX_INJECT\]/, 'should use custom response with marker');
+      assert.match(tmuxLog, /send-keys -t %99 -l continue now \[OMG_TMUX_INJECT\]/, 'should use custom response with marker');
     });
   });
 
@@ -1297,7 +1297,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1334,7 +1334,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
 
       await mkdir(logsDir, { recursive: true });
@@ -1374,7 +1374,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1411,7 +1411,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1462,7 +1462,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
 
       await mkdir(logsDir, { recursive: true });
@@ -1511,7 +1511,7 @@ exit 0
         const omgDir = join(cwd, '.omg');
         const stateDir = join(omgDir, 'state');
         const logsDir = join(omgDir, 'logs');
-        const geminiHome = join(cwd, 'codex-home');
+        const geminiHome = join(cwd, 'gemini-home');
         const fakeBinDir = join(cwd, 'fake-bin');
         const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1550,8 +1550,8 @@ exit 0
         assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
         const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-        assert.doesNotMatch(tmuxLog, /Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMX_TMUX_INJECT\]/);
-        assert.equal(tmuxLog.includes(`send-keys -t %99 -l ${blockedResponse} [OMX_TMUX_INJECT]`), false);
+        assert.doesNotMatch(tmuxLog, /Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMG_TMUX_INJECT\]/);
+        assert.equal(tmuxLog.includes(`send-keys -t %99 -l ${blockedResponse} [OMG_TMUX_INJECT]`), false);
       });
     });
   }
@@ -1561,7 +1561,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1600,7 +1600,7 @@ exit 0
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      assert.doesNotMatch(tmuxLog, /send-keys -t %99 -l Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMX_TMUX_INJECT\]/);
+      assert.doesNotMatch(tmuxLog, /send-keys -t %99 -l Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMG_TMUX_INJECT\]/);
     });
   });
 
@@ -1609,7 +1609,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1648,8 +1648,8 @@ exit 0
       assert.equal(result.status, 0, `hook failed: ${result.stderr || result.stdout}`);
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      assert.doesNotMatch(tmuxLog, /Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMX_TMUX_INJECT\]/);
-      assert.equal(tmuxLog.includes(`send-keys -t %99 -l ${NEXT_I_SHOULD_RESPONSE} [OMX_TMUX_INJECT]`), false);
+      assert.doesNotMatch(tmuxLog, /Deep interview is active; auto-approval shortcuts are blocked until the interview finishes\. \[OMG_TMUX_INJECT\]/);
+      assert.equal(tmuxLog.includes(`send-keys -t %99 -l ${NEXT_I_SHOULD_RESPONSE} [OMG_TMUX_INJECT]`), false);
     });
   });
 
@@ -1658,7 +1658,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
 
       await mkdir(logsDir, { recursive: true });
@@ -1715,7 +1715,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
 
       await mkdir(logsDir, { recursive: true });
@@ -1772,7 +1772,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
 
       await mkdir(logsDir, { recursive: true });
@@ -1832,7 +1832,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1886,7 +1886,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 
@@ -1919,7 +1919,7 @@ exit 0
       const omgDir = join(cwd, '.omg');
       const stateDir = join(omgDir, 'state');
       const logsDir = join(omgDir, 'logs');
-      const geminiHome = join(cwd, 'codex-home');
+      const geminiHome = join(cwd, 'gemini-home');
       const fakeBinDir = join(cwd, 'fake-bin');
       const tmuxLogPath = join(cwd, 'tmux.log');
 

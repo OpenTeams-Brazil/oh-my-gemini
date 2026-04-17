@@ -11,8 +11,8 @@ import {
   getStandardDefaultModel,
 } from '../config/models.js';
 
-export const OMX_MODELS_START_MARKER = '<!-- OMX:MODELS:START -->';
-export const OMX_MODELS_END_MARKER = '<!-- OMX:MODELS:END -->';
+export const OMG_MODELS_START_MARKER = '<!-- OMX:MODELS:START -->';
+export const OMG_MODELS_END_MARKER = '<!-- OMX:MODELS:END -->';
 
 const TEAM_MODEL_RESOLUTION_END = '</team_model_resolution>';
 
@@ -139,9 +139,9 @@ export function renderAgentsModelTableBlock(
   definitions: Record<string, AgentDefinition> = AGENT_DEFINITIONS,
 ): string {
   return [
-    OMX_MODELS_START_MARKER,
+    OMG_MODELS_START_MARKER,
     buildAgentsModelTable(context, definitions),
-    OMX_MODELS_END_MARKER,
+    OMG_MODELS_END_MARKER,
   ].join('\n');
 }
 
@@ -151,11 +151,11 @@ export function upsertAgentsModelTable(
   definitions: Record<string, AgentDefinition> = AGENT_DEFINITIONS,
 ): string {
   const block = renderAgentsModelTableBlock(context, definitions);
-  const startIndex = content.indexOf(OMX_MODELS_START_MARKER);
-  const endIndex = content.indexOf(OMX_MODELS_END_MARKER);
+  const startIndex = content.indexOf(OMG_MODELS_START_MARKER);
+  const endIndex = content.indexOf(OMG_MODELS_END_MARKER);
 
   if (startIndex >= 0 && endIndex > startIndex) {
-    const replaceEnd = endIndex + OMX_MODELS_END_MARKER.length;
+    const replaceEnd = endIndex + OMG_MODELS_END_MARKER.length;
     return `${content.slice(0, startIndex)}${block}${content.slice(replaceEnd)}`;
   }
 

@@ -9,9 +9,9 @@ import { initTeamState, readTeamLeaderAttention, readTeamManifestV2, writeTeamLe
 
 describe('dispatchHookEventRuntime', () => {
   it('dispatches native events even when plugins env var is not set', async () => {
-    const originalEnv = process.env.OMX_HOOK_PLUGINS;
+    const originalEnv = process.env.OMG_HOOK_PLUGINS;
     try {
-      delete process.env.OMX_HOOK_PLUGINS;
+      delete process.env.OMG_HOOK_PLUGINS;
 
       const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
       try {
@@ -27,17 +27,17 @@ describe('dispatchHookEventRuntime', () => {
       }
     } finally {
       if (originalEnv !== undefined) {
-        process.env.OMX_HOOK_PLUGINS = originalEnv;
+        process.env.OMG_HOOK_PLUGINS = originalEnv;
       } else {
-        delete process.env.OMX_HOOK_PLUGINS;
+        delete process.env.OMG_HOOK_PLUGINS;
       }
     }
   });
 
   it('dispatches when plugins are enabled', async () => {
-    const originalEnv = process.env.OMX_HOOK_PLUGINS;
+    const originalEnv = process.env.OMG_HOOK_PLUGINS;
     try {
-      process.env.OMX_HOOK_PLUGINS = '1';
+      process.env.OMG_HOOK_PLUGINS = '1';
 
       const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
       try {
@@ -60,17 +60,17 @@ describe('dispatchHookEventRuntime', () => {
       }
     } finally {
       if (originalEnv !== undefined) {
-        process.env.OMX_HOOK_PLUGINS = originalEnv;
+        process.env.OMG_HOOK_PLUGINS = originalEnv;
       } else {
-        delete process.env.OMX_HOOK_PLUGINS;
+        delete process.env.OMG_HOOK_PLUGINS;
       }
     }
   });
 
   it('passes allowTeamWorkerSideEffects through to dispatcher', async () => {
-    const originalEnv = process.env.OMX_HOOK_PLUGINS;
+    const originalEnv = process.env.OMG_HOOK_PLUGINS;
     try {
-      process.env.OMX_HOOK_PLUGINS = '1';
+      process.env.OMG_HOOK_PLUGINS = '1';
 
       const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
       try {
@@ -88,17 +88,17 @@ describe('dispatchHookEventRuntime', () => {
       }
     } finally {
       if (originalEnv !== undefined) {
-        process.env.OMX_HOOK_PLUGINS = originalEnv;
+        process.env.OMG_HOOK_PLUGINS = originalEnv;
       } else {
-        delete process.env.OMX_HOOK_PLUGINS;
+        delete process.env.OMG_HOOK_PLUGINS;
       }
     }
   });
 
   it('returns event name and source in result', async () => {
-    const originalEnv = process.env.OMX_HOOK_PLUGINS;
+    const originalEnv = process.env.OMG_HOOK_PLUGINS;
     try {
-      delete process.env.OMX_HOOK_PLUGINS;
+      delete process.env.OMG_HOOK_PLUGINS;
 
       const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
       try {
@@ -113,9 +113,9 @@ describe('dispatchHookEventRuntime', () => {
       }
     } finally {
       if (originalEnv !== undefined) {
-        process.env.OMX_HOOK_PLUGINS = originalEnv;
+        process.env.OMG_HOOK_PLUGINS = originalEnv;
       } else {
-        delete process.env.OMX_HOOK_PLUGINS;
+        delete process.env.OMG_HOOK_PLUGINS;
       }
     }
   });
@@ -188,7 +188,7 @@ describe('dispatchHookEventRuntime', () => {
         source: 'native',
         session_id: 'omg-canonical-session',
         context: {
-          native_session_id: 'codex-native-session',
+          native_session_id: 'gemini-native-session',
         },
       });
       const result = await dispatchHookEventRuntime({ cwd, event });

@@ -337,7 +337,7 @@ Patch release for deeper deep-interview / ralplan coordination, setup repair, an
 
 ### Added
 - **Live ralplan state visibility** — consensus planning now exposes observable runtime state so the pipeline, HUD, and attached guidance can reflect active ralplan progress more faithfully. (PR [#1060](https://github.com/Yeachan-Heo/oh-my-gemini/pull/1060))
-- **Analyze skill trace refresh** — the shipped analyze skill now follows the OmC trace methodology with restored execution-policy contract wording, improving investigation guidance. (direct commits `fa01cb5`, `c0a0e1a`)
+- **Analyze skill trace refresh** — the shipped analyze skill now follows the OMG trace methodology with restored execution-policy contract wording, improving investigation guidance. (direct commits `fa01cb5`, `c0a0e1a`)
 
 ### Fixed
 - **Deep-interview lock suppresses tmux-pane nudges** — active deep-interview lock state now blocks fallback tmux-pane nudges, and planning handoff applies stronger deep-interview pressure before execution can proceed. (PRs [#1062](https://github.com/Yeachan-Heo/oh-my-gemini/pull/1062), [#1058](https://github.com/Yeachan-Heo/oh-my-gemini/pull/1058))
@@ -394,7 +394,7 @@ Patch release for degraded-state auto-nudge recovery, tighter team control-plane
 ### Verified
 - **Commit-window review** — parallel module review across `main...dev` found `3` main-only merge commits (`#995`, `#997`, `#1000`) but no main-only patch content after cherry-pick elimination, so the shipped release delta is entirely on the `dev` side.
 - **Targeted hook + watcher regression suite** — `notify-fallback-watcher` and `notify-hook auto-nudge` pass with the degraded-state coverage (`49/49` passing).
-- **Real tmux smoke for degraded auto-nudge** — a live Gemini pane received `yes, proceed [OMX_TMUX_INJECT]` from the fallback watcher after a 5s stalled-turn window with only HUD state available.
+- **Real tmux smoke for degraded auto-nudge** — a live Gemini pane received `yes, proceed [OMG_TMUX_INJECT]` from the fallback watcher after a 5s stalled-turn window with only HUD state available.
 - **Real tmux smoke for Ralph anti-spam** — two back-to-back fallback watcher ticks did not emit repeated `Ralph loop active continue` sends; the persisted state stayed in cooldown (`startup_cooldown`).
 
 ## [0.11.6] - 2026-03-21
@@ -432,7 +432,7 @@ Hotfix release for team worker delivery regressions.
 - **OMX SDK architecture enhancements** — improved SDK facade contracts and verification patterns for external integrations. (PR [#985](https://github.com/Yeachan-Heo/oh-my-gemini/pull/985))
 
 ### Fixed
-- **Deep-interview state mode compatibility** — deep-interview workflow now correctly uses OMX state APIs instead of legacy OMC state paths. (PR [#987](https://github.com/Yeachan-Heo/oh-my-gemini/pull/987), closes [#1783](https://github.com/Yeachan-Heo/oh-my-gemini/issues/1783))
+- **Deep-interview state mode compatibility** — deep-interview workflow now correctly uses OMX state APIs instead of legacy OMG state paths. (PR [#987](https://github.com/Yeachan-Heo/oh-my-gemini/pull/987), closes [#1783](https://github.com/Yeachan-Heo/oh-my-gemini/issues/1783))
 - **Real tmux test isolation** — tmux/session tests are now isolated from live maintainer sessions to prevent interference. (PR [#980](https://github.com/Yeachan-Heo/oh-my-gemini/pull/980), closes [#960](https://github.com/Yeachan-Heo/oh-my-gemini/issues/960))
 - **npm pack dry-run race condition** — prevented parallel test runs from rebuilding dist during npm pack dry-runs. (PR [#986](https://github.com/Yeachan-Heo/oh-my-gemini/pull/986))
 - **Ambient tmux bootstrap restoration** — restored ambient tmux bootstrap for state tools with aligned fake tmux fixtures. (hotfix commits)
@@ -491,7 +491,7 @@ Version bump for release.
 3 PRs landed after the `0.10.1` release tag and before this `0.10.2` release-prep commit: all 3 are targeted fixes. The `0.10.1` tag landed at `2026-03-16 06:57 UTC`; the last shipped merge (`#878`) landed at `2026-03-16 08:43 UTC`, for a turnaround of about 1 hour 46 minutes before release prep closed the patch.
 
 ### Fixed
-- **Autoresearch codex args normalized for sandbox bypass** — ensures `--dangerously-bypass-approvals-and-sandbox` flag is correctly normalized when composing codex launch arguments, preventing double-flag or missing-flag edge cases. (PR [#875](https://github.com/Yeachan-Heo/oh-my-gemini/pull/875))
+- **Autoresearch gemini args normalized for sandbox bypass** — ensures `--dangerously-bypass-approvals-and-sandbox` flag is correctly normalized when composing gemini launch arguments, preventing double-flag or missing-flag edge cases. (PR [#875](https://github.com/Yeachan-Heo/oh-my-gemini/pull/875))
 - **Duplicate `[tui]` config sections auto-repaired before Gemini CLI launch** — detects and merges duplicate `[tui]` sections in `config.toml` before invoking Gemini, preventing TOML parse failures. (PR [#876](https://github.com/Yeachan-Heo/oh-my-gemini/pull/876))
 - **tmux launch policy on darwin** — uses the correct tmux launch policy on macOS to prevent session startup failures when tmux server is not yet running. (PR [#878](https://github.com/Yeachan-Heo/oh-my-gemini/pull/878))
 
@@ -535,7 +535,7 @@ Version bump for release.
 - **Team worktree continuous integration** — hybrid merge strategy with auto-commit and cross-worker rebase for reliable worktree synchronization. (PR [#852](https://github.com/Yeachan-Heo/oh-my-gemini/pull/852))
 - **Setup skill validation** — skills are now validated before install to prevent broken skill directories. (PR [#845](https://github.com/Yeachan-Heo/oh-my-gemini/pull/845), issue [#844](https://github.com/Yeachan-Heo/oh-my-gemini/issues/844))
 - **Ralph auto-expand iterations** — active Ralph sessions now auto-expand `max_iterations` instead of halting prematurely. (PR [#843](https://github.com/Yeachan-Heo/oh-my-gemini/pull/843), issue [#842](https://github.com/Yeachan-Heo/oh-my-gemini/issues/842))
-- **Setup defaults to CODEX_HOME** — user skills path now correctly defaults to `CODEX_HOME`. (PR [#839](https://github.com/Yeachan-Heo/oh-my-gemini/pull/839))
+- **Setup defaults to GEMINI_HOME** — user skills path now correctly defaults to `GEMINI_HOME`. (PR [#839](https://github.com/Yeachan-Heo/oh-my-gemini/pull/839))
 - **Post-ralplan team context preserved** — team follow-up context no longer lost after ralplan completes. (PR [#833](https://github.com/Yeachan-Heo/oh-my-gemini/pull/833))
 - **Pipeline planning artifact checks unified** — planning-complete artifact detection now uses a single consistent check. (PR [#828](https://github.com/Yeachan-Heo/oh-my-gemini/pull/828), issue [#827](https://github.com/Yeachan-Heo/oh-my-gemini/issues/827))
 - **Config.toml merge fix** — existing notify and tui entries are now preserved during config merge. (PR [#826](https://github.com/Yeachan-Heo/oh-my-gemini/pull/826), issue [#825](https://github.com/Yeachan-Heo/oh-my-gemini/issues/825))
@@ -583,7 +583,7 @@ Version bump for release.
 19 non-merge commits from `main..dev`. Contributors: [@Yeachan-Heo](https://github.com/Yeachan-Heo), [@HaD0Yun](https://github.com/HaD0Yun), [@gobylor](https://github.com/gobylor).
 
 ### Added
-- **Top-level `omg resume` command** — added `omg resume` passthrough so OMX mirrors `codex resume`, with CLI/help/docs coverage. (PR [#752](https://github.com/Yeachan-Heo/oh-my-gemini/pull/752) — @gobylor)
+- **Top-level `omg resume` command** — added `omg resume` passthrough so OMX mirrors `gemini resume`, with CLI/help/docs coverage. (PR [#752](https://github.com/Yeachan-Heo/oh-my-gemini/pull/752) — @gobylor)
 - **Team allocation and conservative rebalance policy seams** — team startup assignment is now lane-aware, and runtime monitoring can safely reassign reclaimed pending work to eligible idle workers without rewriting the claim model. (PR [#761](https://github.com/Yeachan-Heo/oh-my-gemini/pull/761) — @HaD0Yun)
 
 ### Changed
@@ -627,7 +627,7 @@ Generated from the latest merged `dev` runtime/model-default work and validated 
 
 ### Added
 - **Additive team event-query APIs** — `omg team api` now exposes dedicated event-query operations so team runtime signals can be consumed more structurally. (PR [#714](https://github.com/Yeachan-Heo/oh-my-gemini/pull/714))
-- **Explicit model-default contract** — runtime/docs/tests now align around the intended main/spark default model behavior (`gpt-5.4` / `gpt-5.3-codex-spark`). (PR [#718](https://github.com/Yeachan-Heo/oh-my-gemini/pull/718))
+- **Explicit model-default contract** — runtime/docs/tests now align around the intended main/spark default model behavior (`gpt-5.4` / `gpt-5.3-gemini-spark`). (PR [#718](https://github.com/Yeachan-Heo/oh-my-gemini/pull/718))
 
 ### Changed
 - **Team prompt decomposition is less brittle for prose prompts** — natural-language task prompts are no longer fragmented into pathological subtasks as easily. (PR [#712](https://github.com/Yeachan-Heo/oh-my-gemini/pull/712))
@@ -643,7 +643,7 @@ Generated from the latest merged `dev` runtime/model-default work and validated 
 5 non-merge commits from `v0.8.9..dev`. Contributors: [@Yeachan-Heo](https://github.com/Yeachan-Heo), [@HaD0Yun](https://github.com/HaD0Yun).
 
 ### Added
-- **Release-critical regression coverage and test-environment isolation** — expanded CLI auto-update regression coverage across success, decline, failure, and already-up-to-date paths, and hardened CLI/OpenClaw integration suites against ambient `CODEX_HOME` leakage so release validation stays deterministic. (direct commit `aedd068` — @Yeachan-Heo)
+- **Release-critical regression coverage and test-environment isolation** — expanded CLI auto-update regression coverage across success, decline, failure, and already-up-to-date paths, and hardened CLI/OpenClaw integration suites against ambient `GEMINI_HOME` leakage so release validation stays deterministic. (direct commit `aedd068` — @Yeachan-Heo)
 
 ### Changed
 - **Root prompt contracts now bias more explicitly toward direct execution and evidence-backed verification** — tightened the top-level `GEMINI.md` / template contracts and simplified core prompt surfaces while preserving workflow, team, and verification guarantees. (PR [#646](https://github.com/Yeachan-Heo/oh-my-gemini/pull/646) — @HaD0Yun)
@@ -722,7 +722,7 @@ Generated from the latest merged `dev` runtime/model-default work and validated 
 ### Fixed
 - **Windows ESM import crash** — `bin/omg.js` now converts absolute paths to `file://` URLs before `import()`, fixing `ERR_UNSUPPORTED_ESM_URL_SCHEME` on Windows. (PR [#589](https://github.com/Yeachan-Heo/oh-my-gemini/pull/589) — @sjals93, fixes [#557](https://github.com/Yeachan-Heo/oh-my-gemini/issues/557))
 - **tmux capture-pane history flag** — replaced invalid `-l` flag with the correct `-S` negative-offset form so `capture-pane` actually returns recent output. (PR [#593](https://github.com/Yeachan-Heo/oh-my-gemini/pull/593), fixes [#591](https://github.com/Yeachan-Heo/oh-my-gemini/issues/591))
-- **Legacy model alias cleanup** — removed stale `gpt-5.3-codex` / `o3` references from 15 prompt files and runtime agent metadata generation, preventing confusion when posture routing is active. (part of PR [#592](https://github.com/Yeachan-Heo/oh-my-gemini/pull/592))
+- **Legacy model alias cleanup** — removed stale `gpt-5.3-gemini` / `o3` references from 15 prompt files and runtime agent metadata generation, preventing confusion when posture routing is active. (part of PR [#592](https://github.com/Yeachan-Heo/oh-my-gemini/pull/592))
 
 ## [0.8.4] - 2026-03-06
 
@@ -736,7 +736,7 @@ Generated from `v0.8.3..dev` (non-merge commits) and release validation on `dev`
 - Setup refresh coverage for managed artifact replacement, scope-aware updates, and uninstall compatibility paths.
 
 ### Fixed
-- Setup now prompts before upgrading managed Gemini model references from `gpt-5.3-codex` to `gpt-5.4`, reducing surprise config churn during refreshes.
+- Setup now prompts before upgrading managed Gemini model references from `gpt-5.3-gemini` to `gpt-5.4`, reducing surprise config churn during refreshes.
 - Config generation and setup refresh flows are more idempotent and resilient across repeated runs and scoped installs.
 
 ### Docs
@@ -887,7 +887,7 @@ Generated strictly from commit logs in `main..dev`:
 - `d33ecfc` fix(team): remove unused symbols flagged in PR review
 - `f0cc833` fix(tmux): restore injection when scoped mode state is missing
 - `baeb8e7` fix(skills): restore visual-verdict contract and ralph visual-loop guidance
-- `e0c5974` fix(skills): normalize forked OMC references to OMX canonical paths
+- `e0c5974` fix(skills): normalize forked OMG references to OMX canonical paths
 
 ### Reverts
 - `ee72e1f` Revert "fix(team): switch dedicated tmux session to opt-in with worker location hint (#432)"
@@ -919,7 +919,7 @@ Generated strictly from commit logs in `main..dev`:
 - `2026-03-02` `baeb8e7` fix(skills): restore visual-verdict contract and ralph visual-loop guidance
 - `2026-03-02` `a5f2b77` Revert "fix(skills): restore visual-verdict contract and ralph visual-loop guidance"
 - `2026-03-02` `6c1c4eb` docs(changelog): update unreleased notes for main...dev
-- `2026-03-02` `e0c5974` fix(skills): normalize forked OMC references to OMX canonical paths
+- `2026-03-02` `e0c5974` fix(skills): normalize forked OMG references to OMX canonical paths
 
 ## [0.7.3] - 2026-02-28
 
@@ -979,7 +979,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 - Dynamic team worker scaling — Phase 1 manual `scale_up` / `scale_down` mid-session (#363).
 - Per-worker idle notification forwarded to leader pane (#335).
 - Prompt-mode worker launch transport for interactive team workflows (#264).
-- Worker model defaults resolved from config with `OMX_TEAM_WORKER_CLI_MAP` (#263).
+- Worker model defaults resolved from config with `OMG_TEAM_WORKER_CLI_MAP` (#263).
 - Worker hard cap raised to 20 (#343).
 - Team shutdown gated on unresolved tasks to prevent premature teardown (#320, #322).
 - MSYS2 / Git Bash tmux worker support (#266).
@@ -992,7 +992,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 - Keyword trigger registry (`keyword-registry.ts`) as canonical single source of truth for all 31 keyword triggers.
 
 #### Notifications
-- Full notification engine overhaul from OMC 4.5.x (#373): template engine, idle cooldown, hook-config types, session registry.
+- Full notification engine overhaul from OMG 4.5.x (#373): template engine, idle cooldown, hook-config types, session registry.
 - Slack / Discord / Telegram env-var configuration via `buildConfigFromEnv()`.
 - Reply listener per-channel gating and credential isolation for disabled channels.
 - Skill-active lifecycle tracking in notify hook for auto-continuation (#262).
@@ -1106,12 +1106,12 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 - Added a new "What's New in 0.6.0" section to the docs site homepage with highlights for mixed Gemini/Claude teammates and reliability updates.
 
 ### Changed
-- Clarified `skills/team/SKILL.md` docs that `N:agent-type` selects worker role prompts (not CLI choice), and documented `OMX_TEAM_WORKER_CLI` / `OMX_TEAM_WORKER_CLI_MAP` usage for launching Claude teammates.
+- Clarified `skills/team/SKILL.md` docs that `N:agent-type` selects worker role prompts (not CLI choice), and documented `OMG_TEAM_WORKER_CLI` / `OMG_TEAM_WORKER_CLI_MAP` usage for launching Claude teammates.
 
 ## [0.6.0] - 2026-02-23
 
 ### Added
-- Mixed team worker CLI routing via `OMX_TEAM_WORKER_CLI_MAP` so a single `$team` run can launch Gemini and Claude workers together (e.g. `codex,codex,claude,claude`).
+- Mixed team worker CLI routing via `OMG_TEAM_WORKER_CLI_MAP` so a single `$team` run can launch Gemini and Claude workers together (e.g. `gemini,gemini,claude,claude`).
 - Leader-side all-workers-idle nudge fallback for Claude teams, so leader notifications still fire even when worker-side Gemini hooks are unavailable.
 - Adaptive trigger submit retry guard helper and tests to reduce false-positive resend escalation.
 
@@ -1121,8 +1121,8 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 
 ### Fixed
 - Pre-assigned worker tasks can now be claimed by their assigned owner in `pending` state, unblocking Gemini worker bootstrap claim flow.
-- `OMX_TEAM_WORKER_CLI_MAP` parsing now rejects empty entries and reports map-specific validation errors.
-- `OMX_TEAM_WORKER_CLI_MAP=auto` now resolves from launch args/model detection and no longer inherits `OMX_TEAM_WORKER_CLI` overrides unexpectedly.
+- `OMG_TEAM_WORKER_CLI_MAP` parsing now rejects empty entries and reports map-specific validation errors.
+- `OMG_TEAM_WORKER_CLI_MAP=auto` now resolves from launch args/model detection and no longer inherits `OMG_TEAM_WORKER_CLI` overrides unexpectedly.
 - Team leader nudge targeting now prioritizes `leader_pane_id`, improving reliability with mixed/Claude worker setups.
 
 ## [0.5.1] - 2026-02-23
@@ -1185,7 +1185,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 ### Added
 - Consolidated the prompt/skill catalog and hardened team runtime contracts after the mainline merge (PR #137).
 - Added setup scope-aware install modes (`user`, `project`) with persisted scope behavior.
-- Added spark worker routing via `--spark` / `--madmax-spark` so team workers can use `gpt-5.3-codex-spark` without forcing the leader model.
+- Added spark worker routing via `--spark` / `--madmax-spark` so team workers can use `gpt-5.3-gemini-spark` without forcing the leader model.
 - Added notifier verbosity levels for CCNotifier output control.
 
 ### Changed
@@ -1216,7 +1216,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 ### Added
 - Added broader auto-nudge stall detection patterns (for example: "next I can", "say go", and "keep driving") with a focused last-lines hot zone.
 - Added worker-idle aggregation notifications so team leaders are alerted when all workers are idle/done (with cooldown and event logging).
-- Added automatic tmux mouse scrolling for team sessions (opt-out via `OMX_TEAM_MOUSE=0`).
+- Added automatic tmux mouse scrolling for team sessions (opt-out via `OMG_TEAM_MOUSE=0`).
 
 ### Fixed
 - Fixed worker message submission reliability by adding settle/delay timing before and during submit key rounds.
@@ -1244,7 +1244,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 - Updated team skill docs to describe team-scoped `worker-agents.md` composition (no project `GEMINI.md` mutation).
 
 ### Fixed
-- Preserved and restored pre-existing `OMX_MODEL_INSTRUCTIONS_FILE` values during team start rollback/shutdown to avoid clobbering leader config.
+- Preserved and restored pre-existing `OMG_MODEL_INSTRUCTIONS_FILE` values during team start rollback/shutdown to avoid clobbering leader config.
 
 ## [0.3.8] - 2026-02-15
 
@@ -1259,7 +1259,7 @@ Hotfix: team shutdown `--force` flag was not being parsed from CLI arguments.
 - Added broader hook and worker bootstrap test coverage for session-scoped behavior.
 
 ### Changed
-- Defaulted low-complexity team workers to `gpt-5.3-codex-spark`.
+- Defaulted low-complexity team workers to `gpt-5.3-gemini-spark`.
 - Improved `omg` CLI behavior for session-scoped `model_instructions_file` handling.
 - Hardened worker bootstrap/orchestrator guidance flow and executor prompt migration.
 - Improved HUD pane dedupe and `--help` launch behavior in tmux workflows.

@@ -8,20 +8,20 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 pub const DEFAULT_SUMMARY_TIMEOUT_MS: u64 = 60_000;
-pub const DEFAULT_SPARK_MODEL: &str = "gpt-5.3-codex-spark";
+pub const DEFAULT_SPARK_MODEL: &str = "gpt-5.3-gemini-spark";
 pub const DEFAULT_FRONTIER_MODEL: &str = "gpt-5.4";
 
 pub fn resolve_model() -> String {
-    env::var("OMX_SPARKSHELL_MODEL")
+    env::var("OMG_SPARKSHELL_MODEL")
         .ok()
         .filter(|value| !value.trim().is_empty())
         .or_else(|| {
-            env::var("OMX_DEFAULT_SPARK_MODEL")
+            env::var("OMG_DEFAULT_SPARK_MODEL")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
         })
         .or_else(|| {
-            env::var("OMX_SPARK_MODEL")
+            env::var("OMG_SPARK_MODEL")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
         })
@@ -29,11 +29,11 @@ pub fn resolve_model() -> String {
 }
 
 pub fn resolve_fallback_model() -> String {
-    env::var("OMX_SPARKSHELL_FALLBACK_MODEL")
+    env::var("OMG_SPARKSHELL_FALLBACK_MODEL")
         .ok()
         .filter(|value| !value.trim().is_empty())
         .or_else(|| {
-            env::var("OMX_DEFAULT_FRONTIER_MODEL")
+            env::var("OMG_DEFAULT_FRONTIER_MODEL")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
         })
@@ -41,7 +41,7 @@ pub fn resolve_fallback_model() -> String {
 }
 
 pub fn read_summary_timeout_ms() -> u64 {
-    env::var("OMX_SPARKSHELL_SUMMARY_TIMEOUT_MS")
+    env::var("OMG_SPARKSHELL_SUMMARY_TIMEOUT_MS")
         .ok()
         .and_then(|value| value.trim().parse::<u64>().ok())
         .filter(|value| *value > 0)
@@ -56,42 +56,42 @@ pub fn summarize_output(
     let model = resolve_model();
     let fallback_model = resolve_fallback_model();
     let timeout_ms = read_summary_timeout_ms();
-    let (stdout, stderr, status_ok) = run_codex_exec(&prompt, &model, timeout_ms)?;
+    let (stdout, stderr, status_ok) = run_gemini_exec(&prompt, &model, timeout_ms)?;
     if !status_ok {
         let should_retry = fallback_model != model && should_retry_with_fallback(&stderr);
         if should_retry {
             let (fallback_stdout, fallback_stderr, fallback_ok) =
-                run_codex_exec(&prompt, &fallback_model, timeout_ms)?;
+                run_gemini_exec(&prompt, &fallback_model, timeout_ms)?;
             if !fallback_ok {
                 let primary_message = if stderr.trim().is_empty() {
-                    "codex exec exited unsuccessfully".to_string()
+                    "gemini exec exited unsuccessfully".to_string()
                 } else {
                     stderr.trim().to_string()
                 };
                 let fallback_message = if fallback_stderr.trim().is_empty() {
-                    "codex exec exited unsuccessfully".to_string()
+                    "gemini exec exited unsuccessfully".to_string()
                 } else {
                     fallback_stderr.trim().to_string()
                 };
                 return Err(SparkshellError::SummaryBridge(format!(
-                    "codex exec failed for primary model `{model}` ({primary_message}) and fallback model `{fallback_model}` ({fallback_message})"
+                    "gemini exec failed for primary model `{model}` ({primary_message}) and fallback model `{fallback_model}` ({fallback_message})"
                 )));
             }
             return normalize_summary(&fallback_stdout).ok_or_else(|| {
                 SparkshellError::SummaryBridge(
-                    "codex exec fallback returned no valid summary sections".to_string(),
+                    "gemini exec fallback returned no valid summary sections".to_string(),
                 )
             });
         }
         let message = if stderr.trim().is_empty() {
-            "codex exec exited unsuccessfully".to_string()
+            "gemini exec exited unsuccessfully".to_string()
         } else {
-            format!("codex exec exited unsuccessfully: {}", stderr.trim())
+            format!("gemini exec exited unsuccessfully: {}", stderr.trim())
         };
         return Err(SparkshellError::SummaryBridge(message));
     }
     normalize_summary(&stdout).ok_or_else(|| {
-        SparkshellError::SummaryBridge("codex exec returned no valid summary sections".to_string())
+        SparkshellError::SummaryBridge("gemini exec returned no valid summary sections".to_string())
     })
 }
 
@@ -112,12 +112,12 @@ fn should_retry_with_fallback(stderr: &str) -> bool {
     .any(|needle| normalized.contains(needle))
 }
 
-fn run_codex_exec(
+fn run_gemini_exec(
     prompt: &str,
     model: &str,
     timeout_ms: u64,
 ) -> Result<(String, String, bool), SparkshellError> {
-    let mut child = Command::new("codex")
+    let mut child = Command::new("gemini")
         .arg("exec")
         .arg("--model")
         .arg(model)
@@ -137,15 +137,15 @@ fn run_codex_exec(
     let mut stdin = child
         .stdin
         .take()
-        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open codex stdin".to_string()))?;
+        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open gemini stdin".to_string()))?;
     let mut stdout = child
         .stdout
         .take()
-        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open codex stdout".to_string()))?;
+        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open gemini stdout".to_string()))?;
     let mut stderr = child
         .stderr
         .take()
-        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open codex stderr".to_string()))?;
+        .ok_or_else(|| SparkshellError::SummaryBridge("failed to open gemini stderr".to_string()))?;
 
     let prompt_owned = prompt.to_string();
     let stdin_writer = thread::spawn(move || stdin.write_all(prompt_owned.as_bytes()));
@@ -179,10 +179,10 @@ fn run_codex_exec(
     let _ = stdin_writer.join();
     let stdout_bytes = stdout_reader
         .join()
-        .map_err(|_| SparkshellError::SummaryBridge("failed reading codex stdout".to_string()))?;
+        .map_err(|_| SparkshellError::SummaryBridge("failed reading gemini stdout".to_string()))?;
     let stderr_bytes = stderr_reader
         .join()
-        .map_err(|_| SparkshellError::SummaryBridge("failed reading codex stderr".to_string()))?;
+        .map_err(|_| SparkshellError::SummaryBridge("failed reading gemini stderr".to_string()))?;
 
     Ok((
         String::from_utf8_lossy(&stdout_bytes).into_owned(),
@@ -281,14 +281,14 @@ mod tests {
     fn model_resolution_prefers_sparkshell_override() {
         let _guard = env_lock();
         unsafe {
-            env::set_var("OMX_SPARKSHELL_MODEL", "spark-a");
-            env::set_var("OMX_DEFAULT_SPARK_MODEL", "spark-b");
+            env::set_var("OMG_SPARKSHELL_MODEL", "spark-a");
+            env::set_var("OMG_DEFAULT_SPARK_MODEL", "spark-b");
         }
         assert_eq!(resolve_model(), "spark-a");
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_MODEL");
-            env::remove_var("OMX_DEFAULT_SPARK_MODEL");
-            env::remove_var("OMX_SPARK_MODEL");
+            env::remove_var("OMG_SPARKSHELL_MODEL");
+            env::remove_var("OMG_DEFAULT_SPARK_MODEL");
+            env::remove_var("OMG_SPARK_MODEL");
         }
     }
 
@@ -296,18 +296,18 @@ mod tests {
     fn fallback_model_resolution_prefers_override_then_default_frontier() {
         let _guard = env_lock();
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_FALLBACK_MODEL");
-            env::remove_var("OMX_DEFAULT_FRONTIER_MODEL");
+            env::remove_var("OMG_SPARKSHELL_FALLBACK_MODEL");
+            env::remove_var("OMG_DEFAULT_FRONTIER_MODEL");
         }
         assert_eq!(resolve_fallback_model(), DEFAULT_FRONTIER_MODEL);
 
         unsafe {
-            env::set_var("OMX_DEFAULT_FRONTIER_MODEL", "frontier-a");
+            env::set_var("OMG_DEFAULT_FRONTIER_MODEL", "frontier-a");
         }
         assert_eq!(resolve_fallback_model(), "frontier-a");
 
         unsafe {
-            env::set_var("OMX_SPARKSHELL_FALLBACK_MODEL", "frontier-b");
+            env::set_var("OMG_SPARKSHELL_FALLBACK_MODEL", "frontier-b");
         }
         assert_eq!(resolve_fallback_model(), "frontier-b");
     }
@@ -316,9 +316,9 @@ mod tests {
     fn model_resolution_falls_back_to_default() {
         let _guard = env_lock();
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_MODEL");
-            env::remove_var("OMX_DEFAULT_SPARK_MODEL");
-            env::remove_var("OMX_SPARK_MODEL");
+            env::remove_var("OMG_SPARKSHELL_MODEL");
+            env::remove_var("OMG_DEFAULT_SPARK_MODEL");
+            env::remove_var("OMG_SPARK_MODEL");
         }
         assert_eq!(resolve_model(), DEFAULT_SPARK_MODEL);
     }
@@ -327,7 +327,7 @@ mod tests {
     fn timeout_defaults_when_unset() {
         let _guard = env_lock();
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_SUMMARY_TIMEOUT_MS");
+            env::remove_var("OMG_SPARKSHELL_SUMMARY_TIMEOUT_MS");
         }
         assert_eq!(read_summary_timeout_ms(), 60_000);
     }
@@ -336,14 +336,14 @@ mod tests {
     fn model_resolution_ignores_blank_override_and_uses_secondary_env() {
         let _guard = env_lock();
         unsafe {
-            env::set_var("OMX_SPARKSHELL_MODEL", "   ");
-            env::set_var("OMX_DEFAULT_SPARK_MODEL", "spark-b");
+            env::set_var("OMG_SPARKSHELL_MODEL", "   ");
+            env::set_var("OMG_DEFAULT_SPARK_MODEL", "spark-b");
         }
         assert_eq!(resolve_model(), "spark-b");
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_MODEL");
-            env::remove_var("OMX_DEFAULT_SPARK_MODEL");
-            env::remove_var("OMX_SPARK_MODEL");
+            env::remove_var("OMG_SPARKSHELL_MODEL");
+            env::remove_var("OMG_DEFAULT_SPARK_MODEL");
+            env::remove_var("OMG_SPARK_MODEL");
         }
     }
 
@@ -351,17 +351,17 @@ mod tests {
     fn timeout_defaults_for_zero_and_invalid_values() {
         let _guard = env_lock();
         unsafe {
-            env::set_var("OMX_SPARKSHELL_SUMMARY_TIMEOUT_MS", "0");
+            env::set_var("OMG_SPARKSHELL_SUMMARY_TIMEOUT_MS", "0");
         }
         assert_eq!(read_summary_timeout_ms(), DEFAULT_SUMMARY_TIMEOUT_MS);
 
         unsafe {
-            env::set_var("OMX_SPARKSHELL_SUMMARY_TIMEOUT_MS", "bogus");
+            env::set_var("OMG_SPARKSHELL_SUMMARY_TIMEOUT_MS", "bogus");
         }
         assert_eq!(read_summary_timeout_ms(), DEFAULT_SUMMARY_TIMEOUT_MS);
 
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_SUMMARY_TIMEOUT_MS");
+            env::remove_var("OMG_SPARKSHELL_SUMMARY_TIMEOUT_MS");
         }
     }
 

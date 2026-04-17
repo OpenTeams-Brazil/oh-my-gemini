@@ -15,9 +15,9 @@ function runOmx(cwd: string, argv: string[]) {
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_AUTO_UPDATE: '0',
-      OMX_NOTIFY_FALLBACK: '0',
-      OMX_HOOK_DERIVED_SIGNALS: '0',
+      OMG_AUTO_UPDATE: '0',
+      OMG_NOTIFY_FALLBACK: '0',
+      OMG_HOOK_DERIVED_SIGNALS: '0',
     },
   });
 }

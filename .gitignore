@@ -1,11 +1,11 @@
 node_modules/
 dist/
 *.tsbuildinfo
-.omc/state/
-.omc/prompts/
-.omc/logs/
-.omc/research/
-.omc/
+.omg/state/
+.omg/prompts/
+.omg/logs/
+.omg/research/
+.omg/
 .omg/
 
 # Local agent/worktree artifacts (never commit)

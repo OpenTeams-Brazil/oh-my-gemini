@@ -4,7 +4,7 @@ import {
   addGeneratedAgentsMarker,
   hasOmxManagedAgentsSections,
   isOmxGeneratedAgentsMd,
-  OMX_GENERATED_AGENTS_MARKER,
+  OMG_GENERATED_AGENTS_MARKER,
 } from '../agents-md.js';
 
 describe('agents-md helpers', () => {
@@ -27,7 +27,7 @@ describe('agents-md helpers', () => {
   });
 
   it('does not duplicate an existing generated marker', () => {
-    const content = `header\n${OMX_GENERATED_AGENTS_MARKER}\nbody\n`;
+    const content = `header\n${OMG_GENERATED_AGENTS_MARKER}\nbody\n`;
     assert.equal(addGeneratedAgentsMarker(content), content);
   });
 
@@ -36,7 +36,7 @@ describe('agents-md helpers', () => {
       '<!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->',
       'directive body',
       '<!-- END AUTONOMY DIRECTIVE -->',
-      OMX_GENERATED_AGENTS_MARKER,
+      OMG_GENERATED_AGENTS_MARKER,
       '# oh-my-gemini - Intelligent Multi-Agent Orchestration',
     ].join('\n');
 

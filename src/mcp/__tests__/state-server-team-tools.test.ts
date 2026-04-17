@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 describe('state-server team_* MCP deprecation', () => {
   it('does not expose team_* tools from ListTools output', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { buildStateServerTools } = await import('../state-server.js');
 
     const tools = buildStateServerTools();
@@ -15,7 +15,7 @@ describe('state-server team_* MCP deprecation', () => {
   });
 
   it('returns hard-deprecation error + CLI hint when team_* tool is called', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const resp = await handleStateToolCall({

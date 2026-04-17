@@ -7,7 +7,7 @@ export const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 export const STATE_MODE_SEGMENT_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const STATE_FILE_SUFFIX = '-state.json';
 const STATE_FILE_NAME_PATTERN = /^[A-Za-z0-9._-]{1,128}$/;
-const WORKDIR_ALLOWLIST_ENV = 'OMX_MCP_WORKDIR_ROOTS';
+const WORKDIR_ALLOWLIST_ENV = 'OMG_MCP_WORKDIR_ROOTS';
 
 export type StateFileScope = 'root' | 'session';
 
@@ -160,9 +160,9 @@ function enforceWorkingDirectoryPolicy(resolvedWorkingDirectory: string): void {
 }
 
 export function getBaseStateDir(workingDirectory?: string): string {
-  if ((workingDirectory == null || workingDirectory === '') && typeof process.env.OMX_TEAM_STATE_ROOT === 'string' && process.env.OMX_TEAM_STATE_ROOT.trim() !== '') {
+  if ((workingDirectory == null || workingDirectory === '') && typeof process.env.OMG_TEAM_STATE_ROOT === 'string' && process.env.OMG_TEAM_STATE_ROOT.trim() !== '') {
     try {
-      return resolveWorkingDirectoryForState(process.env.OMX_TEAM_STATE_ROOT.trim());
+      return resolveWorkingDirectoryForState(process.env.OMG_TEAM_STATE_ROOT.trim());
     } catch {}
   }
   return join(resolveWorkingDirectoryForState(workingDirectory), '.omg', 'state');
@@ -190,7 +190,7 @@ export interface ResolvedStateScope {
 }
 
 function readSessionIdFromEnvironment(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  const candidates = [env.OMX_SESSION_ID, env.CODEX_SESSION_ID, env.SESSION_ID];
+  const candidates = [env.OMG_SESSION_ID, env.GEMINI_SESSION_ID, env.SESSION_ID];
   for (const candidate of candidates) {
     if (typeof candidate !== 'string') continue;
     const trimmed = candidate.trim();

@@ -86,4 +86,4 @@ This release note is based strictly on:
 - `2026-03-02 baeb8e7 fix(skills): restore visual-verdict contract and ralph visual-loop guidance`
 - `2026-03-02 a5f2b77 Revert "fix(skills): restore visual-verdict contract and ralph visual-loop guidance"`
 - `2026-03-02 6c1c4eb docs(changelog): update unreleased notes for main...dev`
-- `2026-03-02 e0c5974 fix(skills): normalize forked OMC references to OMX canonical paths`
+- `2026-03-02 e0c5974 fix(skills): normalize forked OMG references to OMX canonical paths`

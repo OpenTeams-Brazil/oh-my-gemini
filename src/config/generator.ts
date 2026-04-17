@@ -35,7 +35,7 @@ function escapeTomlString(value: string): string {
 // ---------------------------------------------------------------------------
 
 /** Keys we own at the TOML root level. Used for upsert + strip. */
-const OMX_TOP_LEVEL_KEYS = [
+const OMG_TOP_LEVEL_KEYS = [
   "notify",
   "model_reasoning_effort",
   "developer_instructions",
@@ -47,18 +47,18 @@ const DEFAULT_SETUP_MODEL_AUTO_COMPACT_TOKEN_LIMIT = 900000;
 const SHARED_MCP_REGISTRY_MARKER = "oh-my-gemini (OMX) Shared MCP Registry Sync";
 const SHARED_MCP_REGISTRY_END_MARKER =
   "# End oh-my-gemini shared MCP registry sync";
-const OMX_AGENTS_MAX_THREADS = 6;
-const OMX_AGENTS_MAX_DEPTH = 2;
-const OMX_EXPLORE_ROUTING_DEFAULT = '1';
-const OMX_EXPLORE_CMD_ENV = 'USE_OMX_EXPLORE_CMD';
+const OMG_AGENTS_MAX_THREADS = 6;
+const OMG_AGENTS_MAX_DEPTH = 2;
+const OMG_EXPLORE_ROUTING_DEFAULT = '1';
+const OMG_EXPLORE_CMD_ENV = 'USE_OMG_EXPLORE_CMD';
 const DEFAULT_LAUNCHER_MCP_STARTUP_TIMEOUT_SEC = 15;
-const OMX_TUI_STATUS_LINE =
+const OMG_TUI_STATUS_LINE =
   'status_line = ["model-with-reasoning", "git-branch", "context-remaining", "total-input-tokens", "total-output-tokens", "five-hour-limit", "weekly-limit"]';
-const LEGACY_OMX_TEAM_RUN_TABLE_PATTERN =
+const LEGACY_OMG_TEAM_RUN_TABLE_PATTERN =
   /^\s*\[mcp_servers\.(?:"omg_team_run"|omg_team_run)\]\s*$/m;
 
 export function hasLegacyOmxTeamRunTable(config: string): boolean {
-  return LEGACY_OMX_TEAM_RUN_TABLE_PATTERN.test(config);
+  return LEGACY_OMG_TEAM_RUN_TABLE_PATTERN.test(config);
 }
 
 function unwrapTomlString(value: string | undefined): string | undefined {
@@ -126,7 +126,7 @@ function stripRootLevelKeys(config: string, keys: readonly string[]): string {
 
   if (
     keys.some((key) =>
-      OMX_TOP_LEVEL_KEYS.includes(key as (typeof OMX_TOP_LEVEL_KEYS)[number]),
+      OMG_TOP_LEVEL_KEYS.includes(key as (typeof OMG_TOP_LEVEL_KEYS)[number]),
     )
   ) {
     lines = lines.filter(
@@ -170,7 +170,7 @@ function stripOrphanedManagedNotify(config: string): string {
  * cleanly. Also removes the comment line that precedes them.
  */
 export function stripOmxTopLevelKeys(config: string): string {
-  return stripRootLevelKeys(config, OMX_TOP_LEVEL_KEYS);
+  return stripRootLevelKeys(config, OMG_TOP_LEVEL_KEYS);
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ function upsertFeatureFlags(config: string): string {
       "[features]",
       "multi_agent = true",
       "child_agents_md = true",
-      "codex_hooks = true",
+      "gemini_hooks = true",
       "",
     ].join("\n");
     if (base.length === 0) {
@@ -216,14 +216,14 @@ function upsertFeatureFlags(config: string): string {
 
   let multiAgentIdx = -1;
   let childAgentsIdx = -1;
-  let codexHooksIdx = -1;
+  let geminiHooksIdx = -1;
   for (let i = featuresStart + 1; i < sectionEnd; i++) {
     if (/^\s*multi_agent\s*=/.test(lines[i])) {
       multiAgentIdx = i;
     } else if (/^\s*child_agents_md\s*=/.test(lines[i])) {
       childAgentsIdx = i;
-    } else if (/^\s*codex_hooks\s*=/.test(lines[i])) {
-      codexHooksIdx = i;
+    } else if (/^\s*gemini_hooks\s*=/.test(lines[i])) {
+      geminiHooksIdx = i;
     }
   }
 
@@ -241,10 +241,10 @@ function upsertFeatureFlags(config: string): string {
     sectionEnd += 1;
   }
 
-  if (codexHooksIdx >= 0) {
-    lines[codexHooksIdx] = "codex_hooks = true";
+  if (geminiHooksIdx >= 0) {
+    lines[geminiHooksIdx] = "gemini_hooks = true";
   } else {
-    lines.splice(sectionEnd, 0, "codex_hooks = true");
+    lines.splice(sectionEnd, 0, "gemini_hooks = true");
   }
 
   return lines.join("\n");
@@ -258,7 +258,7 @@ function upsertEnvSettings(config: string): string {
     const base = config.trimEnd();
     const envBlock = [
       "[env]",
-      `${OMX_EXPLORE_CMD_ENV} = "${OMX_EXPLORE_ROUTING_DEFAULT}"`,
+      `${OMG_EXPLORE_CMD_ENV} = "${OMG_EXPLORE_ROUTING_DEFAULT}"`,
       "",
     ].join("\n");
     if (base.length === 0) return envBlock;
@@ -275,7 +275,7 @@ function upsertEnvSettings(config: string): string {
 
   let exploreRoutingIdx = -1;
   for (let i = envStart + 1; i < sectionEnd; i++) {
-    if (new RegExp(`^\\s*${OMX_EXPLORE_CMD_ENV}\\s*=`).test(lines[i])) {
+    if (new RegExp(`^\\s*${OMG_EXPLORE_CMD_ENV}\\s*=`).test(lines[i])) {
       exploreRoutingIdx = i;
       break;
     }
@@ -285,7 +285,7 @@ function upsertEnvSettings(config: string): string {
     lines.splice(
       sectionEnd,
       0,
-      `${OMX_EXPLORE_CMD_ENV} = "${OMX_EXPLORE_ROUTING_DEFAULT}"`,
+      `${OMG_EXPLORE_CMD_ENV} = "${OMG_EXPLORE_ROUTING_DEFAULT}"`,
     );
   }
 
@@ -302,8 +302,8 @@ function upsertAgentsSettings(config: string): string {
     const base = config.trimEnd();
     const agentsBlock = [
       "[agents]",
-      `max_threads = ${OMX_AGENTS_MAX_THREADS}`,
-      `max_depth = ${OMX_AGENTS_MAX_DEPTH}`,
+      `max_threads = ${OMG_AGENTS_MAX_THREADS}`,
+      `max_depth = ${OMG_AGENTS_MAX_DEPTH}`,
       "",
     ].join("\n");
     if (base.length === 0) return agentsBlock;
@@ -329,11 +329,11 @@ function upsertAgentsSettings(config: string): string {
   }
 
   if (maxThreadsIdx < 0) {
-    lines.splice(sectionEnd, 0, `max_threads = ${OMX_AGENTS_MAX_THREADS}`);
+    lines.splice(sectionEnd, 0, `max_threads = ${OMG_AGENTS_MAX_THREADS}`);
     sectionEnd += 1;
   }
   if (maxDepthIdx < 0) {
-    lines.splice(sectionEnd, 0, `max_depth = ${OMX_AGENTS_MAX_DEPTH}`);
+    lines.splice(sectionEnd, 0, `max_depth = ${OMG_AGENTS_MAX_DEPTH}`);
   }
 
   return lines.join("\n");
@@ -359,7 +359,7 @@ export function stripOmxFeatureFlags(config: string): string {
     }
   }
 
-  const omgFlags = ["multi_agent", "child_agents_md", "codex_hooks", "collab"];
+  const omgFlags = ["multi_agent", "child_agents_md", "gemini_hooks", "collab"];
   const filtered: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     if (i > featuresStart && i < sectionEnd) {
@@ -410,7 +410,7 @@ export function stripOmxEnvSettings(config: string): string {
   for (let i = 0; i < lines.length; i++) {
     if (i > envStart && i < sectionEnd) {
       const isOmxEnvKey = new RegExp(
-        `^\\s*${OMX_EXPLORE_CMD_ENV}\\s*=`,
+        `^\\s*${OMG_EXPLORE_CMD_ENV}\\s*=`,
       ).test(lines[i]);
       if (isOmxEnvKey) continue;
     }
@@ -546,7 +546,7 @@ function upsertTuiStatusLine(config: string): {
     }
   }
 
-  const mergedSection = ["[tui]", ...preservedKeyLines, OMX_TUI_STATUS_LINE];
+  const mergedSection = ["[tui]", ...preservedKeyLines, OMG_TUI_STATUS_LINE];
   const firstStart = sections[0].start;
   const rebuilt: string[] = [];
 
@@ -894,7 +894,7 @@ function getOmxTablesBlock(pkgRoot: string, includeTui = true): string {
           "",
           "# OMX TUI StatusLine (Gemini CLI v0.101.0+)",
           "[tui]",
-          OMX_TUI_STATUS_LINE,
+          OMG_TUI_STATUS_LINE,
           "",
         ]
       : []),

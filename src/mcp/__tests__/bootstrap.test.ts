@@ -21,11 +21,11 @@ const ALL_SERVERS: readonly McpServerName[] = [
 ] as const;
 
 const SERVER_DISABLE_ENV: Record<McpServerName, string> = {
-  state: 'OMX_STATE_SERVER_DISABLE_AUTO_START',
-  memory: 'OMX_MEMORY_SERVER_DISABLE_AUTO_START',
-  code_intel: 'OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START',
-  trace: 'OMX_TRACE_SERVER_DISABLE_AUTO_START',
-  wiki: 'OMX_WIKI_SERVER_DISABLE_AUTO_START',
+  state: 'OMG_STATE_SERVER_DISABLE_AUTO_START',
+  memory: 'OMG_MEMORY_SERVER_DISABLE_AUTO_START',
+  code_intel: 'OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START',
+  trace: 'OMG_TRACE_SERVER_DISABLE_AUTO_START',
+  wiki: 'OMG_WIKI_SERVER_DISABLE_AUTO_START',
 };
 
 const SERVER_ENTRYPOINTS: Array<{ server: McpServerName; file: string }> = [
@@ -44,7 +44,7 @@ describe('mcp bootstrap auto-start guard', () => {
   });
 
   it('disables all servers when global disable flag is set', () => {
-    const env = { OMX_MCP_SERVER_DISABLE_AUTO_START: '1' };
+    const env = { OMG_MCP_SERVER_DISABLE_AUTO_START: '1' };
 
     for (const server of ALL_SERVERS) {
       assert.equal(shouldAutoStartMcpServer(server, env), false, `${server} should honor global disable flag`);

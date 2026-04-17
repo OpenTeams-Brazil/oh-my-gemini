@@ -3,7 +3,7 @@ import { promisify } from 'util';
 import { existsSync, readFileSync } from 'fs';
 import { isAbsolute, join, resolve } from 'path';
 import {
-  CODEX_BYPASS_FLAG,
+  GEMINI_BYPASS_FLAG,
   CLAUDE_SKIP_PERMISSIONS_FLAG,
   MADMAX_FLAG,
   CONFIG_FLAG,
@@ -48,19 +48,19 @@ export interface TeamSession {
   resizeHookTarget: string | null;
 }
 
-const INJECTION_MARKER = '[OMX_TMUX_INJECT]';
+const INJECTION_MARKER = '[OMG_TMUX_INJECT]';
 const MODEL_INSTRUCTIONS_FILE_KEY = 'model_instructions_file';
-const OMX_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV = 'OMX_BYPASS_DEFAULT_SYSTEM_PROMPT';
-const OMX_MODEL_INSTRUCTIONS_FILE_ENV = 'OMX_MODEL_INSTRUCTIONS_FILE';
-const OMX_TEAM_WORKER_CLI_ENV = 'OMX_TEAM_WORKER_CLI';
-const OMX_TEAM_WORKER_CLI_MAP_ENV = 'OMX_TEAM_WORKER_CLI_MAP';
-const OMX_TEAM_WORKER_LAUNCH_MODE_ENV = 'OMX_TEAM_WORKER_LAUNCH_MODE';
-const OMX_TEAM_AUTO_INTERRUPT_RETRY_ENV = 'OMX_TEAM_AUTO_INTERRUPT_RETRY';
+const OMG_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV = 'OMG_BYPASS_DEFAULT_SYSTEM_PROMPT';
+const OMG_MODEL_INSTRUCTIONS_FILE_ENV = 'OMG_MODEL_INSTRUCTIONS_FILE';
+const OMG_TEAM_WORKER_CLI_ENV = 'OMG_TEAM_WORKER_CLI';
+const OMG_TEAM_WORKER_CLI_MAP_ENV = 'OMG_TEAM_WORKER_CLI_MAP';
+const OMG_TEAM_WORKER_LAUNCH_MODE_ENV = 'OMG_TEAM_WORKER_LAUNCH_MODE';
+const OMG_TEAM_AUTO_INTERRUPT_RETRY_ENV = 'OMG_TEAM_AUTO_INTERRUPT_RETRY';
 const GEMINI_PROMPT_INTERACTIVE_FLAG = '-i';
 const GEMINI_APPROVAL_MODE_FLAG = '--approval-mode';
 const GEMINI_APPROVAL_MODE_YOLO = 'yolo';
-const OMX_LEADER_NODE_PATH_ENV = 'OMX_LEADER_NODE_PATH';
-const OMX_LEADER_CLI_PATH_ENV = 'OMX_LEADER_CLI_PATH';
+const OMG_LEADER_NODE_PATH_ENV = 'OMG_LEADER_NODE_PATH';
+const OMG_LEADER_CLI_PATH_ENV = 'OMG_LEADER_CLI_PATH';
 const TMUX_WORKER_AMBIENT_ENV_ALLOWLIST = [
   'HTTPS_PROXY',
   'HTTP_PROXY',
@@ -81,7 +81,7 @@ const TMUX_COPY_MODE_STYLE_OPTIONS = [
   'copy-mode-selection-style',
 ] as const;
 
-export type TeamWorkerCli = 'codex' | 'claude' | 'gemini';
+export type TeamWorkerCli = 'gemini' | 'claude' | 'gemini';
 type TeamWorkerCliMode = 'auto' | TeamWorkerCli;
 export type TeamWorkerLaunchMode = 'interactive' | 'prompt';
 
@@ -571,20 +571,20 @@ function hasModelInstructionsOverride(args: string[]): boolean {
   return false;
 }
 
-function normalizeTeamWorkerCliMode(raw: string | undefined, sourceEnv: string = OMX_TEAM_WORKER_CLI_ENV): TeamWorkerCliMode {
+function normalizeTeamWorkerCliMode(raw: string | undefined, sourceEnv: string = OMG_TEAM_WORKER_CLI_ENV): TeamWorkerCliMode {
   const normalized = String(raw ?? 'auto').trim().toLowerCase();
   if (normalized === '' || normalized === 'auto') return 'auto';
-  if (normalized === 'codex' || normalized === 'claude' || normalized === 'gemini') return normalized;
-  throw new Error(`Invalid ${sourceEnv} value "${raw}". Expected: auto, codex, claude, gemini`);
+  if (normalized === 'gemini' || normalized === 'claude' || normalized === 'gemini') return normalized;
+  throw new Error(`Invalid ${sourceEnv} value "${raw}". Expected: auto, gemini, claude, gemini`);
 }
 
 export function resolveTeamWorkerLaunchMode(
   env: NodeJS.ProcessEnv = process.env,
 ): TeamWorkerLaunchMode {
-  const raw = String(env[OMX_TEAM_WORKER_LAUNCH_MODE_ENV] ?? 'interactive').trim().toLowerCase();
+  const raw = String(env[OMG_TEAM_WORKER_LAUNCH_MODE_ENV] ?? 'interactive').trim().toLowerCase();
   if (raw === '' || raw === 'interactive') return 'interactive';
   if (raw === 'prompt') return 'prompt';
-  throw new Error(`Invalid ${OMX_TEAM_WORKER_LAUNCH_MODE_ENV} value "${env[OMX_TEAM_WORKER_LAUNCH_MODE_ENV]}". Expected: interactive, prompt`);
+  throw new Error(`Invalid ${OMG_TEAM_WORKER_LAUNCH_MODE_ENV} value "${env[OMG_TEAM_WORKER_LAUNCH_MODE_ENV]}". Expected: interactive, prompt`);
 }
 
 function extractModelOverride(args: string[]): string | null {
@@ -608,7 +608,7 @@ function extractModelOverride(args: string[]): string | null {
 }
 
 export function resolveTeamWorkerCli(launchArgs: string[] = [], env: NodeJS.ProcessEnv = process.env): TeamWorkerCli {
-  const mode = normalizeTeamWorkerCliMode(env[OMX_TEAM_WORKER_CLI_ENV]);
+  const mode = normalizeTeamWorkerCliMode(env[OMG_TEAM_WORKER_CLI_ENV]);
   if (mode !== 'auto') return mode;
   return resolveTeamWorkerCliFromLaunchArgs(launchArgs);
 }
@@ -617,7 +617,7 @@ function resolveTeamWorkerCliFromLaunchArgs(launchArgs: string[] = []): TeamWork
   const model = extractModelOverride(launchArgs);
   if (model && /claude/i.test(model)) return 'claude';
   if (model && /gemini/i.test(model)) return 'gemini';
-  return 'codex';
+  return 'gemini';
 }
 
 export function resolveTeamWorkerCliPlan(
@@ -629,7 +629,7 @@ export function resolveTeamWorkerCliPlan(
     throw new Error(`workerCount must be >= 1 (got ${workerCount})`);
   }
 
-  const rawMap = String(env[OMX_TEAM_WORKER_CLI_MAP_ENV] ?? '').trim();
+  const rawMap = String(env[OMG_TEAM_WORKER_CLI_MAP_ENV] ?? '').trim();
   const fallback = (): TeamWorkerCli => resolveTeamWorkerCli(launchArgs, env);
   const fallbackAutoFromArgs = (): TeamWorkerCli => resolveTeamWorkerCliFromLaunchArgs(launchArgs);
 
@@ -644,26 +644,26 @@ export function resolveTeamWorkerCliPlan(
 
   if (entries.length === 0 || entries.every((part) => part.length === 0)) {
     throw new Error(
-      `Invalid ${OMX_TEAM_WORKER_CLI_MAP_ENV} value "${env[OMX_TEAM_WORKER_CLI_MAP_ENV]}". `
-        + `Expected comma-separated values: auto|codex|claude|gemini.`,
+      `Invalid ${OMG_TEAM_WORKER_CLI_MAP_ENV} value "${env[OMG_TEAM_WORKER_CLI_MAP_ENV]}". `
+        + `Expected comma-separated values: auto|gemini|claude|gemini.`,
     );
   }
   if (entries.some((part) => part.length === 0)) {
     throw new Error(
-      `Invalid ${OMX_TEAM_WORKER_CLI_MAP_ENV} value "${env[OMX_TEAM_WORKER_CLI_MAP_ENV]}". `
+      `Invalid ${OMG_TEAM_WORKER_CLI_MAP_ENV} value "${env[OMG_TEAM_WORKER_CLI_MAP_ENV]}". `
         + `Empty entries are not allowed.`,
     );
   }
   if (entries.length !== 1 && entries.length !== workerCount) {
     throw new Error(
-      `Invalid ${OMX_TEAM_WORKER_CLI_MAP_ENV} length ${entries.length}; `
+      `Invalid ${OMG_TEAM_WORKER_CLI_MAP_ENV} length ${entries.length}; `
         + `expected 1 or ${workerCount} comma-separated values.`,
     );
   }
 
   const expanded = entries.length === 1 ? Array.from({ length: workerCount }, () => entries[0] as string) : entries;
   return expanded.map((entry) => {
-    const mode = normalizeTeamWorkerCliMode(entry, OMX_TEAM_WORKER_CLI_MAP_ENV);
+    const mode = normalizeTeamWorkerCliMode(entry, OMG_TEAM_WORKER_CLI_MAP_ENV);
     return mode === 'auto' ? fallbackAutoFromArgs() : mode;
   });
 }
@@ -682,7 +682,7 @@ export function translateWorkerLaunchArgsForCli(
   initialPrompt?: string,
   workerRole?: string,
 ): string[] {
-  if (workerCli === 'codex') return [...args];
+  if (workerCli === 'gemini') return [...args];
   if (workerCli === 'gemini') {
     const model = extractModelOverride(args);
     const geminiModel = model && /gemini/i.test(model) ? model : null;
@@ -723,7 +723,7 @@ function resolveAbsoluteBinaryPath(binary: string): string {
  */
 let _leaderPaths: { node: string; } | null = null;
 function resolveLeaderNodePath(): string {
-  const envOverride = process.env[OMX_LEADER_NODE_PATH_ENV];
+  const envOverride = process.env[OMG_LEADER_NODE_PATH_ENV];
   if (typeof envOverride === 'string' && envOverride.trim() !== '') {
     return envOverride.trim();
   }
@@ -740,16 +740,16 @@ export function assertTeamWorkerCliBinaryAvailable(
   if (existsImpl(workerCli)) return;
   throw new Error(
     `Selected team worker CLI "${workerCli}" is not available on PATH. `
-      + `Install "${workerCli}" or set ${OMX_TEAM_WORKER_CLI_ENV}=codex|claude|gemini.`,
+      + `Install "${workerCli}" or set ${OMG_TEAM_WORKER_CLI_ENV}=gemini|claude|gemini.`,
   );
 }
 
 function shouldBypassDefaultSystemPrompt(env: NodeJS.ProcessEnv): boolean {
-  return env[OMX_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV] !== '0';
+  return env[OMG_BYPASS_DEFAULT_SYSTEM_PROMPT_ENV] !== '0';
 }
 
 function buildModelInstructionsOverride(cwd: string, env: NodeJS.ProcessEnv): string {
-  const filePath = translatePathForMsys(env[OMX_MODEL_INSTRUCTIONS_FILE_ENV] || join(cwd, 'GEMINI.md'));
+  const filePath = translatePathForMsys(env[OMG_MODEL_INSTRUCTIONS_FILE_ENV] || join(cwd, 'GEMINI.md'));
   return `${MODEL_INSTRUCTIONS_FILE_KEY}="${escapeTomlString(filePath)}"`;
 }
 
@@ -765,9 +765,9 @@ function readTmuxWorkerAmbientEnv(env: NodeJS.ProcessEnv = process.env): Record<
 
 function resolveWorkerLaunchArgs(extraArgs: string[] = [], cwd: string = process.cwd(), env: NodeJS.ProcessEnv = process.env): string[] {
   const merged = [...extraArgs];
-  const wantsBypass = process.argv.includes(CODEX_BYPASS_FLAG) || process.argv.includes(MADMAX_FLAG);
-  if (wantsBypass && !merged.includes(CODEX_BYPASS_FLAG)) {
-    merged.push(CODEX_BYPASS_FLAG);
+  const wantsBypass = process.argv.includes(GEMINI_BYPASS_FLAG) || process.argv.includes(MADMAX_FLAG);
+  if (wantsBypass && !merged.includes(GEMINI_BYPASS_FLAG)) {
+    merged.push(GEMINI_BYPASS_FLAG);
   }
   if (shouldBypassDefaultSystemPrompt(env) && !hasModelInstructionsOverride(merged)) {
     merged.push(CONFIG_FLAG, buildModelInstructionsOverride(cwd, env));
@@ -799,7 +799,7 @@ export function buildWorkerStartupCommand(
     ...readTmuxWorkerAmbientEnv(process.env),
     ...processSpec.env,
   };
-  const resolvedLeaderNodePath = processSpec.env[OMX_LEADER_NODE_PATH_ENV]?.trim() || resolveLeaderNodePath();
+  const resolvedLeaderNodePath = processSpec.env[OMG_LEADER_NODE_PATH_ENV]?.trim() || resolveLeaderNodePath();
   const leaderNodeDir = /[\\/]/.test(resolvedLeaderNodePath)
     ? resolvedLeaderNodePath.replace(/[\\/][^\\/]+$/, '')
     : '';
@@ -847,10 +847,10 @@ export function buildWorkerProcessLaunchSpec(
   const fullLaunchArgs = resolveWorkerLaunchArgs(launchArgs, cwd, effectiveEnv);
   const workerCli = workerCliOverride ?? resolveTeamWorkerCli(fullLaunchArgs, effectiveEnv);
   const cliLaunchArgs = translateWorkerLaunchArgsForCli(workerCli, fullLaunchArgs, initialPrompt, workerRole);
-  const effectiveCliLaunchArgs = workerCli === 'codex'
+  const effectiveCliLaunchArgs = workerCli === 'gemini'
     && shouldGrantExecutionBypassForRole(workerRole)
-    && !cliLaunchArgs.includes(CODEX_BYPASS_FLAG)
-    ? [...cliLaunchArgs, CODEX_BYPASS_FLAG]
+    && !cliLaunchArgs.includes(GEMINI_BYPASS_FLAG)
+    ? [...cliLaunchArgs, GEMINI_BYPASS_FLAG]
     : cliLaunchArgs;
   const workerGeminiHomeOverride = typeof effectiveEnv.GEMINI_HOME === 'string'
     ? effectiveEnv.GEMINI_HOME.trim()
@@ -865,10 +865,10 @@ export function buildWorkerProcessLaunchSpec(
     : { command: resolvedCliPath, args: effectiveCliLaunchArgs };
   const resolvedLauncherPath = platformSpec.resolvedPath || resolvedCliPath;
   const workerEnv: Record<string, string> = {
-    OMX_TEAM_WORKER: `${teamName}/worker-${workerIndex}`,
-    [OMX_LEADER_NODE_PATH_ENV]: resolveLeaderNodePath(),
-    [OMX_LEADER_CLI_PATH_ENV]: resolvedLauncherPath,
-    ...(workerCli === 'codex'
+    OMG_TEAM_WORKER: `${teamName}/worker-${workerIndex}`,
+    [OMG_LEADER_NODE_PATH_ENV]: resolveLeaderNodePath(),
+    [OMG_LEADER_CLI_PATH_ENV]: resolvedLauncherPath,
+    ...(workerCli === 'gemini'
       ? readActiveProviderEnvOverrides(
           effectiveEnv,
           providerLookupGeminiHome,
@@ -1131,8 +1131,8 @@ export function createTeamSession(
     // Enable mouse scrolling so agent output panes can be scrolled with the
     // mouse wheel without conflicting with keyboard up/down arrow-key input
     // history navigation in the Gemini CLI input field. (issue #103)
-    // Opt-out: set OMX_TEAM_MOUSE=0 in the environment.
-    if (process.env.OMX_TEAM_MOUSE !== '0') {
+    // Opt-out: set OMG_TEAM_MOUSE=0 in the environment.
+    if (process.env.OMG_TEAM_MOUSE !== '0') {
       enableMouseScrolling(sessionName);
     }
 
@@ -1273,7 +1273,7 @@ function acceptClaudeBypassPermissionsPrompt(target: string): void {
 }
 
 function dismissClaudeBypassPermissionsPromptIfPresent(target: string, captured: string): boolean {
-  if (process.env.OMX_TEAM_AUTO_ACCEPT_BYPASS === '0') return false;
+  if (process.env.OMG_TEAM_AUTO_ACCEPT_BYPASS === '0') return false;
   if (!paneHasClaudeBypassPermissionsPrompt(captured)) return false;
   acceptClaudeBypassPermissionsPrompt(target);
   return true;
@@ -1282,7 +1282,7 @@ function dismissClaudeBypassPermissionsPromptIfPresent(target: string, captured:
 export const paneHasActiveTask = sharedPaneHasActiveTask;
 
 function resolveSendStrategyFromEnv(): 'auto' | 'queue' | 'interrupt' {
-  const raw = String(process.env.OMX_TEAM_SEND_STRATEGY || '')
+  const raw = String(process.env.OMG_TEAM_SEND_STRATEGY || '')
     .trim()
     .toLowerCase();
   if (raw === 'interrupt' || raw === 'queue' || raw === 'auto') {
@@ -1296,14 +1296,14 @@ function resolveWorkerCliFromMapForSend(
   launchArgs: string[] = [],
   env: NodeJS.ProcessEnv = process.env,
 ): TeamWorkerCli | null {
-  const rawMap = String(env[OMX_TEAM_WORKER_CLI_MAP_ENV] ?? '').trim();
+  const rawMap = String(env[OMG_TEAM_WORKER_CLI_MAP_ENV] ?? '').trim();
   if (rawMap === '') return null;
   const entries = rawMap.split(',').map((entry) => entry.trim());
   if (entries.length === 0 || entries.some((entry) => entry.length === 0)) return null;
   const selectedRaw = entries.length === 1 ? entries[0] : entries[workerIndex - 1];
   if (!selectedRaw) return null;
   try {
-    const mode = normalizeTeamWorkerCliMode(selectedRaw, OMX_TEAM_WORKER_CLI_MAP_ENV);
+    const mode = normalizeTeamWorkerCliMode(selectedRaw, OMG_TEAM_WORKER_CLI_MAP_ENV);
     return mode === 'auto' ? resolveTeamWorkerCliFromLaunchArgs(launchArgs) : mode;
   } catch {
     return null;
@@ -1313,8 +1313,8 @@ function resolveWorkerCliFromMapForSend(
 /**
  * Worker CLI resolution contract for submit routing:
  * 1) explicit workerCli param from caller
- * 2) per-worker OMX_TEAM_WORKER_CLI_MAP entry (worker index aware)
- * 3) global/default OMX_TEAM_WORKER_CLI behavior
+ * 2) per-worker OMG_TEAM_WORKER_CLI_MAP entry (worker index aware)
+ * 3) global/default OMG_TEAM_WORKER_CLI behavior
  */
 export function resolveWorkerCliForSend(
   workerIndex: number,
@@ -1337,10 +1337,10 @@ export function buildWorkerSubmitPlan(
   const queueRequested = strategy === 'queue' || (strategy === 'auto' && paneBusyAtStart);
   return {
     shouldInterrupt: strategy === 'interrupt',
-    queueFirstRound: workerCli === 'codex' && queueRequested,
+    queueFirstRound: workerCli === 'gemini' && queueRequested,
     rounds: 6,
     submitKeyPressesPerRound: workerCli === 'claude' ? 1 : 2,
-    allowAdaptiveRetry: workerCli === 'codex' && allowAdaptiveRetry,
+    allowAdaptiveRetry: workerCli === 'gemini' && allowAdaptiveRetry,
   };
 }
 
@@ -1456,8 +1456,8 @@ export function waitForWorkerReady(
     }
     if (paneHasTrustPrompt(result.stdout)) {
       // Default-on for team workers: they are spawned explicitly by the leader in the same cwd.
-      // Opt-out by setting OMX_TEAM_AUTO_TRUST=0.
-      if (process.env.OMX_TEAM_AUTO_TRUST !== '0') {
+      // Opt-out by setting OMG_TEAM_AUTO_TRUST=0.
+      if (process.env.OMG_TEAM_AUTO_TRUST !== '0') {
         sendRobustEnter();
         promptDismissed = true;
         return false;
@@ -1498,14 +1498,14 @@ export function waitForWorkerReady(
 /**
  * Detect and auto-dismiss a Gemini "Trust this directory?" prompt in a worker pane.
  * Returns true if a trust prompt was found and dismissed, false otherwise.
- * Opt-out: set OMX_TEAM_AUTO_TRUST=0 to disable auto-dismissal.
+ * Opt-out: set OMG_TEAM_AUTO_TRUST=0 to disable auto-dismissal.
  */
 export function dismissTrustPromptIfPresent(
   sessionName: string,
   workerIndex: number,
   workerPaneId?: string,
 ): boolean {
-  if (process.env.OMX_TEAM_AUTO_TRUST === '0') return false;
+  if (process.env.OMG_TEAM_AUTO_TRUST === '0') return false;
   if (!isTmuxAvailable()) return false;
   const target = paneTarget(sessionName, workerIndex, workerPaneId);
   const result = runTmux(sharedBuildVisibleCapturePaneArgv(target));
@@ -1578,7 +1578,7 @@ export async function sendToWorker(
   // Allow the input buffer to settle before sending C-m
   await sleep(150);
 
-  const allowAutoInterruptRetry = process.env[OMX_TEAM_AUTO_INTERRUPT_RETRY_ENV] !== '0';
+  const allowAutoInterruptRetry = process.env[OMG_TEAM_AUTO_INTERRUPT_RETRY_ENV] !== '0';
   const submitPlan = buildWorkerSubmitPlan(strategy, resolvedWorkerCli, paneBusy, allowAutoInterruptRetry);
   if (submitPlan.shouldInterrupt) {
     // Explicit interrupt mode: abort current turn first, then submit the new command.
@@ -1610,8 +1610,8 @@ export async function sendToWorker(
   }
 
   // Fail-open by default: Gemini may keep the last submitted line visible even after executing it.
-  // If you need strictness for debugging, set OMX_TEAM_STRICT_SUBMIT=1.
-  const strict = process.env.OMX_TEAM_STRICT_SUBMIT === '1';
+  // If you need strictness for debugging, set OMG_TEAM_STRICT_SUBMIT=1.
+  const strict = process.env.OMG_TEAM_STRICT_SUBMIT === '1';
   if (strict) {
     throw new Error('sendToWorker: submit_failed (trigger text still visible after retries)');
   }

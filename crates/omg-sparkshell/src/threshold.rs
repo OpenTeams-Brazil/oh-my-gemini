@@ -3,7 +3,7 @@ use std::env;
 pub const DEFAULT_MAX_VISIBLE_LINES: usize = 12;
 
 pub fn read_line_threshold() -> usize {
-    env::var("OMX_SPARKSHELL_LINES")
+    env::var("OMG_SPARKSHELL_LINES")
         .ok()
         .and_then(|raw| raw.trim().parse::<usize>().ok())
         .filter(|value| *value > 0)
@@ -47,24 +47,24 @@ mod tests {
     #[test]
     fn threshold_defaults_for_zero_invalid_and_blank_values() {
         let _guard = env_lock();
-        unsafe { env::set_var("OMX_SPARKSHELL_LINES", "0") };
+        unsafe { env::set_var("OMG_SPARKSHELL_LINES", "0") };
         assert_eq!(read_line_threshold(), DEFAULT_MAX_VISIBLE_LINES);
 
-        unsafe { env::set_var("OMX_SPARKSHELL_LINES", "not-a-number") };
+        unsafe { env::set_var("OMG_SPARKSHELL_LINES", "not-a-number") };
         assert_eq!(read_line_threshold(), DEFAULT_MAX_VISIBLE_LINES);
 
-        unsafe { env::set_var("OMX_SPARKSHELL_LINES", "   ") };
+        unsafe { env::set_var("OMG_SPARKSHELL_LINES", "   ") };
         assert_eq!(read_line_threshold(), DEFAULT_MAX_VISIBLE_LINES);
 
-        unsafe { env::remove_var("OMX_SPARKSHELL_LINES") };
+        unsafe { env::remove_var("OMG_SPARKSHELL_LINES") };
     }
 
     #[test]
     fn threshold_accepts_trimmed_positive_values() {
         let _guard = env_lock();
-        unsafe { env::set_var("OMX_SPARKSHELL_LINES", " 7 ") };
+        unsafe { env::set_var("OMG_SPARKSHELL_LINES", " 7 ") };
         assert_eq!(read_line_threshold(), 7);
-        unsafe { env::remove_var("OMX_SPARKSHELL_LINES") };
+        unsafe { env::remove_var("OMG_SPARKSHELL_LINES") };
     }
 
     #[test]

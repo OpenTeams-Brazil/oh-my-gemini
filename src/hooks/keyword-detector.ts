@@ -1,7 +1,7 @@
 /**
  * Keyword Detection Engine
  *
- * In OMC, this runs as a UserPromptSubmit hook that detects magic keywords
+ * In OMG, this runs as a UserPromptSubmit hook that detects magic keywords
  * and injects skill prompts via system-reminder.
  *
  * In OMX, this logic is embedded in the GEMINI.md orchestration brain,
@@ -800,9 +800,9 @@ export async function recordSkillActivation(input: RecordSkillActivationInput): 
 }
 
 /**
- * Pre-execution gate — ported from OMC src/hooks/keyword-detector/index.ts
+ * Pre-execution gate — ported from OMG src/hooks/keyword-detector/index.ts
  *
- * In OMC these functions run at prompt time in bridge.ts (mandatory enforcement).
+ * In OMG these functions run at prompt time in bridge.ts (mandatory enforcement).
  * In OMX they generate GEMINI.md instructions and serve as test infrastructure.
  * See task-size-detector.ts for full advisory-nature documentation.
  */

@@ -5,7 +5,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 
 describe('MCP state/team tools path traversal prevention', () => {
-  process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+  process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
 
   it('rejects invalid workingDirectory inputs containing NUL bytes', async () => {
     const { handleStateToolCall } = await import('../state-server.js');

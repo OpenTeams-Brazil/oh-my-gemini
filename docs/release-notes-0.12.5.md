@@ -52,7 +52,7 @@
 - Stop auto-continuation no longer fires during the deep-interview intent-first questioning phase; that phase is now treated as planning for native stall detection instead of forcing continuation. (PR [#1473](https://github.com/Yeachan-Heo/oh-my-gemini/pull/1473), issue [#1472](https://github.com/Yeachan-Heo/oh-my-gemini/issues/1472))
 
 ### Fixed — Explore harness
-- `omg explore` now emits a clear actionable error when cargo is a rustup shim with no default toolchain configured, instead of surfacing the raw rustup error. Users are directed to `rustup default stable`, `OMX_EXPLORE_BIN`, or `omg doctor`. (`src/cli/explore.ts`)
+- `omg explore` now emits a clear actionable error when cargo is a rustup shim with no default toolchain configured, instead of surfacing the raw rustup error. Users are directed to `rustup default stable`, `OMG_EXPLORE_BIN`, or `omg doctor`. (`src/cli/explore.ts`)
 
 ### Fixed — Hooks / auth / notify
 - Ralph stop-hook leakage across sessions eliminated; session authority enforced before gating (PR [#1466](https://github.com/Yeachan-Heo/oh-my-gemini/pull/1466), issue [#1461](https://github.com/Yeachan-Heo/oh-my-gemini/issues/1461))

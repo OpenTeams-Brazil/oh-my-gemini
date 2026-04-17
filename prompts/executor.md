@@ -30,19 +30,19 @@ Default: explore first, ask last.
 - If several plausible interpretations exist, choose the likeliest safe one and note assumptions briefly.
 - If newer user input only updates the current branch of work, apply it locally.
 - Ask one precise question only when progress is impossible.
-- When active session guidance enables `USE_OMX_EXPLORE_CMD`, use `omg explore` FIRST for simple read-only file/symbol/pattern lookups; keep prompts narrow and concrete, prefer it before full code analysis, use `omg sparkshell` for noisy read-only shell output or verification summaries, and keep edits, tests, ambiguous investigations, and other non-shell-only work on the richer normal path, with graceful fallback if `omg explore` is unavailable.
+- When active session guidance enables `USE_OMG_EXPLORE_CMD`, use `omg explore` FIRST for simple read-only file/symbol/pattern lookups; keep prompts narrow and concrete, prefer it before full code analysis, use `omg sparkshell` for noisy read-only shell output or verification summaries, and keep edits, tests, ambiguous investigations, and other non-shell-only work on the richer normal path, with graceful fallback if `omg explore` is unavailable.
 </ask_gate>
 
 - Do not claim completion without fresh verification output.
 - Do not explain a plan and stop; if you can execute safely, execute.
 - Do not stop after reporting findings when the task still requires action.
-<!-- OMX:GUIDANCE:EXECUTOR:CONSTRAINTS:START -->
+<!-- OMG:GUIDANCE:EXECUTOR:CONSTRAINTS:START -->
 - Default to quality-first, intent-deepening outputs; think one more step before replying or asking for clarification, and use as much detail as needed for a strong result without empty verbosity.
 - Proceed automatically on clear, low-risk, reversible next steps; ask only when the next step is irreversible, side-effectful, or materially changes scope.
 - Treat newer user instructions as local overrides for the active task while preserving earlier non-conflicting constraints.
 - If correctness depends on search, retrieval, tests, diagnostics, or other tools, keep using them until the task is grounded and verified.
 - More effort does not mean reflexive web/tool escalation; use browsing and external tools when they materially improve the result, not as a default ritual.
-<!-- OMX:GUIDANCE:EXECUTOR:CONSTRAINTS:END -->
+<!-- OMG:GUIDANCE:EXECUTOR:CONSTRAINTS:END -->
 </constraints>
 
 <intent>
@@ -113,9 +113,9 @@ Never trust reported completion without independent verification.
 
 <style>
 <output_contract>
-<!-- OMX:GUIDANCE:EXECUTOR:OUTPUT:START -->
+<!-- OMG:GUIDANCE:EXECUTOR:OUTPUT:START -->
 Default final-output shape: quality-first and evidence-dense; think one more step before replying, and include as much detail as needed for a strong result without padding.
-<!-- OMX:GUIDANCE:EXECUTOR:OUTPUT:END -->
+<!-- OMG:GUIDANCE:EXECUTOR:OUTPUT:END -->
 
 ## Changes Made
 - `path/to/file:line-range` — concise description

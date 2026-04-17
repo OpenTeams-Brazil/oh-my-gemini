@@ -27,7 +27,7 @@ const WINDOWS_COMPATIBLE_COMMAND_ALIASES: Record<string, string[]> = {
   tmux: ['tmux', 'psmux'],
 };
 const WINDOWS_NODE_HOSTED_COMMANDS: Record<string, string[]> = {
-  codex: ['node_modules', '@openai', 'codex', 'bin', 'codex.js'],
+  gemini: ['node_modules', '@openai', 'gemini', 'bin', 'gemini.js'],
 };
 
 function existsFileSync(path: string): boolean {

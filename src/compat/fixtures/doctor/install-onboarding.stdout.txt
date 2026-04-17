@@ -3,7 +3,7 @@ oh-my-gemini doctor
 
 Resolved setup scope: user
 
-  [CODEX_CLI_STATUS]
+  [GEMINI_CLI_STATUS]
   [OK] Node.js: <NODE_VERSION>
   [EXPLORE_HARNESS_STATUS]
   [OK] Gemini home: <GEMINI_HOME>

@@ -192,7 +192,7 @@ export async function resolveSessionToPane(sessionName: any): Promise<string | n
   if (rows.length === 0) return null;
 
   const nonHudRows = rows.filter((row: any) => !isHudPaneStartCommand(row.startCommand));
-  const canonicalRows = nonHudRows.filter((row: any) => /\bcodex\b/i.test(row.startCommand));
+  const canonicalRows = nonHudRows.filter((row: any) => /\bgemini\b/i.test(row.startCommand));
   const activeCanonical = canonicalRows.find((row: any) => row.active);
   if (activeCanonical) return activeCanonical.paneId;
   if (canonicalRows[0]) return canonicalRows[0].paneId;
@@ -203,7 +203,7 @@ export async function resolveSessionToPane(sessionName: any): Promise<string | n
 }
 
 export async function resolvePaneTarget(target: any, expectedCwd: any, modePane: any, cwd: string, payload: any): Promise<any> {
-  const requiresManagedOwnership = safeString(cwd).trim() !== '' && safeString(payload?.session_id || payload?.['session-id'] || process.env.OMX_SESSION_ID || '').trim() !== '';
+  const requiresManagedOwnership = safeString(cwd).trim() !== '' && safeString(payload?.session_id || payload?.['session-id'] || process.env.OMG_SESSION_ID || '').trim() !== '';
   const managedContext = requiresManagedOwnership
     ? await resolveManagedSessionContext(cwd, payload, { allowTeamWorker: false })
     : { managed: false, reason: 'not_required', invocationSessionId: '', sessionState: null, expectedTmuxSessionName: '', currentTmuxSessionName: '' };

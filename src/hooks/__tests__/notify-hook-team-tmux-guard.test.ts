@@ -154,7 +154,7 @@ shift || true
 if [[ "$cmd" == "display-message" ]]; then
   format="\${@: -1}"
   if [[ "$format" == "#{pane_current_command}" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_in_mode}" ]]; then
@@ -184,14 +184,14 @@ exit 0
       const parsed = JSON.parse(result.stdout);
       assert.equal(parsed.ok, false);
       assert.equal(parsed.reason, 'pane_not_ready');
-      assert.equal(parsed.paneCurrentCommand, 'codex');
+      assert.equal(parsed.paneCurrentCommand, 'gemini');
       assert.match(parsed.paneCapture, /loading workspace state/);
     } finally {
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
-  it('treats capture-pane failure as non-blocking for a live codex pane', async () => {
+  it('treats capture-pane failure as non-blocking for a live gemini pane', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-tmux-guard-'));
     const fakeBinDir = join(cwd, 'fake-bin');
     const tmuxLogPath = join(cwd, 'tmux.log');
@@ -208,7 +208,7 @@ shift || true
 if [[ "$cmd" == "display-message" ]]; then
   format="\${@: -1}"
   if [[ "$format" == "#{pane_current_command}" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   if [[ "$format" == "#{pane_in_mode}" ]]; then
@@ -239,7 +239,7 @@ exit 0
       const parsed = JSON.parse(result.stdout);
       assert.equal(parsed.ok, true);
       assert.equal(parsed.reason, 'ok');
-      assert.equal(parsed.paneCurrentCommand, 'codex');
+      assert.equal(parsed.paneCurrentCommand, 'gemini');
       assert.equal(parsed.paneCapture, '');
     } finally {
       await rm(cwd, { recursive: true, force: true });

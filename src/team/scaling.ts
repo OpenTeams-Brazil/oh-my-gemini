@@ -2,7 +2,7 @@
  * Dynamic worker scaling for team mode — Phase 1: Manual Scaling.
  *
  * Provides scale_up (add workers mid-session) and scale_down (drain + remove idle workers).
- * Gated behind the OMX_TEAM_SCALING_ENABLED environment variable.
+ * Gated behind the OMG_TEAM_SCALING_ENABLED environment variable.
  *
  * Key design decisions:
  * - Monotonic worker index counter (next_worker_index in config) ensures unique names
@@ -77,11 +77,11 @@ import {
 
 // ── Environment gate ──────────────────────────────────────────────────────────
 
-const OMX_TEAM_SCALING_ENABLED_ENV = 'OMX_TEAM_SCALING_ENABLED';
-const WORKTREE_TRIGGER_STATE_ROOT = '$OMX_TEAM_STATE_ROOT';
+const OMG_TEAM_SCALING_ENABLED_ENV = 'OMG_TEAM_SCALING_ENABLED';
+const WORKTREE_TRIGGER_STATE_ROOT = '$OMG_TEAM_STATE_ROOT';
 
 export function isScalingEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  const raw = env[OMX_TEAM_SCALING_ENABLED_ENV];
+  const raw = env[OMG_TEAM_SCALING_ENABLED_ENV];
   if (!raw) return false;
   const normalized = raw.trim().toLowerCase();
   return ['1', 'true', 'yes', 'on', 'enabled'].includes(normalized);
@@ -90,7 +90,7 @@ export function isScalingEnabled(env: NodeJS.ProcessEnv = process.env): boolean 
 function assertScalingEnabled(env: NodeJS.ProcessEnv = process.env): void {
   if (!isScalingEnabled(env)) {
     throw new Error(
-      `Dynamic scaling is disabled. Set ${OMX_TEAM_SCALING_ENABLED_ENV}=1 to enable.`,
+      `Dynamic scaling is disabled. Set ${OMG_TEAM_SCALING_ENABLED_ENV}=1 to enable.`,
     );
   }
 }
@@ -169,7 +169,7 @@ async function notifyWorkerPaneOutcome(
   workerIndex: number,
   message: string,
   paneId?: string,
-  workerCli?: 'codex' | 'claude' | 'gemini',
+  workerCli?: 'gemini' | 'claude' | 'gemini',
 ): Promise<DispatchOutcome> {
   try {
     await sendToWorker(sessionName, workerIndex, message, paneId, workerCli);
@@ -374,16 +374,16 @@ export async function scaleUp(
           ? await writeWorkerRoleInstructionsFile(sanitized, workerName, leaderCwd, teamInstructionsPath, workerRole, rolePromptContent)
           : teamInstructionsPath;
       const extraEnv: Record<string, string> = {
-        OMX_TEAM_STATE_ROOT: teamStateRoot,
-        OMX_TEAM_LEADER_CWD: leaderCwd,
-        OMX_MODEL_INSTRUCTIONS_FILE: instructionsFilePath,
+        OMG_TEAM_STATE_ROOT: teamStateRoot,
+        OMG_TEAM_LEADER_CWD: leaderCwd,
+        OMG_MODEL_INSTRUCTIONS_FILE: instructionsFilePath,
       };
       if (workerWorkspace) {
-        extraEnv.OMX_TEAM_WORKTREE_PATH = workerWorkspace.worktreePath;
+        extraEnv.OMG_TEAM_WORKTREE_PATH = workerWorkspace.worktreePath;
         if (workerWorkspace.branchName) {
-          extraEnv.OMX_TEAM_WORKTREE_BRANCH = workerWorkspace.branchName;
+          extraEnv.OMG_TEAM_WORKTREE_BRANCH = workerWorkspace.branchName;
         }
-        extraEnv.OMX_TEAM_WORKTREE_DETACHED = workerWorkspace.detached ? '1' : '0';
+        extraEnv.OMG_TEAM_WORKTREE_DETACHED = workerWorkspace.detached ? '1' : '0';
       }
       const cmd = buildWorkerStartupCommand(
         sanitized,
@@ -451,7 +451,7 @@ export async function scaleUp(
 
       // Wait for worker readiness
       const readyTimeoutMs = resolveWorkerReadyTimeoutMs(env);
-      const skipReadyWait = env.OMX_TEAM_SKIP_READY_WAIT === '1';
+      const skipReadyWait = env.OMG_TEAM_SKIP_READY_WAIT === '1';
       if (!skipReadyWait) {
         const ready = waitForWorkerReady(sessionName, workerIndex, readyTimeoutMs, paneId);
         if (!ready) {
@@ -801,7 +801,7 @@ export async function scaleDown(
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function resolveWorkerReadyTimeoutMs(env: NodeJS.ProcessEnv): number {
-  const raw = env.OMX_TEAM_READY_TIMEOUT_MS;
+  const raw = env.OMG_TEAM_READY_TIMEOUT_MS;
   const parsed = Number.parseInt(String(raw ?? ''), 10);
   if (Number.isFinite(parsed) && parsed >= 5_000) return parsed;
   return 45_000;
@@ -816,7 +816,7 @@ function resolveWorkerLaunchArgsForScaling(
   const fallbackModel = resolveAgentDefaultModel(agentType, env.GEMINI_HOME);
 
   return resolveTeamWorkerLaunchArgs({
-    existingRaw: env.OMX_TEAM_WORKER_LAUNCH_ARGS,
+    existingRaw: env.OMG_TEAM_WORKER_LAUNCH_ARGS,
     inheritedArgs,
     fallbackModel,
     preferredReasoning,

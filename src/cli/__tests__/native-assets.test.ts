@@ -59,7 +59,7 @@ describe('native asset helpers', () => {
   it('prefers musl cache paths before glibc and legacy Linux cache paths', () => {
     assert.deepEqual(
       resolveCachedNativeBinaryCandidatePaths('omg-sparkshell', '0.8.15', 'linux', 'x64', {
-        OMX_NATIVE_CACHE_DIR: '/tmp/omg-native-cache',
+        OMG_NATIVE_CACHE_DIR: '/tmp/omg-native-cache',
       }, {
         linuxLibcPreference: ['musl', 'glibc'],
       }),
@@ -179,15 +179,15 @@ describe('native asset helpers', () => {
         const hydrated = await hydrateNativeBinary('omg-sparkshell', {
           packageRoot: wd,
           env: {
-            OMX_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
-            OMX_NATIVE_CACHE_DIR: cacheDir,
+            OMG_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
+            OMG_NATIVE_CACHE_DIR: cacheDir,
           },
           platform: 'linux',
           arch: 'x64',
         });
 
         assert.equal(hydrated, resolveCachedNativeBinaryPath('omg-sparkshell', '0.8.15', 'linux', 'x64', {
-          OMX_NATIVE_CACHE_DIR: cacheDir,
+          OMG_NATIVE_CACHE_DIR: cacheDir,
         }, 'musl'));
         assert.equal(await readFile(hydrated!, 'utf-8'), '#!/bin/sh\necho hydrated\n');
       } finally {
@@ -247,15 +247,15 @@ describe('native asset helpers', () => {
         const hydrated = await hydrateNativeBinary('omg-sparkshell', {
           packageRoot: wd,
           env: {
-            OMX_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
-            OMX_NATIVE_CACHE_DIR: cacheDir,
+            OMG_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
+            OMG_NATIVE_CACHE_DIR: cacheDir,
           },
           platform: 'linux',
           arch: 'x64',
         });
 
         assert.equal(hydrated, resolveCachedNativeBinaryPath('omg-sparkshell', '0.8.15', 'linux', 'x64', {
-          OMX_NATIVE_CACHE_DIR: cacheDir,
+          OMG_NATIVE_CACHE_DIR: cacheDir,
         }, 'musl'));
         assert.equal(await readFile(hydrated!, 'utf-8'), '#!/bin/sh\necho hydrated-nested\n');
       } finally {
@@ -281,8 +281,8 @@ describe('native asset helpers', () => {
         const hydrated = await hydrateNativeBinary('omg-sparkshell', {
           packageRoot: wd,
           env: {
-            OMX_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
-            OMX_NATIVE_CACHE_DIR: join(wd, 'cache'),
+            OMG_NATIVE_MANIFEST_URL: `${server.baseUrl}/native-release-manifest.json`,
+            OMG_NATIVE_CACHE_DIR: join(wd, 'cache'),
           },
           platform: 'linux',
           arch: 'x64',

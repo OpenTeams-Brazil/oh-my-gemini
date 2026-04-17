@@ -18,7 +18,7 @@ describe('reconcileHudForPromptSubmit', () => {
     const result = await reconcileHudForPromptSubmit('/repo', {
       env: { TMUX: '1', TMUX_PANE: '%1' },
       listCurrentWindowPanes: () => [
-        { paneId: '%1', currentCommand: 'codex', startCommand: 'codex' },
+        { paneId: '%1', currentCommand: 'gemini', startCommand: 'gemini' },
       ],
       createHudWatchPane: (cwd, cmd, options) => {
         created.push({ cwd, cmd, options });
@@ -46,10 +46,10 @@ describe('reconcileHudForPromptSubmit', () => {
     const result = await reconcileHudForPromptSubmit('/repo', {
       env: { TMUX: '1', TMUX_PANE: '%1' },
       listCurrentWindowPanes: () => [
-        { paneId: '%1', currentCommand: 'codex', startCommand: 'codex' },
+        { paneId: '%1', currentCommand: 'gemini', startCommand: 'gemini' },
         { paneId: '%2', currentCommand: 'node', startCommand: 'node omg hud --watch' },
         { paneId: '%3', currentCommand: 'node', startCommand: 'node omg hud --watch' },
-        { paneId: '%4', currentCommand: 'codex', startCommand: 'codex' },
+        { paneId: '%4', currentCommand: 'gemini', startCommand: 'gemini' },
       ],
       killTmuxPane: (paneId) => {
         killed.push(paneId);
@@ -73,7 +73,7 @@ describe('reconcileHudForPromptSubmit', () => {
     const result = await reconcileHudForPromptSubmit('/repo', {
       env: { TMUX: '1', TMUX_PANE: '%1' },
       listCurrentWindowPanes: () => [
-        { paneId: '%1', currentCommand: 'codex', startCommand: 'codex' },
+        { paneId: '%1', currentCommand: 'gemini', startCommand: 'gemini' },
         { paneId: '%2', currentCommand: 'node', startCommand: 'node omg hud --watch' },
       ],
       resizeTmuxPane: (paneId, heightLines) => {

@@ -60,7 +60,7 @@ function runNotifyHook(
     encoding: 'utf-8',
     env: {
       ...process.env,
-      OMX_TEAM_WORKER: '',
+      OMG_TEAM_WORKER: '',
       TMUX: '',
       TMUX_PANE: '',
       ...envOverrides,
@@ -142,12 +142,12 @@ describe('notify-hook session-idle dedupe', () => {
       await writeFile(join(hooksDir, 'session-idle-counter.mjs'), buildSessionIdlePlugin(pluginStatePath), 'utf-8');
 
       const first = runNotifyHook(repoRoot, wd, 'Waiting for your next instruction.', 'turn-idle-5', {
-        OMX_IDLE_COOLDOWN_SECONDS: '0',
+        OMG_IDLE_COOLDOWN_SECONDS: '0',
       });
       assert.equal(first.status, 0, first.stderr || first.stdout);
 
       const second = runNotifyHook(repoRoot, wd, 'Waiting for your next instruction.', 'turn-idle-6', {
-        OMX_IDLE_COOLDOWN_SECONDS: '0',
+        OMG_IDLE_COOLDOWN_SECONDS: '0',
       });
       assert.equal(second.status, 0, second.stderr || second.stdout);
 

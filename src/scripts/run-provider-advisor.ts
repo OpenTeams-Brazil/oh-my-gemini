@@ -9,7 +9,7 @@ const PROVIDER_BINARIES: Record<string, string> = {
   claude: 'claude',
   gemini: 'gemini',
 };
-const ASK_ORIGINAL_TASK_ENV = 'OMX_ASK_ORIGINAL_TASK';
+const ASK_ORIGINAL_TASK_ENV = 'OMG_ASK_ORIGINAL_TASK';
 const ISSUE_WORK_PROMPT_PATTERNS = [
   /\bgh\s+issue\b/i,
   /\b(?:fix|work on|work|investigate|implement|triage|debug|review|handle)\s+issue\s*#?\d+\b/i,

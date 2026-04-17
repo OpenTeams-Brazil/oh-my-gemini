@@ -7,8 +7,8 @@ import { isHookPluginFeatureEnabled, dispatchHookEvent } from '../dispatcher.js'
 import { buildHookEvent } from '../events.js';
 
 describe('isHookPluginFeatureEnabled', () => {
-  it('returns true when OMX_HOOK_PLUGINS=1', () => {
-    assert.equal(isHookPluginFeatureEnabled({ OMX_HOOK_PLUGINS: '1' }), true);
+  it('returns true when OMG_HOOK_PLUGINS=1', () => {
+    assert.equal(isHookPluginFeatureEnabled({ OMG_HOOK_PLUGINS: '1' }), true);
   });
 
   it('returns true when env var is missing', () => {
@@ -16,7 +16,7 @@ describe('isHookPluginFeatureEnabled', () => {
   });
 
   it('returns false for "0"', () => {
-    assert.equal(isHookPluginFeatureEnabled({ OMX_HOOK_PLUGINS: '0' }), false);
+    assert.equal(isHookPluginFeatureEnabled({ OMG_HOOK_PLUGINS: '0' }), false);
   });
 });
 
@@ -69,7 +69,7 @@ describe('dispatchHookEvent', () => {
       const event = buildHookEvent('session-start');
       const result = await dispatchHookEvent(event, {
         cwd,
-        env: { OMX_HOOK_PLUGINS: '1' },
+        env: { OMG_HOOK_PLUGINS: '1' },
       });
 
       assert.equal(result.enabled, true);
@@ -95,7 +95,7 @@ describe('dispatchHookEvent', () => {
       const event = buildHookEvent('session-start');
       const result = await dispatchHookEvent(event, {
         cwd,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1' },
       });
 
       assert.equal(result.enabled, true);
@@ -125,7 +125,7 @@ export async function onHookEvent() {}
       const event = buildHookEvent('session-start');
       const result = await dispatchHookEvent(event, {
         cwd,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1' },
       });
 
       assert.equal(result.enabled, true);
@@ -192,7 +192,7 @@ export async function onHookEvent() {}
       const event = buildHookEvent('session-start');
       const result = await dispatchHookEvent(event, {
         cwd,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1', OMX_TEAM_WORKER: 'worker-1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1', OMG_TEAM_WORKER: 'worker-1' },
       });
 
       assert.equal(result.enabled, true);
@@ -222,7 +222,7 @@ export async function onHookEvent() {}
       const result = await dispatchHookEvent(event, {
         cwd,
         timeoutMs: 50,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1' },
       });
       const elapsedMs = Date.now() - startedAt;
 
@@ -257,11 +257,11 @@ export async function onHookEvent() {}
 
       const first = await dispatchHookEvent(event, {
         cwd,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1' },
       });
       const second = await dispatchHookEvent(event, {
         cwd,
-        env: { ...process.env, OMX_HOOK_PLUGINS: '1' },
+        env: { ...process.env, OMG_HOOK_PLUGINS: '1' },
       });
 
       assert.equal(first.enabled, true);

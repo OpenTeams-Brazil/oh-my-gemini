@@ -36,7 +36,7 @@ import {
   buildNativePostToolUseOutput,
   buildNativePreToolUseOutput,
   detectMcpTransportFailure,
-} from "./codex-native-pre-post.js";
+} from "./gemini-native-pre-post.js";
 import {
   buildNativeHookEvent,
 } from "../hooks/extensibility/events.js";
@@ -294,8 +294,8 @@ function looksLikeShellCommand(command: string): boolean {
 }
 
 function looksLikeGeminiCommand(command: string): boolean {
-  if (/codex-native-hook(?:\.js)?/i.test(command)) return false;
-  return /\bcodex(?:\.js)?\b/i.test(command);
+  if (/gemini-native-hook(?:\.js)?/i.test(command)) return false;
+  return /\bgemini(?:\.js)?\b/i.test(command);
 }
 
 export function resolveSessionOwnerPidFromAncestry(
@@ -318,8 +318,8 @@ export function resolveSessionOwnerPidFromAncestry(
     currentPid = nextPid;
   }
 
-  const codexAncestor = lineage.find((entry) => looksLikeGeminiCommand(entry.command));
-  if (codexAncestor) return codexAncestor.pid;
+  const geminiAncestor = lineage.find((entry) => looksLikeGeminiCommand(entry.command));
+  if (geminiAncestor) return geminiAncestor.pid;
 
   if (lineage.length >= 2 && looksLikeShellCommand(lineage[0]?.command || "")) {
     return lineage[1].pid;
@@ -563,12 +563,12 @@ async function resolveTeamStateDirForWorkerContext(
   cwd: string,
   workerContext: { teamName: string; workerName: string },
 ): Promise<string> {
-  const explicitStateRoot = safeString(process.env.OMX_TEAM_STATE_ROOT).trim();
+  const explicitStateRoot = safeString(process.env.OMG_TEAM_STATE_ROOT).trim();
   if (explicitStateRoot) {
     return resolve(cwd, explicitStateRoot);
   }
 
-  const leaderCwd = safeString(process.env.OMX_TEAM_LEADER_CWD).trim();
+  const leaderCwd = safeString(process.env.OMG_TEAM_LEADER_CWD).trim();
   const candidateStateDirs = [
     ...(leaderCwd ? [join(resolve(leaderCwd), ".omg", "state")] : []),
     join(cwd, ".omg", "state"),
@@ -598,7 +598,7 @@ async function resolveTeamStateDirForWorkerContext(
 async function buildTeamWorkerStopOutput(
   cwd: string,
 ): Promise<Record<string, unknown> | null> {
-  const workerContext = parseTeamWorkerEnv(safeString(process.env.OMX_TEAM_WORKER));
+  const workerContext = parseTeamWorkerEnv(safeString(process.env.OMG_TEAM_WORKER));
   if (!workerContext) return null;
 
   const stateDir = await resolveTeamStateDirForWorkerContext(cwd, workerContext);
@@ -637,7 +637,7 @@ async function buildTeamWorkerStopOutput(
 }
 
 function hasTeamWorkerContext(): boolean {
-  return parseTeamWorkerEnv(safeString(process.env.OMX_TEAM_WORKER)) !== null;
+  return parseTeamWorkerEnv(safeString(process.env.OMG_TEAM_WORKER)) !== null;
 }
 
 function isStopExempt(payload: GeminiHookPayload): boolean {
@@ -966,7 +966,7 @@ function readNativeStopSessionKey(
 }
 
 function hasManagedStopSessionEnv(sessionIds: string[]): boolean {
-  const envSessionId = safeString(process.env.OMX_SESSION_ID).trim();
+  const envSessionId = safeString(process.env.OMG_SESSION_ID).trim();
   if (!envSessionId) return false;
   return sessionIds.length === 0 || sessionIds.includes(envSessionId);
 }
@@ -1471,35 +1471,20 @@ export async function dispatchGeminiNativeHook(
       };
     }
   } else if (hookEventName === "PreToolUse") {
-    const legacyName = safeString(payload.tool_name).trim();
-    const nativeName = translateToolName(legacyName);
+    const toolName = safeString(payload.tool_name).trim();
     const args = safeObject(payload.tool_input);
-    
-    logToolCall(legacyName, nativeName, args, "pending");
-    
+
+    logToolCall(toolName, toolName, args, "pending");
+
     outputJson = buildNativePreToolUseOutput(payload);
-    
-    // Shim Layer: If names differ, we can try to override arguments or provide a system message.
-    // For now, we'll just log it and provide a hint if it's a legacy tool.
-    if (legacyName !== nativeName) {
-      const shimOutput = {
-        systemMessage: `Legacy tool ${legacyName} detected. Mapping to native Gemini tool ${nativeName}.`,
-        hookSpecificOutput: {
-          tool_name: nativeName, // This might not be supported by Gemini CLI but we log it.
-        }
-      };
-      outputJson = outputJson ? { ...outputJson, ...shimOutput } : shimOutput;
-    }
   } else if (hookEventName === "PostToolUse") {
-    const legacyName = safeString(payload.tool_name).trim();
-    const nativeName = translateToolName(legacyName);
+    const toolName = safeString(payload.tool_name).trim();
     const args = safeObject(payload.tool_input);
     const result = payload.tool_response;
-    
-    logToolCall(legacyName, nativeName, args, "completed", result);
 
-    if (detectMcpTransportFailure(payload)) {
-      await markTeamTransportFailure(cwd, payload);
+    logToolCall(toolName, toolName, args, "completed", result);
+
+    if (detectMcpTransportFailure(payload)) {      await markTeamTransportFailure(cwd, payload);
     }
     outputJson = buildNativePostToolUseOutput(payload);
   } else if (hookEventName === "Stop") {
@@ -1551,7 +1536,7 @@ export async function runGeminiNativeHookCli(): Promise<void> {
       hookSpecificOutput: {
         hookEventName: "Unknown",
         additionalContext:
-          `stdin JSON parsing failed inside codex-native-hook: ${parseError.message}. Emit valid JSON from the native hook caller before retrying.`,
+          `stdin JSON parsing failed inside gemini-native-hook: ${parseError.message}. Emit valid JSON from the native hook caller before retrying.`,
       },
     })}\n`);
     return;
@@ -1566,7 +1551,7 @@ export async function runGeminiNativeHookCli(): Promise<void> {
 if (import.meta.url === `file://${process.argv[1]}`) {
   runGeminiNativeHookCli().catch((error) => {
     process.stderr.write(
-      `[omg] codex-native-hook failed: ${
+      `[omg] gemini-native-hook failed: ${
         error instanceof Error ? error.message : String(error)
       }\n`,
     );

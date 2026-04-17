@@ -30,7 +30,7 @@
       </ul>
 
       <h2>Installation</h2>
-      <pre><code>npm install -g @openai/codex oh-my-gemini
+      <pre><code>npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg doctor</code></pre>
 
@@ -52,8 +52,8 @@ omg                    # standard launch</code></pre>
       <p>OMX layers project instructions by default (extends Gemini behavior, does not replace/bypass Gemini core system policies):</p>
       <pre><code>-c model_instructions_file="&lt;cwd&gt;/GEMINI.md"</code></pre>
       <p>Override behavior when needed:</p>
-      <pre><code>OMX_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg
-OMX_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg</code></pre>
+      <pre><code>OMG_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg
+OMG_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg</code></pre>
 
       <h2>Troubleshooting</h2>
       <table>

@@ -79,23 +79,23 @@ describe('Wiki Storage', () => {
     });
 
     it('should append to existing .gitignore', () => {
-      const omcDir = path.join(tempDir, '.omg');
-      fs.mkdirSync(omcDir, { recursive: true });
-      fs.writeFileSync(path.join(omcDir, '.gitignore'), 'state/\n');
+      const omgDir = path.join(tempDir, '.omg');
+      fs.mkdirSync(omgDir, { recursive: true });
+      fs.writeFileSync(path.join(omgDir, '.gitignore'), 'state/\n');
 
       ensureWikiDir(tempDir);
-      const content = fs.readFileSync(path.join(omcDir, '.gitignore'), 'utf-8');
+      const content = fs.readFileSync(path.join(omgDir, '.gitignore'), 'utf-8');
       expect(content).toContain('state/');
       expect(content).toContain('wiki/');
     });
 
     it('should not duplicate wiki/ in .gitignore', () => {
-      const omcDir = path.join(tempDir, '.omg');
-      fs.mkdirSync(omcDir, { recursive: true });
-      fs.writeFileSync(path.join(omcDir, '.gitignore'), 'wiki/\n');
+      const omgDir = path.join(tempDir, '.omg');
+      fs.mkdirSync(omgDir, { recursive: true });
+      fs.writeFileSync(path.join(omgDir, '.gitignore'), 'wiki/\n');
 
       ensureWikiDir(tempDir);
-      const content = fs.readFileSync(path.join(omcDir, '.gitignore'), 'utf-8');
+      const content = fs.readFileSync(path.join(omgDir, '.gitignore'), 'utf-8');
       const matches = content.match(/wiki\//g);
       expect(matches?.length).toBe(1);
     });

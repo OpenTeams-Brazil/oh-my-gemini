@@ -62,12 +62,12 @@ function runNotifyHookAsWorker(
     env: {
       ...process.env,
       PATH: `${fakeBinDir}:${process.env.PATH || ''}`,
-      OMX_TEAM_WORKER: workerEnv,
-      OMX_TEAM_STATE_ROOT: join(cwd, '.omg', 'state'),
-      OMX_TEAM_LEADER_CWD: '',
-      OMX_MODEL_INSTRUCTIONS_FILE: '',
-      OMX_TEAM_WORKER_IDLE_NOTIFY: 'false',
-      OMX_TEAM_ALL_IDLE_COOLDOWN_MS: '500', // short cooldown for tests
+      OMG_TEAM_WORKER: workerEnv,
+      OMG_TEAM_STATE_ROOT: join(cwd, '.omg', 'state'),
+      OMG_TEAM_LEADER_CWD: '',
+      OMG_MODEL_INSTRUCTIONS_FILE: '',
+      OMG_TEAM_WORKER_IDLE_NOTIFY: 'false',
+      OMG_TEAM_ALL_IDLE_COOLDOWN_MS: '500', // short cooldown for tests
       TMUX: '',
       TMUX_PANE: '',
       ...extraEnv,
@@ -193,9 +193,9 @@ describe('notify-hook all-workers-idle notification', () => {
       await writeFile(fakeTmuxPath, buildFakeTmux(tmuxLogPath));
       await chmod(fakeTmuxPath, 0o755);
 
-      const first = runNotifyHookAsWorker(cwd, fakeBinDir, `${teamName}/worker-1`, { OMX_TEAM_ALL_IDLE_COOLDOWN_MS: '600000' });
+      const first = runNotifyHookAsWorker(cwd, fakeBinDir, `${teamName}/worker-1`, { OMG_TEAM_ALL_IDLE_COOLDOWN_MS: '600000' });
       assert.equal(first.status, 0, `notify-hook failed: ${first.stderr || first.stdout}`);
-      const second = runNotifyHookAsWorker(cwd, fakeBinDir, `${teamName}/worker-1`, { OMX_TEAM_ALL_IDLE_COOLDOWN_MS: '600000' });
+      const second = runNotifyHookAsWorker(cwd, fakeBinDir, `${teamName}/worker-1`, { OMG_TEAM_ALL_IDLE_COOLDOWN_MS: '600000' });
       assert.equal(second.status, 0, `notify-hook failed: ${second.stderr || second.stdout}`);
 
       const eventsPath = join(teamDir, 'events', 'events.ndjson');
@@ -349,7 +349,7 @@ if [[ "$cmd" == "display-message" ]]; then
     exit 0
   fi
   if [[ "$format" == "#{pane_current_command}" && "$target" == "%182" ]]; then
-    echo "codex"
+    echo "gemini"
     exit 0
   fi
   exit 0
@@ -635,7 +635,7 @@ exit 0
 
       // Use a long cooldown (10 minutes) so the 100ms-old entry blocks the notification
       const result = runNotifyHookAsWorker(cwd, fakeBinDir, `${teamName}/worker-1`, {
-        OMX_TEAM_ALL_IDLE_COOLDOWN_MS: '600000',
+        OMG_TEAM_ALL_IDLE_COOLDOWN_MS: '600000',
       });
       assert.equal(result.status, 0, `notify-hook failed: ${result.stderr || result.stdout}`);
 
@@ -705,7 +705,7 @@ exit 0
       assert.ok(idleEvent.created_at, 'event should have a created_at timestamp');
 
       const tmuxLog = await readFile(tmuxLogPath, 'utf-8');
-      assert.doesNotMatch(tmuxLog, /\[OMX_INTENT:/);
+      assert.doesNotMatch(tmuxLog, /\[OMG_INTENT:/);
     });
   });
 
@@ -742,7 +742,7 @@ exit 0
       await writeFile(fakeTmuxPath, buildFakeTmux(tmuxLogPath));
       await chmod(fakeTmuxPath, 0o755);
 
-      // Run as LEADER (no OMX_TEAM_WORKER env var)
+      // Run as LEADER (no OMG_TEAM_WORKER env var)
       const payload = {
         cwd,
         type: 'agent-turn-complete',
@@ -756,10 +756,10 @@ exit 0
         env: {
           ...process.env,
           PATH: `${fakeBinDir}:${process.env.PATH || ''}`,
-          OMX_TEAM_WORKER: '', // empty = not a worker
-          OMX_TEAM_STATE_ROOT: '',
-          OMX_TEAM_LEADER_CWD: '',
-          OMX_MODEL_INSTRUCTIONS_FILE: '',
+          OMG_TEAM_WORKER: '', // empty = not a worker
+          OMG_TEAM_STATE_ROOT: '',
+          OMG_TEAM_LEADER_CWD: '',
+          OMG_MODEL_INSTRUCTIONS_FILE: '',
           TMUX: '',
           TMUX_PANE: '',
         },

@@ -17,7 +17,7 @@ Verdict: **GO** ✅
 ### Multi-skill / workflow state
 - `src/hooks/keyword-detector.ts`, `src/skills/state.ts` — planning-state preservation during mixed prompt routing
 - `src/modes/workflow-state.ts`, `src/modes/reconcile.ts` — handoff correctness, malformed-state rejection
-- `src/scripts/codex-native-hook.ts` — session-scoped hook contract enforcement
+- `src/scripts/gemini-native-hook.ts` — session-scoped hook contract enforcement
 
 ### Windows
 - `src/team/mux/psmux.ts` — launcher path resolution

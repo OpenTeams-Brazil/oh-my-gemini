@@ -14,7 +14,7 @@ export const RALPH_HELP = `omg ralph - Launch Gemini with ralph persistence mode
 Usage:
   omg ralph [task text...]
   omg ralph --prd "<task text>"
-  omg ralph [ralph-options] [codex-args...] [task text...]
+  omg ralph [ralph-options] [gemini-args...] [task text...]
 
 Options:
   --help, -h           Show this help message
@@ -37,8 +37,8 @@ Common patterns:
 `;
 
 const VALUE_TAKING_FLAGS = new Set(['--model', '--provider', '--config', '-c', '-i', '--images-dir']);
-const RALPH_OMX_FLAGS = new Set(['--prd', '--no-deslop']);
-const RALPH_APPEND_ENV = 'OMX_RALPH_APPEND_INSTRUCTIONS_FILE';
+const RALPH_OMG_FLAGS = new Set(['--prd', '--no-deslop']);
+const RALPH_APPEND_ENV = 'OMG_RALPH_APPEND_INSTRUCTIONS_FILE';
 const REQUIRED_RALPH_PRD_JSON_PATH = '.omg/prd.json';
 const COMPLETED_RALPH_STORY_STATUSES = new Set(['passed', 'complete', 'completed']);
 const APPROVED_RALPH_ARCHITECT_VERDICTS = new Set(['approve', 'approved']);
@@ -182,7 +182,7 @@ export function normalizeRalphCliArgs(args: readonly string[]): string[] {
 export function filterRalphGeminiArgs(args: readonly string[]): string[] {
   const filtered: string[] = [];
   for (const token of args) {
-    if (RALPH_OMX_FLAGS.has(token.toLowerCase())) continue;
+    if (RALPH_OMG_FLAGS.has(token.toLowerCase())) continue;
     filtered.push(token);
   }
   return filtered;
@@ -291,15 +291,15 @@ export async function ralphCommand(args: string[]): Promise<void> {
   console.log(`[ralph] available_agent_types: ${staffingPlan.rosterSummary}`);
   console.log(`[ralph] staffing_plan: ${staffingPlan.staffingSummary}`);
   const { launchWithHud } = await import('./index.js');
-  const codexArgsBase = filterRalphGeminiArgs(normalizedArgs);
-  const codexArgs = explicitTask === 'ralph-cli-launch' && approvedHint?.task
-    ? [...codexArgsBase, approvedHint.task]
-    : codexArgsBase;
+  const geminiArgsBase = filterRalphGeminiArgs(normalizedArgs);
+  const geminiArgs = explicitTask === 'ralph-cli-launch' && approvedHint?.task
+    ? [...geminiArgsBase, approvedHint.task]
+    : geminiArgsBase;
   const appendixPath = sessionFiles.instructionsPath;
   const previousAppendixEnv = process.env[RALPH_APPEND_ENV];
   process.env[RALPH_APPEND_ENV] = appendixPath;
   try {
-    await launchWithHud(codexArgs);
+    await launchWithHud(geminiArgs);
   } finally {
     if (typeof previousAppendixEnv === 'string') process.env[RALPH_APPEND_ENV] = previousAppendixEnv;
     else delete process.env[RALPH_APPEND_ENV];

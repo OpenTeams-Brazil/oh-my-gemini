@@ -33,7 +33,7 @@ import {
   getRootModelName,
   hasLegacyOmxTeamRunTable,
 } from "../config/generator.js";
-import { mergeManagedCodexHooksConfig } from "../config/codex-hooks.js";
+import { mergeManagedGeminiHooksConfig } from "../config/gemini-hooks.js";
 import {
   getLegacyUnifiedMcpRegistryCandidate,
   getUnifiedMcpRegistryCandidates,
@@ -51,7 +51,7 @@ import { DEFAULT_FRONTIER_MODEL } from "../config/models.js";
 import {
   addGeneratedAgentsMarker,
   hasOmxManagedAgentsSections,
-  isOmxGeneratedAgentsMd,
+  isOmgGeneratedAgentsMd,
 } from "../utils/agents-md.js";
 import {
   resolveAgentsModelTableContext,
@@ -169,10 +169,10 @@ const REQUIRED_TEAM_CLI_API_MARKERS = [
 ] as const;
 
 const DEFAULT_SETUP_SCOPE: SetupScope = "user";
-const LEGACY_SETUP_MODEL = "gpt-5.3-codex";
+const LEGACY_SETUP_MODEL = "gpt-5.3-gemini";
 const DEFAULT_SETUP_MODEL = DEFAULT_FRONTIER_MODEL;
 const OBSOLETE_NATIVE_AGENT_FIELD = ["skill", "ref"].join("_");
-const TUI_OWNED_BY_CODEX_VERSION = [0, 107, 0] as const;
+const TUI_OWNED_BY_GEMINI_VERSION = [0, 107, 0] as const;
 
 function createEmptyCategorySummary(): SetupCategorySummary {
   return {
@@ -521,7 +521,7 @@ function shouldOmxManageTuiFromGeminiVersion(versionOutput: string | null): bool
   if (!versionOutput) return true;
   const parsed = parseSemverTriplet(versionOutput);
   if (!parsed) return true;
-  return !semverGte(parsed, TUI_OWNED_BY_CODEX_VERSION);
+  return !semverGte(parsed, TUI_OWNED_BY_GEMINI_VERSION);
 }
 
 async function promptForAgentsOverwrite(
@@ -851,7 +851,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
   const existingHooksContent = existsSync(scopeDirs.geminiHooksFile)
     ? await readFile(scopeDirs.geminiHooksFile, "utf-8")
     : null;
-  const hooksConfig = mergeManagedCodexHooksConfig(
+  const hooksConfig = mergeManagedGeminiHooksConfig(
     existingHooksContent,
     pkgRoot,
   );
@@ -1049,7 +1049,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     "  5. Native agent defaults configured in config.toml [agents] and TOML files written to .gemini/agents/",
   );
   console.log(
-    '  6. "omg explore" and "omg sparkshell" can hydrate native release binaries on first use; source installs still allow repo-local fallbacks and OMX_EXPLORE_BIN / OMX_SPARKSHELL_BIN overrides',
+    '  6. "omg explore" and "omg sparkshell" can hydrate native release binaries on first use; source installs still allow repo-local fallbacks and OMG_EXPLORE_BIN / OMG_SPARKSHELL_BIN overrides',
   );
   if (isGitHubCliConfigured()) {
     console.log("\nSupport the project: gh repo star Yeachan-Heo/oh-my-gemini");
@@ -1217,7 +1217,7 @@ async function syncManagedAgentsContent(
     if (!shouldOverwrite) {
       summary.skipped += 1;
       if (options.verbose) {
-        const managedLabel = isOmxGeneratedAgentsMd(existing)
+        const managedLabel = isOmgGeneratedAgentsMd(existing)
           ? "managed"
           : "unmanaged";
         console.log(`  skipped ${managedLabel} GEMINI.md at ${dstPath}`);

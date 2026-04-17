@@ -8,7 +8,7 @@ export function resolveCanonicalTeamStateRoot(
   leaderCwd: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const explicit = env.OMX_TEAM_STATE_ROOT;
+  const explicit = env.OMG_TEAM_STATE_ROOT;
   if (typeof explicit === 'string' && explicit.trim() !== '') {
     return resolve(leaderCwd, explicit.trim());
   }

@@ -91,8 +91,8 @@ describe('evaluateInjectionGuards', () => {
     allowed_modes: ['ralph'],
     cooldown_ms: 1000,
     max_injections_per_session: 2,
-    prompt_template: 'Continue [OMX_TMUX_INJECT]',
-    marker: '[OMX_TMUX_INJECT]',
+    prompt_template: 'Continue [OMG_TMUX_INJECT]',
+    marker: '[OMG_TMUX_INJECT]',
     dry_run: false,
     log_level: 'info',
   });
@@ -258,7 +258,7 @@ describe('isPaneRunningShell', () => {
 
   it('returns false for agent processes', () => {
     assert.equal(isPaneRunningShell('node'), false);
-    assert.equal(isPaneRunningShell('codex'), false);
+    assert.equal(isPaneRunningShell('gemini'), false);
     assert.equal(isPaneRunningShell('claude'), false);
     assert.equal(isPaneRunningShell('python'), false);
   });
@@ -399,7 +399,7 @@ describe('resolveGeminiPane', () => {
     const { tmpdir } = await import('node:os');
     const { join } = await import('node:path');
 
-    const fakeBinDir = await mkdtemp(join(tmpdir(), 'omg-resolve-codex-pane-'));
+    const fakeBinDir = await mkdtemp(join(tmpdir(), 'omg-resolve-gemini-pane-'));
     const fakeTmuxPath = join(fakeBinDir, 'tmux');
     const previousPath = process.env.PATH;
     const previousTmuxPane = process.env.TMUX_PANE;
@@ -435,7 +435,7 @@ if [[ "$cmd" == "display-message" ]]; then
   exit 1
 fi
 if [[ "$cmd" == "list-panes" ]]; then
-  printf "%%2\tnode\tnode /pkg/dist/cli/omg.js hud --watch\n%%42\tnode\tcodex --model gpt-5\n"
+  printf "%%2\tnode\tnode /pkg/dist/cli/omg.js hud --watch\n%%42\tnode\tgemini --model gpt-5\n"
   exit 0
 fi
 echo "unsupported" >&2

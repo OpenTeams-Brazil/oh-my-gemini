@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { buildManagedCodexHooksConfig } from '../../config/codex-hooks.js';
+import { buildManagedGeminiHooksConfig } from '../../config/gemini-hooks.js';
 
 function runOmx(
   cwd: string,
@@ -49,7 +49,7 @@ function buildOmxConfig(): string {
     '[features]',
     'multi_agent = true',
     'child_agents_md = true',
-    'codex_hooks = true',
+    'gemini_hooks = true',
     '',
     '# ============================================================',
     '# oh-my-gemini (OMX) Configuration',
@@ -120,7 +120,7 @@ function buildConfigWithSeededModelContext(): string {
     '[features]',
     'multi_agent = true',
     'child_agents_md = true',
-    'codex_hooks = true',
+    'gemini_hooks = true',
     '',
     '# ============================================================',
     '# oh-my-gemini (OMX) Configuration',
@@ -151,7 +151,7 @@ function buildMixedConfig(): string {
     '[features]',
     'multi_agent = true',
     'child_agents_md = true',
-    'codex_hooks = true',
+    'gemini_hooks = true',
     'web_search = true',
     '',
     '[mcp_servers.user_custom]',
@@ -206,12 +206,12 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
       await writeFile(
-        join(codexDir, 'hooks.json'),
-        JSON.stringify(buildManagedCodexHooksConfig(wd), null, 2) + '\n',
+        join(geminiDir, 'hooks.json'),
+        JSON.stringify(buildManagedGeminiHooksConfig(wd), null, 2) + '\n',
       );
 
       const res = runOmx(wd, ['uninstall', '--dry-run'], { HOME: home });
@@ -223,9 +223,9 @@ describe('omg uninstall', () => {
       assert.match(res.stdout, /omg_state/);
 
       // Config should NOT have been modified
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       assert.match(config, /oh-my-gemini \(OMX\) Configuration/);
-      assert.equal(existsSync(join(codexDir, 'hooks.json')), true);
+      assert.equal(existsSync(join(geminiDir, 'hooks.json')), true);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
@@ -235,12 +235,12 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
       await writeFile(
-        join(codexDir, 'hooks.json'),
-        JSON.stringify(buildManagedCodexHooksConfig(wd), null, 2) + '\n',
+        join(geminiDir, 'hooks.json'),
+        JSON.stringify(buildManagedGeminiHooksConfig(wd), null, 2) + '\n',
       );
 
       const res = runOmx(wd, ['uninstall'], { HOME: home });
@@ -248,7 +248,7 @@ describe('omg uninstall', () => {
       assert.equal(res.status, 0, res.stderr || res.stdout);
       assert.match(res.stdout, /Removed OMX configuration block/);
 
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       assert.doesNotMatch(config, /oh-my-gemini \(OMX\) Configuration/);
       assert.doesNotMatch(config, /omg_state/);
       assert.doesNotMatch(config, /omg_memory/);
@@ -262,8 +262,8 @@ describe('omg uninstall', () => {
       assert.doesNotMatch(config, /developer_instructions\s*=/);
       assert.doesNotMatch(config, /multi_agent\s*=/);
       assert.doesNotMatch(config, /child_agents_md\s*=/);
-      assert.doesNotMatch(config, /codex_hooks\s*=/);
-      assert.equal(existsSync(join(codexDir, 'hooks.json')), false);
+      assert.doesNotMatch(config, /gemini_hooks\s*=/);
+      assert.equal(existsSync(join(geminiDir, 'hooks.json')), false);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
@@ -274,15 +274,15 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildMixedConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildMixedConfig());
 
       const res = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
 
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       // User settings preserved
       assert.match(config, /model = "o4-mini"/);
       assert.match(config, /\[mcp_servers\.user_custom\]/);
@@ -293,7 +293,7 @@ describe('omg uninstall', () => {
       assert.doesNotMatch(config, /notify\s*=.*node/);
       assert.doesNotMatch(config, /multi_agent/);
       assert.doesNotMatch(config, /child_agents_md/);
-      assert.doesNotMatch(config, /codex_hooks/);
+      assert.doesNotMatch(config, /gemini_hooks/);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
@@ -303,18 +303,18 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
       await writeFile(
-        join(codexDir, 'hooks.json'),
+        join(geminiDir, 'hooks.json'),
         JSON.stringify(
           {
             hooks: {
               SessionStart: [
                 {
                   hooks: [
-                    { type: 'command', command: 'node "/repo/dist/scripts/codex-native-hook.js"' },
+                    { type: 'command', command: 'node "/repo/dist/scripts/gemini-native-hook.js"' },
                     { type: 'command', command: 'echo keep-me' },
                   ],
                 },
@@ -330,12 +330,12 @@ describe('omg uninstall', () => {
       const res = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
-      assert.equal(existsSync(join(codexDir, 'hooks.json')), true);
+      assert.equal(existsSync(join(geminiDir, 'hooks.json')), true);
 
-      const hooks = await readFile(join(codexDir, 'hooks.json'), 'utf-8');
+      const hooks = await readFile(join(geminiDir, 'hooks.json'), 'utf-8');
       assert.match(hooks, /echo keep-me/);
       assert.match(hooks, /"version": 1/);
-      assert.doesNotMatch(hooks, /codex-native-hook\.js/);
+      assert.doesNotMatch(hooks, /gemini-native-hook\.js/);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
@@ -346,15 +346,15 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildConfigWithSeededModelContext());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildConfigWithSeededModelContext());
 
       const res = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
 
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       assert.match(config, /^model = "gpt-5\.4"$/m);
       assert.match(config, /^model_context_window = 1000000$/m);
       assert.match(config, /^model_auto_compact_token_limit = 900000$/m);
@@ -371,9 +371,9 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
 
       const res = runOmx(wd, ['uninstall', '--keep-config'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
@@ -381,7 +381,7 @@ describe('omg uninstall', () => {
       assert.match(res.stdout, /--keep-config/);
 
       // Config should NOT have been modified
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       assert.match(config, /oh-my-gemini \(OMX\) Configuration/);
       assert.match(config, /omg_state/);
     } finally {
@@ -420,13 +420,13 @@ describe('omg uninstall', () => {
 
       // Create project-scoped setup
       const omgDir = join(wd, '.omg');
-      const codexDir = join(wd, '.gemini');
+      const geminiDir = join(wd, '.gemini');
       await mkdir(omgDir, { recursive: true });
-      await mkdir(join(codexDir, 'prompts'), { recursive: true });
+      await mkdir(join(geminiDir, 'prompts'), { recursive: true });
       await writeFile(join(omgDir, 'setup-scope.json'), JSON.stringify({ scope: 'project' }));
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
       // Install a prompt
-      await writeFile(join(codexDir, 'prompts', 'executor.md'), '# executor');
+      await writeFile(join(geminiDir, 'prompts', 'executor.md'), '# executor');
 
       const res = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
@@ -434,7 +434,7 @@ describe('omg uninstall', () => {
       assert.match(res.stdout, /Resolved scope: project/);
 
       // Project-local config.toml should be cleaned
-      const config = await readFile(join(codexDir, 'config.toml'), 'utf-8');
+      const config = await readFile(join(geminiDir, 'config.toml'), 'utf-8');
       assert.doesNotMatch(config, /oh-my-gemini \(OMX\) Configuration/);
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -460,9 +460,9 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
 
       const res = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(res.error)) return;
@@ -482,8 +482,8 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalHelp = join(codexDir, 'skills', 'help');
+      const geminiDir = join(home, '.gemini');
+      const canonicalHelp = join(geminiDir, 'skills', 'help');
       const legacyHelp = join(home, '.agents', 'skills', 'help');
       await mkdir(canonicalHelp, { recursive: true });
       await mkdir(legacyHelp, { recursive: true });
@@ -508,8 +508,8 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalHelp = join(codexDir, 'skills', 'help');
+      const geminiDir = join(home, '.gemini');
+      const canonicalHelp = join(geminiDir, 'skills', 'help');
       const legacyDoctor = join(home, '.agents', 'skills', 'doctor');
       await mkdir(canonicalHelp, { recursive: true });
       await mkdir(legacyDoctor, { recursive: true });
@@ -534,8 +534,8 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalHelp = join(codexDir, 'skills', 'help');
+      const geminiDir = join(home, '.gemini');
+      const canonicalHelp = join(geminiDir, 'skills', 'help');
       await mkdir(canonicalHelp, { recursive: true });
       await writeFile(join(canonicalHelp, 'SKILL.md'), '# canonical help\n');
 
@@ -577,8 +577,8 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-legacy-link-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalSkillsRoot = join(codexDir, 'skills');
+      const geminiDir = join(home, '.gemini');
+      const canonicalSkillsRoot = join(geminiDir, 'skills');
       const canonicalSkill = join(canonicalSkillsRoot, 'doctor');
       const legacyRoot = join(home, '.agents', 'skills');
       await mkdir(canonicalSkill, { recursive: true });
@@ -590,7 +590,7 @@ describe('omg uninstall', () => {
         process.platform === 'win32' ? 'junction' : 'dir',
       );
 
-      const res = runOmx(wd, ['uninstall', '--keep-config'], { HOME: home, GEMINI_HOME: codexDir });
+      const res = runOmx(wd, ['uninstall', '--keep-config'], { HOME: home, GEMINI_HOME: geminiDir });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
       assert.doesNotMatch(res.stdout, /legacy ~\/\.agents\/skills/);
@@ -627,9 +627,9 @@ describe('omg uninstall', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-uninstall-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'config.toml'), buildOmxConfig());
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'config.toml'), buildOmxConfig());
 
       const first = runOmx(wd, ['uninstall'], { HOME: home });
       if (shouldSkipForSpawnPermissions(first.error)) return;

@@ -67,7 +67,7 @@ describe('runHudAuthorityTick', () => {
     ]);
     assert.equal(call.options.cwd, '/tmp/project');
     assert.equal(call.options.timeoutMs, 4321);
-    assert.equal(call.options.env.OMX_HUD_AUTHORITY, '1');
+    assert.equal(call.options.env.OMG_HUD_AUTHORITY, '1');
     assert.equal(call.options.env.CUSTOM_ENV, '1');
   });
 });

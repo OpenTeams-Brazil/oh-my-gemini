@@ -6,11 +6,11 @@ import { tmpdir } from 'node:os';
 
 const ENV_KEYS = [
   'GEMINI_HOME',
-  'OMX_NOTIFY_TEMP',
-  'OMX_NOTIFY_TEMP_CONTRACT',
-  'OMX_NOTIFY_PROFILE',
-  'OMX_DISCORD_WEBHOOK_URL',
-  'OMX_OPENCLAW',
+  'OMG_NOTIFY_TEMP',
+  'OMG_NOTIFY_TEMP_CONTRACT',
+  'OMG_NOTIFY_PROFILE',
+  'OMG_DISCORD_WEBHOOK_URL',
+  'OMG_OPENCLAW',
 ] as const;
 
 function clearEnv(): void {

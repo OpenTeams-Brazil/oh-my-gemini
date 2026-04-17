@@ -18,7 +18,7 @@ import {
 } from '../state.js';
 import { isScalingEnabled, scaleUp, scaleDown } from '../scaling.js';
 
-delete process.env.OMX_TEAM_STATE_ROOT;
+delete process.env.OMG_TEAM_STATE_ROOT;
 
 async function initCommittedGitRepo(cwd: string): Promise<void> {
   execFileSync('git', ['init'], { cwd, stdio: 'pipe' });
@@ -47,50 +47,50 @@ describe('isScalingEnabled', () => {
   });
 
   it('returns false when env var is empty string', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: '' }), false);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: '' }), false);
   });
 
   it('returns false when env var is "0"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: '0' }), false);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: '0' }), false);
   });
 
   it('returns false when env var is "false"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'false' }), false);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'false' }), false);
   });
 
   it('returns false when env var is "no"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'no' }), false);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'no' }), false);
   });
 
   it('returns true when env var is "1"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: '1' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: '1' }), true);
   });
 
   it('returns true when env var is "true"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'true' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'true' }), true);
   });
 
   it('returns true when env var is "yes"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'yes' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'yes' }), true);
   });
 
   it('returns true when env var is "on"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'on' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'on' }), true);
   });
 
   it('returns true when env var is "enabled"', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'enabled' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'enabled' }), true);
   });
 
   it('returns true case-insensitively', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'TRUE' }), true);
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'Yes' }), true);
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: 'ON' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'TRUE' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'Yes' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: 'ON' }), true);
   });
 
   it('returns true with leading/trailing whitespace', () => {
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: '  1  ' }), true);
-    assert.equal(isScalingEnabled({ OMX_TEAM_SCALING_ENABLED: ' true ' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: '  1  ' }), true);
+    assert.equal(isScalingEnabled({ OMG_TEAM_SCALING_ENABLED: ' true ' }), true);
   });
 });
 
@@ -261,7 +261,7 @@ describe('scaleUp', () => {
   it('returns error for invalid count', async () => {
     const result = await scaleUp(
       'test', 0, 'executor', [], '/tmp',
-      { OMX_TEAM_SCALING_ENABLED: '1' },
+      { OMG_TEAM_SCALING_ENABLED: '1' },
     );
     assert.equal(result.ok, false);
     if (!result.ok) {
@@ -272,7 +272,7 @@ describe('scaleUp', () => {
   it('returns error for negative count', async () => {
     const result = await scaleUp(
       'test', -1, 'executor', [], '/tmp',
-      { OMX_TEAM_SCALING_ENABLED: '1' },
+      { OMG_TEAM_SCALING_ENABLED: '1' },
     );
     assert.equal(result.ok, false);
     if (!result.ok) {
@@ -287,7 +287,7 @@ describe('scaleUp', () => {
     try {
       const result = await scaleUp(
         'test', 1, 'executor', [], '/tmp',
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, false);
       if (!result.ok) {
@@ -373,7 +373,7 @@ describe('scaleUp', () => {
         'executor',
         [{ subject: 'document routing report only', description: 'document routing report only', owner: 'worker-2', role: 'writer' }],
         cwd,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -463,7 +463,7 @@ exit 0
         'executor',
         [{ subject: 'write docs', description: 'write docs', owner: 'worker-2', role: 'writer' }],
         cwd,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, false);
       if (result.ok) return;
@@ -545,9 +545,9 @@ exit 0
         [{ subject: 'write docs', description: 'write docs', owner: 'worker-2', role: 'writer' }],
         cwd,
         {
-          OMX_TEAM_SCALING_ENABLED: '1',
-          OMX_TEAM_SKIP_READY_WAIT: '1',
-          OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5.4-mini',
+          OMG_TEAM_SCALING_ENABLED: '1',
+          OMG_TEAM_SKIP_READY_WAIT: '1',
+          OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5.4-mini',
         },
       );
       assert.equal(result.ok, true);
@@ -636,7 +636,7 @@ exit 0
         'executor',
         [{ subject: 'test routing report only', description: 'test routing report only', owner: 'worker-2', role: 'test-engineer' }],
         cwd,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -717,9 +717,9 @@ exit 0
         [{ subject: 'write docs', description: 'write docs', owner: 'worker-2', role: 'writer' }],
         cwd,
         {
-          OMX_TEAM_SCALING_ENABLED: '1',
-          OMX_TEAM_SKIP_READY_WAIT: '1',
-          OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5.4-mini-tuned',
+          OMG_TEAM_SCALING_ENABLED: '1',
+          OMG_TEAM_SKIP_READY_WAIT: '1',
+          OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5.4-mini-tuned',
         },
       );
       assert.equal(result.ok, true);
@@ -795,7 +795,7 @@ exit 0
         'executor',
         [],
         cwd,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -888,7 +888,7 @@ exit 0
         'executor',
         [],
         repo,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -990,7 +990,7 @@ exit 0
         'executor',
         [],
         repo,
-        { OMX_TEAM_SCALING_ENABLED: '1', OMX_TEAM_SKIP_READY_WAIT: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1', OMG_TEAM_SKIP_READY_WAIT: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -1029,7 +1029,7 @@ describe('scaleDown', () => {
     try {
       const result = await scaleDown(
         'nonexistent', cwd, {},
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, false);
       if (!result.ok) {
@@ -1047,7 +1047,7 @@ describe('scaleDown', () => {
       const result = await scaleDown(
         'all-test', cwd,
         { workerNames: ['worker-1'] },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, false);
       if (!result.ok) {
@@ -1065,7 +1065,7 @@ describe('scaleDown', () => {
       const result = await scaleDown(
         'miss-test', cwd,
         { workerNames: ['worker-99'] },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, false);
       if (!result.ok) {
@@ -1094,7 +1094,7 @@ describe('scaleDown', () => {
       const result = await scaleDown(
         'busy-test', cwd,
         { count: 1 },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, false);
       if (!result.ok) {
@@ -1138,7 +1138,7 @@ describe('scaleDown worktree AGENTS cleanup', () => {
         'scale-down-worktree',
         cwd,
         { workerNames: ['worker-2'], force: true },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -1167,7 +1167,7 @@ describe('scaleDown teardown hardening', () => {
         'dead-pane',
         cwd,
         { workerNames: ['worker-2'], force: true },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, true);
       if (!result.ok) return;
@@ -1216,7 +1216,7 @@ exit 0
         'exclusions',
         cwd,
         { workerNames: ['worker-1', 'worker-2', 'worker-3'], force: true },
-        { OMX_TEAM_SCALING_ENABLED: '1' },
+        { OMG_TEAM_SCALING_ENABLED: '1' },
       );
       assert.equal(result.ok, true);
 

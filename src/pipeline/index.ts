@@ -1,8 +1,8 @@
 /**
  * Pipeline orchestrator for oh-my-gemini
  *
- * Configurable pipeline that sequences: RALPLAN -> teams (codex workers) -> ralph verification.
- * Mirrors OMC #1130 pipeline design.
+ * Configurable pipeline that sequences: RALPLAN -> teams (gemini workers) -> ralph verification.
+ * Mirrors OMG #1130 pipeline design.
  *
  * @module pipeline
  */

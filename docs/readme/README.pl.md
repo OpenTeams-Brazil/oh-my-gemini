@@ -14,7 +14,7 @@
 **Strona:** https://yeachan-heo.github.io/oh-my-gemini-website/
 **Dokumentacja:** [Pierwsze kroki](../getting-started.html) · [Agenty](../agents.html) · [Skille](../skills.html) · [Integracje](../integrations.html) · [Demo](../../DEMO.md) · [Przewodnik po OpenClaw](../openclaw-integration.md)
 
-OMX to nakładka na [OpenAI Gemini CLI](https://github.com/openai/codex).
+OMX to nakładka na [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 Gemini zostaje silnikiem, który wykonuje pracę. OMX daje mu lepszy kontekst, gotowe role i cykle pracy — żebyś nie zaczynał od zera przy każdej sesji. Konkretnie:
 - lepsza sesja Geminia od pierwszego uruchomienia
@@ -27,7 +27,7 @@ Gemini zostaje silnikiem, który wykonuje pracę. OMX daje mu lepszy kontekst, g
 Jeśli chcesz po prostu zacząć:
 
 ```bash
-npm install -g @openai/codex oh-my-gemini
+npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg --madmax --high
 ```
@@ -56,7 +56,7 @@ Jeśli chcesz czystego Geminia bez żadnych dodatków, OMX pewnie nie jest dla C
 ### Wymagania
 
 - Node.js 20+
-- Gemini CLI: `npm install -g @openai/codex`
+- Gemini CLI: `npm install -g @openai/gemini`
 - Skonfigurowane uwierzytelnianie Gemini
 - `tmux` na macOS/Linux — jeśli planujesz używać trybu zespołowego
 - `psmux` na natywnym Windows — jeśli planujesz używać trybu zespołowego

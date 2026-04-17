@@ -40,7 +40,7 @@ Hardcoded default frontier-model fallback references were replaced with `DEFAULT
 Current behavior from this release:
 - default frontier fallback now resolves through a single constant
 - that constant is currently set to **`gpt-5.4`**
-- low-complexity spark default remains **`gpt-5.3-codex-spark`**
+- low-complexity spark default remains **`gpt-5.3-gemini-spark`**
 
 **Why this matters:**
 - fewer hidden fallback mismatches

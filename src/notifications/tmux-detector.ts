@@ -47,7 +47,7 @@ export function analyzePaneContent(content: string): PaneAnalysis {
   const lower = content.toLowerCase();
 
   const hasGemini =
-    lower.includes('codex') ||
+    lower.includes('gemini') ||
     lower.includes('omg') ||
     lower.includes('oh-my-gemini') ||
     lower.includes('openai');
@@ -121,7 +121,7 @@ const TMUX_SUBMIT_REPEAT_DELAY_MS = 100;
  * Mirrors the Rust logic inline to avoid shelling out for a trivial mapping.
  */
 export function getSubmitPresses(workerCli: string): number {
-  if (process.env.OMX_RUNTIME_BRIDGE === '0') {
+  if (process.env.OMG_RUNTIME_BRIDGE === '0') {
     return workerCli.toLowerCase() === 'claude' ? 1 : 2;
   }
   // Rust-owned mapping: Claude=1, Gemini/Other=2

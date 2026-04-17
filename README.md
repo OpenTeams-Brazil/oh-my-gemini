@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://yeachan-heo.github.io/oh-my-gemini-website/omg-character-nobg.png" alt="oh-my-gemini character" width="280">
   <br>
-  <em>Start Gemini stronger, then let OMX add better prompts, workflows, and runtime help when the work grows.</em>
+  <em>Start Gemini stronger, then let oh-my-gemini add better prompts, workflows, and runtime help when the work grows.</em>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/oh-my-gemini)](https://www.npmjs.com/package/oh-my-gemini)
@@ -15,7 +15,7 @@
 **Docs:** [Getting Started](./docs/getting-started.html) · [Agents](./docs/agents.html) · [Skills](./docs/skills.html) · [Integrations](./docs/integrations.html) · [Demo](./DEMO.md) · [OpenClaw guide](./docs/openclaw-integration.md)
 **Community:** [Discord](https://discord.gg/PUwSMR9XNk) — shared OMX/community server for oh-my-gemini and related tooling.
 
-OMX is a workflow layer for [OpenAI Gemini CLI](https://github.com/openai/codex).
+OMX is a workflow layer for [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 <table>
 <tr>
@@ -59,7 +59,7 @@ It keeps Gemini as the execution engine and makes it easier to:
 If you want the default OMX experience, start here:
 
 ```bash
-npm install -g @openai/codex oh-my-gemini
+npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg --madmax --high
 ```
@@ -91,7 +91,7 @@ If you want plain Gemini with no extra workflow layer, you probably do not need 
 ### Requirements
 
 - Node.js 20+
-- Gemini CLI installed: `npm install -g @openai/codex`
+- Gemini CLI installed: `npm install -g @openai/gemini`
 - Gemini auth configured
 - `tmux` on macOS/Linux if you want the recommended durable team runtime
 - `psmux` on native Windows only if you intentionally want the less-supported Windows team path
@@ -187,7 +187,7 @@ For non-team sessions, native Gemini hooks are now the canonical lifecycle surfa
 - `.omg/hooks/*.mjs` = OMX plugin hooks
 - `omg tmux-hook` / notify-hook / derived watcher = tmux + runtime fallback paths
 
-See [Gemini native hook mapping](./docs/codex-native-hooks.md) for the current native / fallback matrix.
+See [Gemini native hook mapping](./docs/gemini-native-hooks.md) for the current native / fallback matrix.
 
 ### Explore and sparkshell
 
@@ -251,7 +251,7 @@ If this happens, try:
 - [Wiki feature](./docs/wiki-feature.md)
 - [Agent catalog](./docs/agents.html)
 - [Skills reference](./docs/skills.html)
-- [Gemini native hook mapping](./docs/codex-native-hooks.md)
+- [Gemini native hook mapping](./docs/gemini-native-hooks.md)
 - [Integrations](./docs/integrations.html)
 - [OpenClaw / notification gateway guide](./docs/openclaw-integration.md)
 - [Contributing](./CONTRIBUTING.md)

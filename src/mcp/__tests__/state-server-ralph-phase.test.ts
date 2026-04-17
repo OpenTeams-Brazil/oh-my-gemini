@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 describe('state-server Ralph phase contract', () => {
   it('normalizes legacy Ralph phase aliases on state_write', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-ralph-phase-'));
@@ -35,7 +35,7 @@ describe('state-server Ralph phase contract', () => {
   });
 
   it('rejects unknown Ralph phases on state_write', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-ralph-phase-'));
@@ -60,7 +60,7 @@ describe('state-server Ralph phase contract', () => {
   });
 
   it('rejects terminal Ralph phase when active=true', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-ralph-phase-'));
@@ -85,7 +85,7 @@ describe('state-server Ralph phase contract', () => {
   });
 
   it('rejects fractional iteration values for Ralph state', async () => {
-    process.env.OMX_STATE_SERVER_DISABLE_AUTO_START = '1';
+    process.env.OMG_STATE_SERVER_DISABLE_AUTO_START = '1';
     const { handleStateToolCall } = await import('../state-server.js');
 
     const wd = await mkdtemp(join(tmpdir(), 'omg-state-ralph-phase-'));

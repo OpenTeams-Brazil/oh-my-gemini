@@ -28,7 +28,7 @@ function shouldSkipForSpawnPermissions(err?: string): boolean {
 }
 
 function resolveCompatTarget(): { command: string; argsPrefix: string[] } {
-  const override = process.env.OMX_COMPAT_TARGET?.trim();
+  const override = process.env.OMG_COMPAT_TARGET?.trim();
   const targetPath = override
     ? (isAbsolute(override) ? override : resolve(process.cwd(), override))
     : defaultTarget;
@@ -60,7 +60,7 @@ function normalizeInstallDoctorOutput(text: string, home: string, cwd: string): 
     .split('\n')
     .map((line) => {
       if (line.startsWith('  [OK] Gemini CLI:') || line.startsWith('  [XX] Gemini CLI:')) {
-        return '  [CODEX_CLI_STATUS]';
+        return '  [GEMINI_CLI_STATUS]';
       }
       if (line.startsWith('  [OK] Node.js:')) {
         return '  [OK] Node.js: <NODE_VERSION>';

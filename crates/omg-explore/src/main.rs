@@ -8,12 +8,12 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-const CODEX_BIN_ENV: &str = "OMX_EXPLORE_CODEX_BIN";
-const HARNESS_ROOT_ENV: &str = "OMX_EXPLORE_ROOT";
+const GEMINI_BIN_ENV: &str = "OMG_EXPLORE_GEMINI_BIN";
+const HARNESS_ROOT_ENV: &str = "OMG_EXPLORE_ROOT";
 const INTERNAL_DIRECT_WRAPPER_FLAG: &str = "--internal-allowlist-direct";
 const INTERNAL_SHELL_WRAPPER_FLAG: &str = "--internal-allowlist-shell";
 const WINDOWS_UNSUPPORTED_ALLOWLIST_MESSAGE: &str =
-    "omg explore built-in harness is not ready on Windows because its allowlist runtime relies on POSIX sh/bash wrappers. Set OMX_EXPLORE_BIN to a compatible custom harness, prefer `omg sparkshell` for shell-native read-only lookups, or run `omg doctor` for readiness details.";
+    "omg explore built-in harness is not ready on Windows because its allowlist runtime relies on POSIX sh/bash wrappers. Set OMG_EXPLORE_BIN to a compatible custom harness, prefer `omg sparkshell` for shell-native read-only lookups, or run `omg doctor` for readiness details.";
 
 const ALLOWED_DIRECT_COMMANDS: &[&str] = &[
     "rg", "grep", "ls", "find", "wc", "cat", "head", "tail", "pwd", "printf",
@@ -100,7 +100,7 @@ where
         )
     })?;
 
-    let spark_attempt = invoke_codex(&args, &args.spark_model, &prompt_contract)
+    let spark_attempt = invoke_gemini(&args, &args.spark_model, &prompt_contract)
         .map_err(|err| format!("spark attempt failed to launch: {err}"))?;
     if spark_attempt.status_code == 0 {
         print_attempt_output(spark_attempt)?;
@@ -118,7 +118,7 @@ where
         );
     }
 
-    let fallback_attempt = invoke_codex(&args, &args.fallback_model, &prompt_contract)
+    let fallback_attempt = invoke_gemini(&args, &args.fallback_model, &prompt_contract)
         .map_err(|err| format!("fallback attempt failed to launch: {err}"))?;
     if fallback_attempt.status_code == 0 {
         print_attempt_output(fallback_attempt)?;
@@ -141,7 +141,7 @@ fn print_attempt_output(attempt: AttemptResult) -> Result<(), String> {
         return Ok(());
     }
     Err(
-        "codex completed successfully but did not produce the expected markdown output artifact"
+        "gemini completed successfully but did not produce the expected markdown output artifact"
             .to_string(),
     )
 }
@@ -199,18 +199,18 @@ fn usage() -> &'static str {
     "Usage: omg-explore --cwd <dir> --prompt <text> --prompt-file <explore-prompt.md> --model-spark <model> --model-fallback <model>"
 }
 
-fn invoke_codex(args: &Args, model: &str, prompt_contract: &str) -> io::Result<AttemptResult> {
-    let codex_launch = resolve_codex_launch();
+fn invoke_gemini(args: &Args, model: &str, prompt_contract: &str) -> io::Result<AttemptResult> {
+    let gemini_launch = resolve_gemini_launch();
     let allowlist = prepare_allowlist_environment().map_err(io::Error::other)?;
     let output_path = temp_output_path();
     let final_prompt = compose_exec_prompt(&args.prompt, prompt_contract);
-    let mut command = Command::new(&codex_launch.program);
-    command.args(&codex_launch.leading_args);
+    let mut command = Command::new(&gemini_launch.program);
+    command.args(&gemini_launch.leading_args);
     command
         .arg("exec")
         .arg("-C")
         .arg(&args.cwd)
-        .args(codex_support_dir_args())
+        .args(gemini_support_dir_args())
         .arg("-m")
         .arg(model)
         .arg("-s")
@@ -243,16 +243,16 @@ struct GeminiLaunch {
     leading_args: Vec<String>,
 }
 
-fn resolve_codex_launch() -> GeminiLaunch {
-    let codex_binary = resolve_codex_binary();
-    codex_launch_for_binary(&codex_binary).unwrap_or_else(|| GeminiLaunch {
-        program: codex_binary,
+fn resolve_gemini_launch() -> GeminiLaunch {
+    let gemini_binary = resolve_gemini_binary();
+    gemini_launch_for_binary(&gemini_binary).unwrap_or_else(|| GeminiLaunch {
+        program: gemini_binary,
         leading_args: Vec::new(),
     })
 }
 
-fn resolve_codex_binary() -> String {
-    if let Some(value) = env::var(CODEX_BIN_ENV)
+fn resolve_gemini_binary() -> String {
+    if let Some(value) = env::var(GEMINI_BIN_ENV)
         .ok()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
@@ -266,35 +266,35 @@ fn resolve_codex_binary() -> String {
         return value;
     }
 
-    resolve_host_command("codex")
+    resolve_host_command("gemini")
         .map(|path| path.display().to_string())
-        .unwrap_or_else(|| "codex".to_string())
+        .unwrap_or_else(|| "gemini".to_string())
 }
 
-fn codex_launch_for_binary(codex_binary: &str) -> Option<GeminiLaunch> {
-    let codex_path = Path::new(codex_binary);
-    if let Some(launch) = codex_launch_for_posix_node_shim(codex_path) {
+fn gemini_launch_for_binary(gemini_binary: &str) -> Option<GeminiLaunch> {
+    let gemini_path = Path::new(gemini_binary);
+    if let Some(launch) = gemini_launch_for_posix_node_shim(gemini_path) {
         return Some(launch);
     }
 
-    let interpreter = read_shebang_interpreter(codex_path)?;
+    let interpreter = read_shebang_interpreter(gemini_path)?;
     let (program, mut leading_args) = resolve_shebang_launch(&interpreter)?;
-    leading_args.push(codex_binary.to_string());
+    leading_args.push(gemini_binary.to_string());
     Some(GeminiLaunch {
         program,
         leading_args,
     })
 }
 
-fn codex_launch_for_posix_node_shim(codex_path: &Path) -> Option<GeminiLaunch> {
-    let shebang = read_shebang_interpreter(codex_path)?;
+fn gemini_launch_for_posix_node_shim(gemini_path: &Path) -> Option<GeminiLaunch> {
+    let shebang = read_shebang_interpreter(gemini_path)?;
     if !is_posix_shell_shebang(&shebang) {
         return None;
     }
 
-    let script = read_to_string(codex_path).ok()?;
-    let entrypoint = resolve_posix_node_shim_entrypoint(codex_path, &script)?;
-    let program = resolve_posix_node_shim_program(codex_path, &script)?;
+    let script = read_to_string(gemini_path).ok()?;
+    let entrypoint = resolve_posix_node_shim_entrypoint(gemini_path, &script)?;
+    let program = resolve_posix_node_shim_program(gemini_path, &script)?;
     Some(GeminiLaunch {
         program: program.display().to_string(),
         leading_args: vec![entrypoint.display().to_string()],
@@ -333,8 +333,8 @@ fn is_posix_shell_name(value: &str) -> bool {
     )
 }
 
-fn resolve_posix_node_shim_entrypoint(codex_path: &Path, script: &str) -> Option<PathBuf> {
-    let basedir = codex_path.parent()?;
+fn resolve_posix_node_shim_entrypoint(gemini_path: &Path, script: &str) -> Option<PathBuf> {
+    let basedir = gemini_path.parent()?;
     quoted_shell_segments(script)
         .into_iter()
         .filter_map(|segment| strip_basedir_prefix(&segment).map(ToOwned::to_owned))
@@ -342,8 +342,8 @@ fn resolve_posix_node_shim_entrypoint(codex_path: &Path, script: &str) -> Option
         .find(|candidate| is_node_entrypoint(candidate))
 }
 
-fn resolve_posix_node_shim_program(codex_path: &Path, script: &str) -> Option<PathBuf> {
-    let basedir = codex_path.parent()?;
+fn resolve_posix_node_shim_program(gemini_path: &Path, script: &str) -> Option<PathBuf> {
+    let basedir = gemini_path.parent()?;
     if quoted_shell_segments(script)
         .into_iter()
         .any(|segment| matches!(strip_basedir_prefix(&segment), Some("node")))
@@ -420,14 +420,14 @@ fn resolve_shebang_launch(shebang: &str) -> Option<(String, Vec<String>)> {
     ))
 }
 
-fn codex_support_dir_args() -> Vec<String> {
-    discover_codex_support_dirs()
+fn gemini_support_dir_args() -> Vec<String> {
+    discover_gemini_support_dirs()
         .into_iter()
         .flat_map(|dir| ["--add-dir".to_string(), dir.display().to_string()])
         .collect()
 }
 
-fn discover_codex_support_dirs() -> Vec<PathBuf> {
+fn discover_gemini_support_dirs() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
     if let Some(home) = env::var_os("HOME").filter(|value| !value.is_empty()) {
         let home = PathBuf::from(home);
@@ -946,7 +946,7 @@ mod tests {
                 "--prompt-file",
                 "/tmp/explore.md",
                 "--model-spark",
-                "gpt-5.3-codex-spark",
+                "gpt-5.3-gemini-spark",
                 "--model-fallback",
                 "gpt-5.4",
             ]
@@ -958,7 +958,7 @@ mod tests {
         assert_eq!(args.cwd, Path::new("/tmp/repo"));
         assert_eq!(args.prompt, "find auth");
         assert_eq!(args.prompt_file, Path::new("/tmp/explore.md"));
-        assert_eq!(args.spark_model, "gpt-5.3-codex-spark");
+        assert_eq!(args.spark_model, "gpt-5.3-gemini-spark");
         assert_eq!(args.fallback_model, "gpt-5.4");
     }
 
@@ -973,54 +973,54 @@ mod tests {
     }
 
     #[test]
-    fn resolve_codex_binary_prefers_env_override() {
+    fn resolve_gemini_binary_prefers_env_override() {
         let _guard = env_lock();
         unsafe {
-            env::set_var(CODEX_BIN_ENV, "/tmp/codex-stub");
+            env::set_var(GEMINI_BIN_ENV, "/tmp/gemini-stub");
         }
-        assert_eq!(resolve_codex_binary(), "/tmp/codex-stub");
+        assert_eq!(resolve_gemini_binary(), "/tmp/gemini-stub");
         unsafe {
-            env::remove_var(CODEX_BIN_ENV);
+            env::remove_var(GEMINI_BIN_ENV);
         }
     }
 
     #[test]
-    fn resolve_codex_binary_resolves_bare_env_override_from_path() {
+    fn resolve_gemini_binary_resolves_bare_env_override_from_path() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
         let bin_dir = root.path.join("bin");
         create_dir_all(&bin_dir).expect("create bin");
-        let fake_codex = bin_dir.join("codex-custom");
-        write(&fake_codex, b"#!/bin/sh\nexit 0\n").expect("write fake codex");
-        write_executable(&fake_codex, "#!/bin/sh\nexit 0\n").expect("chmod fake codex");
+        let fake_gemini = bin_dir.join("gemini-custom");
+        write(&fake_gemini, b"#!/bin/sh\nexit 0\n").expect("write fake gemini");
+        write_executable(&fake_gemini, "#!/bin/sh\nexit 0\n").expect("chmod fake gemini");
 
         let original_path = env::var_os("PATH");
         unsafe {
-            env::set_var(CODEX_BIN_ENV, "codex-custom");
+            env::set_var(GEMINI_BIN_ENV, "gemini-custom");
             env::set_var("PATH", &bin_dir);
         }
 
-        let resolved = resolve_codex_binary();
+        let resolved = resolve_gemini_binary();
 
         unsafe {
-            env::remove_var(CODEX_BIN_ENV);
+            env::remove_var(GEMINI_BIN_ENV);
         }
         match original_path {
             Some(value) => unsafe { env::set_var("PATH", value) },
             None => unsafe { env::remove_var("PATH") },
         }
 
-        assert_eq!(resolved, fake_codex.display().to_string());
+        assert_eq!(resolved, fake_gemini.display().to_string());
     }
 
     #[test]
-    fn codex_launch_for_env_node_shebang_uses_host_node_absolute_path() {
+    fn gemini_launch_for_env_node_shebang_uses_host_node_absolute_path() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
-        let script_path = root.path.join("codex-script");
+        let script_path = root.path.join("gemini-script");
         write(&script_path, b"#!/usr/bin/env node\nconsole.log(\"ok\");\n").expect("write script");
 
-        let launch = codex_launch_for_binary(script_path.to_str().expect("script path"))
+        let launch = gemini_launch_for_binary(script_path.to_str().expect("script path"))
             .expect("launch config");
         let expected_node = resolve_host_command("node").expect("host node path");
         assert_eq!(launch.program, expected_node.display().to_string());
@@ -1029,7 +1029,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn codex_launch_for_posix_package_manager_shim_uses_host_node_and_entrypoint() {
+    fn gemini_launch_for_posix_package_manager_shim_uses_host_node_and_entrypoint() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
         let host_bin = root.path.join("host-bin");
@@ -1038,9 +1038,9 @@ mod tests {
             .path
             .join("node_modules")
             .join("@openai")
-            .join("codex")
+            .join("gemini")
             .join("bin")
-            .join("codex.js");
+            .join("gemini.js");
         create_dir_all(&host_bin).expect("create host bin");
         create_dir_all(&shim_dir).expect("create shim dir");
         create_dir_all(entrypoint.parent().expect("entrypoint parent"))
@@ -1050,15 +1050,15 @@ mod tests {
         write_executable(&fake_node, "#!/bin/sh\nexit 0\n").expect("write fake node");
         write(&entrypoint, "console.log('ok');\n").expect("write entrypoint");
 
-        let shim_path = shim_dir.join("codex");
+        let shim_path = shim_dir.join("gemini");
         write_executable(
             &shim_path,
             r#"#!/bin/sh
 basedir=$(dirname "$0")
 if [ -x "$basedir/node" ]; then
-  exec "$basedir/node" "$basedir/../@openai/codex/bin/codex.js" "$@"
+  exec "$basedir/node" "$basedir/../@openai/gemini/bin/gemini.js" "$@"
 fi
-exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
+exec node "$basedir/../@openai/gemini/bin/gemini.js" "$@"
 "#,
         )
         .expect("write shim");
@@ -1069,7 +1069,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
         }
 
         let launch =
-            codex_launch_for_binary(shim_path.to_str().expect("shim path")).expect("launch config");
+            gemini_launch_for_binary(shim_path.to_str().expect("shim path")).expect("launch config");
 
         match original_path {
             Some(value) => unsafe { env::set_var("PATH", value) },
@@ -1136,7 +1136,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
 
     #[cfg(unix)]
     #[test]
-    fn codex_launch_for_env_node_shebang_skips_non_executable_earlier_node_entry() {
+    fn gemini_launch_for_env_node_shebang_skips_non_executable_earlier_node_entry() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
         let bad_bin = root.path.join("bad-bin");
@@ -1160,7 +1160,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
             fs::set_permissions(&blocked_node, perms).expect("chmod blocked node");
         }
 
-        let script_path = root.path.join("codex-script");
+        let script_path = root.path.join("gemini-script");
         write(&script_path, b"#!/usr/bin/env node\nconsole.log(\"ok\");\n").expect("write script");
 
         let original_path = env::var_os("PATH");
@@ -1171,7 +1171,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
             );
         }
 
-        let launch = codex_launch_for_binary(script_path.to_str().expect("script path"))
+        let launch = gemini_launch_for_binary(script_path.to_str().expect("script path"))
             .expect("launch config");
 
         match original_path {
@@ -1272,7 +1272,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
     }
 
     #[test]
-    fn discover_codex_support_dirs_includes_home_omg_and_codex_when_present() {
+    fn discover_gemini_support_dirs_includes_home_omg_and_gemini_when_present() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
         let home_dir = root.path.join("home");
@@ -1283,7 +1283,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
             env::set_var("HOME", &home_dir);
         }
 
-        let dirs = discover_codex_support_dirs();
+        let dirs = discover_gemini_support_dirs();
 
         match original_home {
             Some(value) => unsafe { env::set_var("HOME", value) },
@@ -1340,7 +1340,7 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
         let diagnostic = allowlist_platform_diagnostic("windows").expect("windows diagnostic");
 
         assert!(diagnostic.contains("not ready on Windows"));
-        assert!(diagnostic.contains("OMX_EXPLORE_BIN"));
+        assert!(diagnostic.contains("OMG_EXPLORE_BIN"));
         assert!(allowlist_platform_diagnostic("linux").is_none());
     }
 
@@ -1472,9 +1472,9 @@ exec node "$basedir/../@openai/codex/bin/codex.js" "$@"
         create_dir_all(&repo).expect("create repo");
         let prompt_file = root.path.join("prompt.md");
         write(&prompt_file, "contract").expect("write prompt");
-        let fake_codex = root.path.join("codex-stub");
+        let fake_gemini = root.path.join("gemini-stub");
         write_executable(
-            &fake_codex,
+            &fake_gemini,
             r#"#!/bin/sh
 model=""
 while [ $# -gt 0 ]; do
@@ -1492,10 +1492,10 @@ fi
 exit 17
 "#,
         )
-        .expect("write fake codex");
+        .expect("write fake gemini");
 
         unsafe {
-            env::set_var(CODEX_BIN_ENV, &fake_codex);
+            env::set_var(GEMINI_BIN_ENV, &fake_gemini);
         }
         let result = run_with_args(
             vec![
@@ -1514,7 +1514,7 @@ exit 17
             .map(OsString::from),
         );
         unsafe {
-            env::remove_var(CODEX_BIN_ENV);
+            env::remove_var(GEMINI_BIN_ENV);
         }
 
         let _error = result.expect_err("both attempts should fail");

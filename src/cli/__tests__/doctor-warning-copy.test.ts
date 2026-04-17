@@ -40,17 +40,17 @@ describe('omg doctor onboarding warning copy', () => {
     assert.equal(check.name, 'Explore Harness');
     assert.equal(check.status, 'warn');
     assert.match(check.message, /not ready on Windows/i);
-    assert.match(check.message, /OMX_EXPLORE_BIN/);
+    assert.match(check.message, /OMG_EXPLORE_BIN/);
   });
 
   it('explains first-setup expectation for config and MCP onboarding warnings', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-copy-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, 'config.toml'),
+        join(geminiDir, 'config.toml'),
         `
 [mcp_servers.non_omg]
 command = "node"
@@ -80,10 +80,10 @@ command = "node"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-copy-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, 'config.toml'),
+        join(geminiDir, 'config.toml'),
         `
 [mcp_servers.omg_team_run]
 command = "node"
@@ -121,12 +121,12 @@ enabled = true
     try {
       await withPackagedExploreHarnessHidden(async () => {
         const home = join(wd, 'home');
-        const codexDir = join(home, '.gemini');
+        const geminiDir = join(home, '.gemini');
         const fakeBin = join(wd, 'bin');
-        await mkdir(codexDir, { recursive: true });
+        await mkdir(geminiDir, { recursive: true });
         await mkdir(fakeBin, { recursive: true });
-        await writeFile(join(fakeBin, 'codex'), '#!/bin/sh\necho "codex test"\n');
-        spawnSync('chmod', ['+x', join(fakeBin, 'codex')], { encoding: 'utf-8' });
+        await writeFile(join(fakeBin, 'gemini'), '#!/bin/sh\necho "gemini test"\n');
+        spawnSync('chmod', ['+x', join(fakeBin, 'gemini')], { encoding: 'utf-8' });
 
         const res = runOmx(wd, ['doctor'], {
           HOME: home,
@@ -137,7 +137,7 @@ enabled = true
         assert.equal(res.status, 0, res.stderr || res.stdout);
         assert.match(
           res.stdout,
-          /Explore Harness: (Rust harness sources are packaged, but no compatible packaged prebuilt or cargo was found \(install Rust or set OMX_EXPLORE_BIN for omg explore\)|not ready \(no packaged binary, OMX_EXPLORE_BIN, or cargo toolchain\))/,
+          /Explore Harness: (Rust harness sources are packaged, but no compatible packaged prebuilt or cargo was found \(install Rust or set OMG_EXPLORE_BIN for omg explore\)|not ready \(no packaged binary, OMG_EXPLORE_BIN, or cargo toolchain\))/,
         );
       });
     } finally {
@@ -150,7 +150,7 @@ enabled = true
       const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-explore-binary-'));
       try {
         const home = join(wd, 'home');
-        const codexDir = join(home, '.gemini');
+        const geminiDir = join(home, '.gemini');
         const fakeBin = join(wd, 'bin');
         const packageBinDir = join(process.cwd(), 'bin');
         const packagedBinary = join(packageBinDir, process.platform === 'win32' ? 'omg-explore-harness.exe' : 'omg-explore-harness');
@@ -158,10 +158,10 @@ enabled = true
         const hadExistingBinary = existsSync(packagedBinary);
         const hadExistingMeta = existsSync(packagedMeta);
 
-        await mkdir(codexDir, { recursive: true });
+        await mkdir(geminiDir, { recursive: true });
         await mkdir(fakeBin, { recursive: true });
-        await writeFile(join(fakeBin, 'codex'), '#!/bin/sh\necho "codex test"\n');
-        spawnSync('chmod', ['+x', join(fakeBin, 'codex')], { encoding: 'utf-8' });
+        await writeFile(join(fakeBin, 'gemini'), '#!/bin/sh\necho "gemini test"\n');
+        spawnSync('chmod', ['+x', join(fakeBin, 'gemini')], { encoding: 'utf-8' });
         const fsPromises = await import('node:fs/promises');
         const originalBinary = hadExistingBinary ? await fsPromises.readFile(packagedBinary) : null;
         const originalMeta = hadExistingMeta ? await fsPromises.readFile(packagedMeta, 'utf-8') : null;
@@ -205,13 +205,13 @@ enabled = true
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-explore-routing-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, 'config.toml'),
+        join(geminiDir, 'config.toml'),
         `
 [env]
-USE_OMX_EXPLORE_CMD = "off"
+USE_OMG_EXPLORE_CMD = "off"
 `.trimStart(),
       );
 
@@ -223,7 +223,7 @@ USE_OMX_EXPLORE_CMD = "off"
       assert.equal(res.status, 0, res.stderr || res.stdout);
       assert.match(
         res.stdout,
-        /Explore routing: disabled in config\.toml \[env\]; set USE_OMX_EXPLORE_CMD = "1" to restore default explore-first routing/,
+        /Explore routing: disabled in config\.toml \[env\]; set USE_OMG_EXPLORE_CMD = "1" to restore default explore-first routing/,
       );
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -234,9 +234,9 @@ USE_OMX_EXPLORE_CMD = "off"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-skill-overlap-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalHelp = join(codexDir, 'skills', 'help');
-      const canonicalPlan = join(codexDir, 'skills', 'plan');
+      const geminiDir = join(home, '.gemini');
+      const canonicalHelp = join(geminiDir, 'skills', 'help');
+      const canonicalPlan = join(geminiDir, 'skills', 'plan');
       const legacyHelp = join(home, '.agents', 'skills', 'help');
       await mkdir(canonicalHelp, { recursive: true });
       await mkdir(canonicalPlan, { recursive: true });
@@ -247,7 +247,7 @@ USE_OMX_EXPLORE_CMD = "off"
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
@@ -264,10 +264,10 @@ USE_OMX_EXPLORE_CMD = "off"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-hooks-coverage-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, 'hooks.json'),
+        join(geminiDir, 'hooks.json'),
         JSON.stringify(
           {
             hooks: {
@@ -276,7 +276,7 @@ USE_OMX_EXPLORE_CMD = "off"
                   hooks: [
                     {
                       type: 'command',
-                      command: 'node "/repo/dist/scripts/codex-native-hook.js"',
+                      command: 'node "/repo/dist/scripts/gemini-native-hook.js"',
                     },
                   ],
                 },
@@ -290,7 +290,7 @@ USE_OMX_EXPLORE_CMD = "off"
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
@@ -307,10 +307,10 @@ USE_OMX_EXPLORE_CMD = "off"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-hooks-missing-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
       await writeFile(
-        join(codexDir, 'config.toml'),
+        join(geminiDir, 'config.toml'),
         `
 omg_enabled = true
 [mcp_servers.omg_state]
@@ -320,7 +320,7 @@ command = "node"
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
@@ -337,13 +337,13 @@ command = "node"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-hooks-invalid-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      await mkdir(codexDir, { recursive: true });
-      await writeFile(join(codexDir, 'hooks.json'), '{invalid json\n');
+      const geminiDir = join(home, '.gemini');
+      await mkdir(geminiDir, { recursive: true });
+      await writeFile(join(geminiDir, 'hooks.json'), '{invalid json\n');
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
@@ -360,8 +360,8 @@ command = "node"
     const wd = await mkdtemp(join(tmpdir(), 'omg-doctor-skill-link-'));
     try {
       const home = join(wd, 'home');
-      const codexDir = join(home, '.gemini');
-      const canonicalSkillsRoot = join(codexDir, 'skills');
+      const geminiDir = join(home, '.gemini');
+      const canonicalSkillsRoot = join(geminiDir, 'skills');
       const canonicalHelp = join(canonicalSkillsRoot, 'help');
       const legacyRoot = join(home, '.agents', 'skills');
       await mkdir(canonicalHelp, { recursive: true });
@@ -375,7 +375,7 @@ command = "node"
 
       const res = runOmx(wd, ['doctor'], {
         HOME: home,
-        GEMINI_HOME: codexDir,
+        GEMINI_HOME: geminiDir,
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);

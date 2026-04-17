@@ -16,8 +16,8 @@
 #   WORKER_COUNT                    Number of workers (default: 3, minimum: 2)
 #   TEAM_TASK                       Task description (default: "tmux claude workers demo")
 #   TEAM_NAME                       Team identifier (default: slugified TEAM_TASK)
-#   OMX_TEAM_WORKER_LAUNCH_MODE     Worker launch mode (default: interactive)
-#   OMX_TEAM_WORKER_LAUNCH_ARGS     Arguments passed to Claude CLI
+#   OMG_TEAM_WORKER_LAUNCH_MODE     Worker launch mode (default: interactive)
+#   OMG_TEAM_WORKER_LAUNCH_ARGS     Arguments passed to Claude CLI
 #
 # Example:
 #   WORKER_COUNT=5 ./scripts/demo-claude-workers.sh
@@ -59,7 +59,7 @@ fi
 
 TEAM_TASK="${TEAM_TASK:-tmux claude workers demo}"
 TEAM_NAME="${TEAM_NAME:-$(slugify "$TEAM_TASK")}"
-OMX_TEAM_WORKER_LAUNCH_MODE="${OMX_TEAM_WORKER_LAUNCH_MODE:-interactive}"
+OMG_TEAM_WORKER_LAUNCH_MODE="${OMG_TEAM_WORKER_LAUNCH_MODE:-interactive}"
 
 # All workers use Claude CLI for this demo
 build_claude_cli_map() {
@@ -72,8 +72,8 @@ build_claude_cli_map() {
   (IFS=,; echo "${entries[*]}")
 }
 
-OMX_TEAM_WORKER_CLI="${OMX_TEAM_WORKER_CLI:-auto}"
-OMX_TEAM_WORKER_CLI_MAP="${OMX_TEAM_WORKER_CLI_MAP:-$(build_claude_cli_map "$WORKER_COUNT")}"
+OMG_TEAM_WORKER_CLI="${OMG_TEAM_WORKER_CLI:-auto}"
+OMG_TEAM_WORKER_CLI_MAP="${OMG_TEAM_WORKER_CLI_MAP:-$(build_claude_cli_map "$WORKER_COUNT")}"
 
 TEAM_STARTED=0
 cleanup() {
@@ -90,8 +90,8 @@ echo "== OMX Tmux Claude Workers Demo v${SCRIPT_VERSION} =="
 echo "TEAM_TASK=$TEAM_TASK"
 echo "TEAM_NAME=$TEAM_NAME"
 echo "WORKER_COUNT=$WORKER_COUNT"
-echo "OMX_TEAM_WORKER_CLI=$OMX_TEAM_WORKER_CLI"
-echo "OMX_TEAM_WORKER_CLI_MAP=$OMX_TEAM_WORKER_CLI_MAP"
+echo "OMG_TEAM_WORKER_CLI=$OMG_TEAM_WORKER_CLI"
+echo "OMG_TEAM_WORKER_CLI_MAP=$OMG_TEAM_WORKER_CLI_MAP"
 echo ""
 echo "This demo showcases Claude Code CLI workers in tmux panes"
 echo "coordinated through the OMX team orchestration system."

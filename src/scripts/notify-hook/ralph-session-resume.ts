@@ -168,8 +168,8 @@ async function scanMatchingRalphCandidates(
     if (!existsSync(path)) continue;
     const state = await readJson(path);
     if (!isActiveRalphCandidate(state)) continue;
-    const ownerSessionId = safeString(state.owner_codex_session_id).trim();
-    const ownerThreadId = safeString(state.owner_codex_thread_id).trim();
+    const ownerSessionId = safeString(state.owner_gemini_session_id).trim();
+    const ownerThreadId = safeString(state.owner_gemini_thread_id).trim();
     if (ownerSessionId) {
       if (!payloadSessionId || ownerSessionId !== payloadSessionId) continue;
     } else if (!payloadThreadId || !ownerThreadId || ownerThreadId !== payloadThreadId) {
@@ -220,23 +220,23 @@ export async function reconcileRalphSessionResume({
         updated.owner_omg_session_id = currentOmxSessionId;
         changed = true;
       }
-      if (payloadSessionId && !safeString(updated.owner_codex_session_id).trim()) {
-        updated.owner_codex_session_id = payloadSessionId;
+      if (payloadSessionId && !safeString(updated.owner_gemini_session_id).trim()) {
+        updated.owner_gemini_session_id = payloadSessionId;
         changed = true;
       }
       if (
-        !safeString(updated.owner_codex_session_id).trim()
+        !safeString(updated.owner_gemini_session_id).trim()
         && normalizedPayloadThreadId
-        && safeString(updated.owner_codex_thread_id).trim() !== normalizedPayloadThreadId
+        && safeString(updated.owner_gemini_thread_id).trim() !== normalizedPayloadThreadId
       ) {
-        updated.owner_codex_thread_id = normalizedPayloadThreadId;
+        updated.owner_gemini_thread_id = normalizedPayloadThreadId;
         changed = true;
       }
       if (
-        typeof updated.owner_codex_thread_id === 'string'
-        && safeString(updated.owner_codex_session_id).trim()
+        typeof updated.owner_gemini_thread_id === 'string'
+        && safeString(updated.owner_gemini_session_id).trim()
       ) {
-        delete updated.owner_codex_thread_id;
+        delete updated.owner_gemini_thread_id;
         changed = true;
       }
       const currentPaneId = resolveResumePane(env);
@@ -274,7 +274,7 @@ export async function reconcileRalphSessionResume({
         currentOmxSessionId,
         resumed: false,
         updatedCurrentOwner: false,
-        reason: 'payload_codex_identity_missing',
+        reason: 'payload_gemini_identity_missing',
       };
     }
 
@@ -299,10 +299,10 @@ export async function reconcileRalphSessionResume({
     const nextState = bindCurrentPane({
       ...source.state,
       owner_omg_session_id: currentOmxSessionId,
-      ...(normalizedPayloadSessionId ? { owner_codex_session_id: normalizedPayloadSessionId } : {}),
+      ...(normalizedPayloadSessionId ? { owner_gemini_session_id: normalizedPayloadSessionId } : {}),
     }, nowIso, env);
-    if (safeString(nextState.owner_codex_session_id).trim()) {
-      delete nextState.owner_codex_thread_id;
+    if (safeString(nextState.owner_gemini_session_id).trim()) {
+      delete nextState.owner_gemini_thread_id;
     }
     delete nextState.completed_at;
     delete nextState.stop_reason;
@@ -328,7 +328,7 @@ export async function reconcileRalphSessionResume({
       currentOmxSessionId,
       resumed: true,
       updatedCurrentOwner: false,
-      reason: 'resumed_same_codex_session',
+      reason: 'resumed_same_gemini_session',
       sourcePath: source.path,
       targetPath: currentRalphPath,
     };

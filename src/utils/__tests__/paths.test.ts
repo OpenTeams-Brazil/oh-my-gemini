@@ -20,8 +20,8 @@ import {
   omgAdaptersDir,
   omgLogsDir,
   packageRoot,
-  OMX_ENTRY_PATH_ENV,
-  OMX_STARTUP_CWD_ENV,
+  OMG_ENTRY_PATH_ENV,
+  OMG_STARTUP_CWD_ENV,
   rememberOmxLaunchContext,
   resolveOmxCliEntryPath,
   resolveOmxEntryPath,
@@ -51,8 +51,8 @@ describe("geminiHome", () => {
   });
 
   it("returns GEMINI_HOME env var when set", () => {
-    process.env.GEMINI_HOME = "/tmp/custom-codex";
-    assert.equal(geminiHome(), "/tmp/custom-codex");
+    process.env.GEMINI_HOME = "/tmp/custom-gemini";
+    assert.equal(geminiHome(), "/tmp/custom-gemini");
   });
 
   it("defaults to ~/.gemini when GEMINI_HOME is not set", () => {
@@ -68,7 +68,7 @@ describe("geminiConfigPath", () => {
   beforeEach(() => {
     originalGeminiHome = process.env.GEMINI_HOME;
     originalUserProfile = process.env.USERPROFILE;
-    process.env.GEMINI_HOME = "/tmp/test-codex";
+    process.env.GEMINI_HOME = "/tmp/test-gemini";
   });
 
   afterEach(() => {
@@ -85,8 +85,8 @@ describe("geminiConfigPath", () => {
     }
   });
 
-  it("returns config.toml under codex home", () => {
-    assert.equal(geminiConfigPath(), join("/tmp/test-codex", "config.toml"));
+  it("returns config.toml under gemini home", () => {
+    assert.equal(geminiConfigPath(), join("/tmp/test-gemini", "config.toml"));
   });
 });
 
@@ -97,7 +97,7 @@ describe("geminiPromptsDir", () => {
   beforeEach(() => {
     originalGeminiHome = process.env.GEMINI_HOME;
     originalUserProfile = process.env.USERPROFILE;
-    process.env.GEMINI_HOME = "/tmp/test-codex";
+    process.env.GEMINI_HOME = "/tmp/test-gemini";
   });
 
   afterEach(() => {
@@ -114,8 +114,8 @@ describe("geminiPromptsDir", () => {
     }
   });
 
-  it("returns prompts/ under codex home", () => {
-    assert.equal(geminiPromptsDir(), join("/tmp/test-codex", "prompts"));
+  it("returns prompts/ under gemini home", () => {
+    assert.equal(geminiPromptsDir(), join("/tmp/test-gemini", "prompts"));
   });
 });
 
@@ -126,7 +126,7 @@ describe("userSkillsDir", () => {
   beforeEach(() => {
     originalGeminiHome = process.env.GEMINI_HOME;
     originalUserProfile = process.env.USERPROFILE;
-    process.env.GEMINI_HOME = "/tmp/test-codex";
+    process.env.GEMINI_HOME = "/tmp/test-gemini";
   });
 
   afterEach(() => {
@@ -144,7 +144,7 @@ describe("userSkillsDir", () => {
   });
 
   it("returns GEMINI_HOME/skills", () => {
-    assert.equal(userSkillsDir(), join("/tmp/test-codex", "skills"));
+    assert.equal(userSkillsDir(), join("/tmp/test-gemini", "skills"));
   });
 });
 
@@ -227,7 +227,7 @@ describe("listInstalledSkillDirectories", () => {
 
   it("deduplicates by skill name and prefers project skills over user skills", async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), "omg-paths-project-"));
-    const geminiHomeRoot = await mkdtemp(join(tmpdir(), "omg-paths-codex-"));
+    const geminiHomeRoot = await mkdtemp(join(tmpdir(), "omg-paths-gemini-"));
     process.env.GEMINI_HOME = geminiHomeRoot;
 
     try {
@@ -408,19 +408,19 @@ describe("packageRoot", () => {
 });
 
 describe("OMX launcher path resolution", () => {
-  const originalEntryPath = process.env[OMX_ENTRY_PATH_ENV];
-  const originalStartupCwd = process.env[OMX_STARTUP_CWD_ENV];
+  const originalEntryPath = process.env[OMG_ENTRY_PATH_ENV];
+  const originalStartupCwd = process.env[OMG_STARTUP_CWD_ENV];
 
   afterEach(() => {
     if (typeof originalEntryPath === "string") {
-      process.env[OMX_ENTRY_PATH_ENV] = originalEntryPath;
+      process.env[OMG_ENTRY_PATH_ENV] = originalEntryPath;
     } else {
-      delete process.env[OMX_ENTRY_PATH_ENV];
+      delete process.env[OMG_ENTRY_PATH_ENV];
     }
     if (typeof originalStartupCwd === "string") {
-      process.env[OMX_STARTUP_CWD_ENV] = originalStartupCwd;
+      process.env[OMG_STARTUP_CWD_ENV] = originalStartupCwd;
     } else {
-      delete process.env[OMX_STARTUP_CWD_ENV];
+      delete process.env[OMG_STARTUP_CWD_ENV];
     }
   });
 
@@ -438,7 +438,7 @@ describe("OMX launcher path resolution", () => {
         cwd: laterCwd,
         env: {
           ...process.env,
-          [OMX_STARTUP_CWD_ENV]: startupCwd,
+          [OMG_STARTUP_CWD_ENV]: startupCwd,
         },
       });
 
@@ -457,16 +457,16 @@ describe("OMX launcher path resolution", () => {
       await mkdir(launcherDir, { recursive: true });
       await writeFile(launcherPath, "#!/usr/bin/env node\n", "utf-8");
 
-      delete process.env[OMX_ENTRY_PATH_ENV];
-      delete process.env[OMX_STARTUP_CWD_ENV];
+      delete process.env[OMG_ENTRY_PATH_ENV];
+      delete process.env[OMG_STARTUP_CWD_ENV];
       rememberOmxLaunchContext({
         argv1: "dist/cli/omg.js",
         cwd: startupCwd,
         env: process.env,
       });
 
-      assert.equal(process.env[OMX_STARTUP_CWD_ENV], startupCwd);
-      assert.equal(process.env[OMX_ENTRY_PATH_ENV], launcherPath);
+      assert.equal(process.env[OMG_STARTUP_CWD_ENV], startupCwd);
+      assert.equal(process.env[OMG_ENTRY_PATH_ENV], launcherPath);
     } finally {
       await rm(startupCwd, { recursive: true, force: true });
     }
@@ -477,7 +477,7 @@ describe("OMX launcher path resolution", () => {
     const packageRootDir = await mkdtemp(join(tmpdir(), "omg-launcher-cli-fallback-root-"));
     try {
       const hookDir = join(startupCwd, "dist", "scripts");
-      const hookPath = join(hookDir, "codex-native-hook.js");
+      const hookPath = join(hookDir, "gemini-native-hook.js");
       const cliDir = join(packageRootDir, "dist", "cli");
       const cliPath = join(cliDir, "omg.js");
       await mkdir(hookDir, { recursive: true });
@@ -486,11 +486,11 @@ describe("OMX launcher path resolution", () => {
       await writeFile(cliPath, "#!/usr/bin/env node\n", "utf-8");
 
       const resolved = resolveOmxCliEntryPath({
-        argv1: "dist/scripts/codex-native-hook.js",
+        argv1: "dist/scripts/gemini-native-hook.js",
         cwd: startupCwd,
         env: {
           ...process.env,
-          [OMX_STARTUP_CWD_ENV]: startupCwd,
+          [OMG_STARTUP_CWD_ENV]: startupCwd,
         },
         packageRootDir,
       });
@@ -515,7 +515,7 @@ describe("OMX launcher path resolution", () => {
         cwd: startupCwd,
         env: {
           ...process.env,
-          [OMX_STARTUP_CWD_ENV]: startupCwd,
+          [OMG_STARTUP_CWD_ENV]: startupCwd,
         },
       });
 
@@ -529,7 +529,7 @@ describe("OMX launcher path resolution", () => {
     const startupCwd = await mkdtemp(join(tmpdir(), "omg-launcher-cli-host-start-"));
     const packageRootDir = await mkdtemp(join(tmpdir(), "omg-launcher-cli-host-root-"));
     try {
-      const hostPath = join(startupCwd, "codex-host");
+      const hostPath = join(startupCwd, "gemini-host");
       const cliDir = join(packageRootDir, "dist", "cli");
       const cliPath = join(cliDir, "omg.js");
       await writeFile(hostPath, "#!/usr/bin/env node\n", "utf-8");
@@ -541,7 +541,7 @@ describe("OMX launcher path resolution", () => {
         cwd: startupCwd,
         env: {
           ...process.env,
-          [OMX_STARTUP_CWD_ENV]: startupCwd,
+          [OMG_STARTUP_CWD_ENV]: startupCwd,
         },
         packageRootDir,
       });

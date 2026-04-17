@@ -150,7 +150,7 @@ describe('session lifecycle manager', () => {
   it('removes canonical and native session-scoped hud state on session end', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-session-end-hud-cleanup-'));
     const canonicalSessionId = 'omg-launch-hud';
-    const nativeSessionId = 'codex-native-hud';
+    const nativeSessionId = 'gemini-native-hud';
     try {
       await writeSessionStart(cwd, canonicalSessionId, { nativeSessionId });
       const stateDir = join(cwd, '.omg', 'state');
@@ -178,25 +178,25 @@ describe('session lifecycle manager', () => {
     try {
       await writeSessionStart(cwd, 'omg-launch-1');
 
-      const reconciled = await reconcileNativeSessionStart(cwd, 'codex-native-1', {
+      const reconciled = await reconcileNativeSessionStart(cwd, 'gemini-native-1', {
         pid: 54321,
         platform: 'win32',
       });
 
       assert.equal(reconciled.session_id, 'omg-launch-1');
-      assert.equal(reconciled.native_session_id, 'codex-native-1');
+      assert.equal(reconciled.native_session_id, 'gemini-native-1');
       assert.equal(reconciled.pid, 54321);
       assert.equal(reconciled.platform, 'win32');
 
       const persisted = await readSessionState(cwd);
       assert.equal(persisted?.session_id, 'omg-launch-1');
-      assert.equal(persisted?.native_session_id, 'codex-native-1');
+      assert.equal(persisted?.native_session_id, 'gemini-native-1');
       assert.equal(persisted?.pid, 54321);
 
       const dailyLogPath = join(cwd, '.omg', 'logs', `omg-${todayIsoDate()}.jsonl`);
       const dailyLog = await readFile(dailyLogPath, 'utf-8');
       assert.match(dailyLog, /"event":"session_start_reconciled"/);
-      assert.match(dailyLog, /"native_session_id":"codex-native-1"/);
+      assert.match(dailyLog, /"native_session_id":"gemini-native-1"/);
     } finally {
       await rm(cwd, { recursive: true, force: true });
     }
@@ -212,13 +212,13 @@ describe('session lifecycle manager', () => {
         cwd: join(cwd, '..', 'different-worktree'),
       }), 'utf-8');
 
-      const reconciled = await reconcileNativeSessionStart(cwd, 'codex-fallback-1', {
+      const reconciled = await reconcileNativeSessionStart(cwd, 'gemini-fallback-1', {
         pid: 67890,
         platform: 'win32',
       });
 
-      assert.equal(reconciled.session_id, 'codex-fallback-1');
-      assert.equal(reconciled.native_session_id, 'codex-fallback-1');
+      assert.equal(reconciled.session_id, 'gemini-fallback-1');
+      assert.equal(reconciled.native_session_id, 'gemini-fallback-1');
       assert.equal(reconciled.pid, 67890);
     } finally {
       await rm(cwd, { recursive: true, force: true });

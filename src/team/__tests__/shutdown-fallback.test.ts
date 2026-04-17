@@ -20,20 +20,20 @@ async function initRepo(): Promise<string> {
 }
 
 function withoutTeamWorkerEnv<T>(fn: () => Promise<T>): Promise<T> {
-  const prev = process.env.OMX_TEAM_WORKER;
-  delete process.env.OMX_TEAM_WORKER;
+  const prev = process.env.OMG_TEAM_WORKER;
+  delete process.env.OMG_TEAM_WORKER;
   return fn().finally(() => {
-    if (typeof prev === 'string') process.env.OMX_TEAM_WORKER = prev;
-    else delete process.env.OMX_TEAM_WORKER;
+    if (typeof prev === 'string') process.env.OMG_TEAM_WORKER = prev;
+    else delete process.env.OMG_TEAM_WORKER;
   });
 }
 
 function withMockPromptModeGeminiAllowed<T>(fn: () => Promise<T>): Promise<T> {
-  const previous = process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT;
-  process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT = '1';
+  const previous = process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT;
+  process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT = '1';
   return fn().finally(() => {
-    if (typeof previous === 'string') process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT = previous;
-    else delete process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT;
+    if (typeof previous === 'string') process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT = previous;
+    else delete process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT;
   });
 }
 
@@ -41,7 +41,7 @@ describe('shutdown fallback worktree reports', () => {
   it('shutdownTeam checkpoints dirty detached worker worktrees, merges them, and writes a report', async () => {
     const repo = await initRepo();
     const binDir = await mkdtemp(join(tmpdir(), 'omg-shutdown-fallback-bin-'));
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     await writeFile(
       fakeGeminiPath,
       `#!/usr/bin/env node
@@ -54,13 +54,13 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
 
     let runtime: TeamRuntime | null = null;
     let preservedWorktreePath: string | null = null;
@@ -130,10 +130,10 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       await rm(binDir, { recursive: true, force: true }).catch(() => {});
       if (preservedWorktreePath) {
         await rm(preservedWorktreePath, { recursive: true, force: true }).catch(() => {});

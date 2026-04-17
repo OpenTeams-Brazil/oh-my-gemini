@@ -20,7 +20,7 @@ import {
   spawnAutoresearchTmux,
   type AutoresearchQuestionIO,
 } from '../autoresearch-guided.js';
-import { OMX_ENTRY_PATH_ENV, OMX_STARTUP_CWD_ENV } from '../../utils/paths.js';
+import { OMG_ENTRY_PATH_ENV, OMG_STARTUP_CWD_ENV } from '../../utils/paths.js';
 
 async function initRepo(): Promise<string> {
   const cwd = await mkdtemp(join(tmpdir(), 'omg-autoresearch-guided-test-'));
@@ -218,8 +218,8 @@ describe('checkTmuxAvailable', () => {
     const missionDir = join(repo, 'missions', 'demo');
     const tmuxLog = join(repo, 'tmux.log');
     const previousPath = process.env.PATH;
-    const previousEntryPath = process.env[OMX_ENTRY_PATH_ENV];
-    const previousStartupCwd = process.env[OMX_STARTUP_CWD_ENV];
+    const previousEntryPath = process.env[OMG_ENTRY_PATH_ENV];
+    const previousStartupCwd = process.env[OMG_STARTUP_CWD_ENV];
 
     try {
       await mkdir(missionDir, { recursive: true });
@@ -253,8 +253,8 @@ esac
       execFileSync('chmod', ['+x', fakeTmuxPath], { stdio: 'ignore' });
 
       process.env.PATH = `${fakeBin}:${previousPath || ''}`;
-      delete process.env[OMX_ENTRY_PATH_ENV];
-      process.env[OMX_STARTUP_CWD_ENV] = startupCwd;
+      delete process.env[OMG_ENTRY_PATH_ENV];
+      process.env[OMG_STARTUP_CWD_ENV] = startupCwd;
 
       const previousArgv = process.argv;
       process.argv = [previousArgv[0] || 'node', 'dist/cli/omg.js'];
@@ -271,10 +271,10 @@ esac
     } finally {
       if (typeof previousPath === 'string') process.env.PATH = previousPath;
       else delete process.env.PATH;
-      if (typeof previousEntryPath === 'string') process.env[OMX_ENTRY_PATH_ENV] = previousEntryPath;
-      else delete process.env[OMX_ENTRY_PATH_ENV];
-      if (typeof previousStartupCwd === 'string') process.env[OMX_STARTUP_CWD_ENV] = previousStartupCwd;
-      else delete process.env[OMX_STARTUP_CWD_ENV];
+      if (typeof previousEntryPath === 'string') process.env[OMG_ENTRY_PATH_ENV] = previousEntryPath;
+      else delete process.env[OMG_ENTRY_PATH_ENV];
+      if (typeof previousStartupCwd === 'string') process.env[OMG_STARTUP_CWD_ENV] = previousStartupCwd;
+      else delete process.env[OMG_STARTUP_CWD_ENV];
       await rm(repo, { recursive: true, force: true });
       await rm(fakeBin, { recursive: true, force: true });
       await rm(startupCwd, { recursive: true, force: true });

@@ -8,7 +8,7 @@
  * Idle = pane shows a prompt (paneLooksReady) AND no active task running
  * (paneHasActiveTask is false).
  *
- * Ported from OMC with adapted sendToWorker signature.
+ * Ported from OMG with adapted sendToWorker signature.
  */
 
 import { execFile } from 'child_process';

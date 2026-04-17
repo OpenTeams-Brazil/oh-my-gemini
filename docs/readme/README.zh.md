@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://yeachan-heo.github.io/oh-my-gemini-website/omg-character-nobg.png" alt="oh-my-gemini character" width="280">
   <br>
-  <em>你的 codex 并不孤单。</em>
+  <em>你的 gemini 并不孤单。</em>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/oh-my-gemini)](https://www.npmjs.com/package/oh-my-gemini)
@@ -13,7 +13,7 @@
 
 > **[Website](https://yeachan-heo.github.io/oh-my-gemini-website/)** | **[Documentation](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html)** | **[CLI Reference](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#cli-reference)** | **[Workflows](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#workflows)** | **[OpenClaw 集成指南](../openclaw-integration.zh.md)** | **[GitHub](https://github.com/Yeachan-Heo/oh-my-gemini)** | **[npm](https://www.npmjs.com/package/oh-my-gemini)**
 
-[OpenAI Gemini CLI](https://github.com/openai/codex) 的多智能体编排层。
+[OpenAI Gemini CLI](https://github.com/openai/gemini) 的多智能体编排层。
 
 ## v0.9.0 新特性 — Spark Initiative
 
@@ -89,7 +89,7 @@ OMX 现在包含用于插件脚手架和验证的 `omg hooks`。
 - `omg tmux-hook` 继续支持且未更改。
 - `omg hooks` 是附加的，不会替代 tmux-hook 工作流。
 - 插件文件位于 `.omg/hooks/*.mjs`。
-- 插件默认关闭；使用 `OMX_HOOK_PLUGINS=1` 启用。
+- 插件默认关闭；使用 `OMG_HOOK_PLUGINS=1` 启用。
 
 完整的扩展工作流和事件模型请参阅 `docs/hooks-extension.md`。
 
@@ -115,7 +115,7 @@ OMX 现在包含用于插件脚手架和验证的 `omg hooks`。
 要限制此行为，请设置允许的根目录列表：
 
 ```bash
-export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
+export OMG_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 ```
 
 设置后，超出这些根目录的 `workingDirectory` 值将被拒绝。
@@ -128,14 +128,14 @@ export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 -c model_instructions_file="<cwd>/GEMINI.md"
 ```
 
-这会将 `CODEX_HOME` 中的 `GEMINI.md` 与项目 `GEMINI.md`（如果存在）合并，然后再附加运行时 overlay。
+这会将 `GEMINI_HOME` 中的 `GEMINI.md` 与项目 `GEMINI.md`（如果存在）合并，然后再附加运行时 overlay。
 扩展 Gemini 行为，但不会替换/绕过 Gemini 核心系统策略。
 
 控制：
 
 ```bash
-OMX_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # 禁用 GEMINI.md 注入
-OMX_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
+OMG_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # 禁用 GEMINI.md 注入
+OMG_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
 ```
 
 ## 团队模式
@@ -167,16 +167,16 @@ Team cleanup now follows one standalone path; legacy linked-Ralph shutdown handl
 团队 worker 的 Worker CLI 选择：
 
 ```bash
-OMX_TEAM_WORKER_CLI=auto    # 默认；当 worker --model 包含 "claude" 时使用 claude
-OMX_TEAM_WORKER_CLI=codex   # 强制 Gemini CLI worker
-OMX_TEAM_WORKER_CLI=claude  # 强制 Claude CLI worker
-OMX_TEAM_WORKER_CLI_MAP=codex,codex,claude,claude  # 每个 worker 的 CLI 混合（长度=1 或 worker 数量）
-OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # 可选：禁用自适应 queue->resend 回退
+OMG_TEAM_WORKER_CLI=auto    # 默认；当 worker --model 包含 "claude" 时使用 claude
+OMG_TEAM_WORKER_CLI=gemini   # 强制 Gemini CLI worker
+OMG_TEAM_WORKER_CLI=claude  # 强制 Claude CLI worker
+OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,claude,claude  # 每个 worker 的 CLI 混合（长度=1 或 worker 数量）
+OMG_TEAM_AUTO_INTERRUPT_RETRY=0  # 可选：禁用自适应 queue->resend 回退
 ```
 
 注意：
-- Worker 启动参数仍通过 `OMX_TEAM_WORKER_LAUNCH_ARGS` 共享。
-- `OMX_TEAM_WORKER_CLI_MAP` 覆盖 `OMX_TEAM_WORKER_CLI` 以实现每个 worker 的选择。
+- Worker 启动参数仍通过 `OMG_TEAM_WORKER_LAUNCH_ARGS` 共享。
+- `OMG_TEAM_WORKER_CLI_MAP` 覆盖 `OMG_TEAM_WORKER_CLI` 以实现每个 worker 的选择。
 - 触发器提交默认使用自适应重试（queue/submit，需要时使用安全的 clear-line+resend 回退）。
 - 在 Claude worker 模式下，OMX 以普通 `claude` 启动 worker（无额外启动参数），并忽略显式的 `--model` / `--config` / `--effort` 覆盖，使 Claude 使用默认 `settings.json`。
 
@@ -186,8 +186,8 @@ OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # 可选：禁用自适应 queue->resend 回退
 - 依赖作用域的安装：
   - `user`：`~/.gemini/prompts/`、`~/.gemini/skills/`、`~/.gemini/config.toml`、`~/.omg/agents/`、`~/.gemini/GEMINI.md`
   - `project`：`./.gemini/prompts/`、`./.gemini/skills/`、`./.gemini/config.toml`、`./.omg/agents/`、`./GEMINI.md`
-- 启动行为：如果持久化的作用域是 `project`，`omg` 启动时自动使用 `CODEX_HOME=./.gemini`（除非 `CODEX_HOME` 已设置）。
-- 启动指令会合并 `~/.gemini/GEMINI.md`（或被覆盖的 `CODEX_HOME/GEMINI.md`）与项目 `./GEMINI.md`，然后附加运行时 overlay。
+- 启动行为：如果持久化的作用域是 `project`，`omg` 启动时自动使用 `GEMINI_HOME=./.gemini`（除非 `GEMINI_HOME` 已设置）。
+- 启动指令会合并 `~/.gemini/GEMINI.md`（或被覆盖的 `GEMINI_HOME/GEMINI.md`）与项目 `./GEMINI.md`，然后附加运行时 overlay。
 - 现有 `GEMINI.md` 文件绝不会被静默覆盖：交互式 TTY 下 setup 会先询问是否替换；非交互模式下除非传入 `--force`，否则会跳过替换（活动会话安全检查仍然适用）。
 - `config.toml` 更新（两种作用域均适用）：
   - `notify = ["node", "..."]`

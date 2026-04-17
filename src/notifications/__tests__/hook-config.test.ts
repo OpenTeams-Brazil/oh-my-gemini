@@ -29,44 +29,44 @@ describe('getHookConfig', () => {
   beforeEach(() => {
     tmpDir = makeTmpDir();
     resetHookConfigCache();
-    delete process.env.OMX_HOOK_CONFIG;
+    delete process.env.OMG_HOOK_CONFIG;
   });
 
   afterEach(() => {
     rmSync(tmpDir, { recursive: true, force: true });
     resetHookConfigCache();
-    delete process.env.OMX_HOOK_CONFIG;
+    delete process.env.OMG_HOOK_CONFIG;
   });
 
   it('returns null when no config exists', () => {
     assert.equal(getHookConfig(), null);
   });
 
-  it('reads config from OMX_HOOK_CONFIG env var path', () => {
+  it('reads config from OMG_HOOK_CONFIG env var path', () => {
     const path = join(tmpDir, 'hook.json');
     writeFileSync(path, JSON.stringify({ version: 1, enabled: true }));
-    process.env.OMX_HOOK_CONFIG = path;
+    process.env.OMG_HOOK_CONFIG = path;
     const result = getHookConfig();
     assert.ok(result !== null);
     assert.equal(result!.enabled, true);
   });
 
-  it('returns null when OMX_HOOK_CONFIG file does not exist', () => {
-    process.env.OMX_HOOK_CONFIG = join(tmpDir, 'nonexistent.json');
+  it('returns null when OMG_HOOK_CONFIG file does not exist', () => {
+    process.env.OMG_HOOK_CONFIG = join(tmpDir, 'nonexistent.json');
     assert.equal(getHookConfig(), null);
   });
 
   it('returns null when config has enabled: false', () => {
     const path = join(tmpDir, 'hook.json');
     writeFileSync(path, JSON.stringify({ version: 1, enabled: false }));
-    process.env.OMX_HOOK_CONFIG = path;
+    process.env.OMG_HOOK_CONFIG = path;
     assert.equal(getHookConfig(), null);
   });
 
   it('caches result after first read', () => {
     const path = join(tmpDir, 'hook.json');
     writeFileSync(path, JSON.stringify({ version: 1, enabled: true }));
-    process.env.OMX_HOOK_CONFIG = path;
+    process.env.OMG_HOOK_CONFIG = path;
     const first = getHookConfig();
     writeFileSync(path, JSON.stringify({ version: 1, enabled: false }));
     const second = getHookConfig();
@@ -76,7 +76,7 @@ describe('getHookConfig', () => {
   it('resetHookConfigCache clears cache', () => {
     const path = join(tmpDir, 'hook.json');
     writeFileSync(path, JSON.stringify({ version: 1, enabled: true }));
-    process.env.OMX_HOOK_CONFIG = path;
+    process.env.OMG_HOOK_CONFIG = path;
     getHookConfig();
     resetHookConfigCache();
     writeFileSync(path, JSON.stringify({ version: 1, enabled: false }));

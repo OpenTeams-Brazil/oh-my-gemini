@@ -12,7 +12,7 @@ import {
 } from '../cleanup.js';
 
 const CURRENT_SESSION_PROCESSES: ProcessEntry[] = [
-  { pid: 700, ppid: 500, command: 'codex' },
+  { pid: 700, ppid: 500, command: 'gemini' },
   { pid: 701, ppid: 700, command: 'node /repo/bin/omg.js cleanup --dry-run' },
   {
     pid: 710,
@@ -32,7 +32,7 @@ const CURRENT_SESSION_PROCESSES: ProcessEntry[] = [
   {
     pid: 820,
     ppid: 50,
-    command: 'codex --model gpt-5',
+    command: 'gemini --model gpt-5',
   },
   {
     pid: 821,
@@ -133,7 +133,7 @@ describe('findCleanupCandidates', () => {
 
   it('always preserves ppid=1 orphan candidates even if pid 1 matches a protected ancestor predicate', () => {
     const reparentedProcesses: ProcessEntry[] = [
-      { pid: 1, ppid: 0, command: 'codex' },
+      { pid: 1, ppid: 0, command: 'gemini' },
       { pid: 701, ppid: 700, command: 'node /repo/bin/omg.js' },
       { pid: 840, ppid: 1, command: 'node /tmp/reparented/dist/mcp/state-server.js' },
     ];
@@ -191,7 +191,7 @@ describe('listOmxProcesses', () => {
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
       const parsed = listOmxProcesses(() => [
-        JSON.stringify({ pid: 700, ppid: 500, command: 'codex' }),
+        JSON.stringify({ pid: 700, ppid: 500, command: 'gemini' }),
         JSON.stringify({ pid: 701, ppid: 700, command: 'node C:/repo/bin/omg.js cleanup --dry-run' }),
         JSON.stringify({ pid: 710, ppid: 700, command: 'node C:/repo/dist/mcp/state-server.js' }),
         JSON.stringify({ pid: 800, ppid: 1, command: 'node C:/tmp/oh-my-gemini/dist/mcp/memory-server.js' }),
@@ -320,7 +320,7 @@ describe('cleanupOmxMcpProcesses', () => {
 describe('cleanupStaleTmpDirectories', () => {
   const tmpEntries = [
     { name: 'omg-stale-a', isDirectory: () => true },
-    { name: 'omc-stale-b', isDirectory: () => true },
+    { name: 'omg-stale-b', isDirectory: () => true },
     { name: 'oh-my-gemini-fresh', isDirectory: () => true },
     { name: 'oh-my-gemini-file', isDirectory: () => false },
     { name: 'other-stale', isDirectory: () => true },
@@ -353,7 +353,7 @@ describe('cleanupStaleTmpDirectories', () => {
       lines.join('\n'),
       /Dry run: would remove 2 stale OMX \/tmp directories:/,
     );
-    assert.match(lines.join('\n'), /\/tmp\/omc-stale-b/);
+    assert.match(lines.join('\n'), /\/tmp\/omg-stale-b/);
     assert.match(lines.join('\n'), /\/tmp\/omg-stale-a/);
     assert.doesNotMatch(lines.join('\n'), /oh-my-gemini-fresh/);
     assert.doesNotMatch(lines.join('\n'), /other-stale/);
@@ -381,8 +381,8 @@ describe('cleanupStaleTmpDirectories', () => {
     });
 
     assert.equal(removedCount, 2);
-    assert.deepEqual(removedPaths, ['/tmp/omc-stale-b', '/tmp/omg-stale-a']);
-    assert.match(lines.join('\n'), /Removed stale \/tmp directory: \/tmp\/omc-stale-b/);
+    assert.deepEqual(removedPaths, ['/tmp/omg-stale-b', '/tmp/omg-stale-a']);
+    assert.match(lines.join('\n'), /Removed stale \/tmp directory: \/tmp\/omg-stale-b/);
     assert.match(lines.join('\n'), /Removed stale \/tmp directory: \/tmp\/omg-stale-a/);
     assert.match(lines.join('\n'), /Removed 2 stale OMX \/tmp directories\./);
   });

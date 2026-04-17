@@ -35,7 +35,7 @@ fn write_executable(path: &Path, body: &str) {
 #[test]
 fn raw_mode_preserves_stdout_and_stderr() {
     let output = Command::new(sparkshell_bin())
-        .env("OMX_SPARKSHELL_LINES", "5")
+        .env("OMG_SPARKSHELL_LINES", "5")
         .arg("sh")
         .arg("-c")
         .arg("printf 'alpha\n'; printf 'warn\n' >&2")
@@ -48,13 +48,13 @@ fn raw_mode_preserves_stdout_and_stderr() {
 }
 
 #[test]
-fn summary_mode_uses_codex_exec_and_model_override() {
-    let temp = unique_temp_dir("codex-success");
-    let codex = temp.join("codex");
+fn summary_mode_uses_gemini_exec_and_model_override() {
+    let temp = unique_temp_dir("gemini-success");
+    let gemini = temp.join("gemini");
     let args_log = temp.join("args.log");
     let prompt_log = temp.join("prompt.log");
     write_executable(
-        &codex,
+        &gemini,
         &format!(
             "#!/bin/sh\nprintf '%s\n' \"$@\" > '{}'\ncat > '{}'\nprintf '%s\n' '- summary: command produced long output' '- warnings: stderr was empty'\n",
             args_log.display(),
@@ -69,8 +69,8 @@ fn summary_mode_uses_codex_exec_and_model_override() {
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
-        .env("OMX_SPARKSHELL_MODEL", "spark-test-model")
+        .env("OMG_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_MODEL", "spark-test-model")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'")
@@ -99,10 +99,10 @@ fn summary_mode_uses_codex_exec_and_model_override() {
 
 #[test]
 fn summary_failure_falls_back_to_raw_output_with_notice() {
-    let temp = unique_temp_dir("codex-fail");
-    let codex = temp.join("codex");
+    let temp = unique_temp_dir("gemini-fail");
+    let gemini = temp.join("gemini");
     write_executable(
-        &codex,
+        &gemini,
         "#!/bin/sh\nprintf '%s\n' 'bridge failed' >&2\nexit 9\n",
     );
 
@@ -113,7 +113,7 @@ fn summary_failure_falls_back_to_raw_output_with_notice() {
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_LINES", "1")
         .arg("/bin/sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'; printf 'child-err\n' >&2")
@@ -131,11 +131,11 @@ fn summary_failure_falls_back_to_raw_output_with_notice() {
 
 #[test]
 fn summary_mode_retries_with_fallback_model_when_spark_is_unavailable() {
-    let temp = unique_temp_dir("codex-fallback-model");
-    let codex = temp.join("codex");
+    let temp = unique_temp_dir("gemini-fallback-model");
+    let gemini = temp.join("gemini");
     let args_log = temp.join("args.log");
     write_executable(
-        &codex,
+        &gemini,
         &format!(
             "#!/bin/sh
 printf '%s\n' \"$@\" >> '{}'
@@ -162,9 +162,9 @@ printf '%s\n' '- summary: fallback model recovered summary'
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
-        .env("OMX_SPARKSHELL_MODEL", "spark-test-model")
-        .env("OMX_SPARKSHELL_FALLBACK_MODEL", "frontier-test-model")
+        .env("OMG_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_MODEL", "spark-test-model")
+        .env("OMG_SPARKSHELL_FALLBACK_MODEL", "frontier-test-model")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'")
@@ -184,10 +184,10 @@ printf '%s\n' '- summary: fallback model recovered summary'
 
 #[test]
 fn summary_mode_reports_both_models_when_fallback_also_fails() {
-    let temp = unique_temp_dir("codex-fallback-model-fail");
-    let codex = temp.join("codex");
+    let temp = unique_temp_dir("gemini-fallback-model-fail");
+    let gemini = temp.join("gemini");
     write_executable(
-        &codex,
+        &gemini,
         "#!/bin/sh
 model=''
 prev=''
@@ -211,9 +211,9 @@ exit 29
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
-        .env("OMX_SPARKSHELL_MODEL", "spark-test-model")
-        .env("OMX_SPARKSHELL_FALLBACK_MODEL", "frontier-test-model")
+        .env("OMG_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_MODEL", "spark-test-model")
+        .env("OMG_SPARKSHELL_FALLBACK_MODEL", "frontier-test-model")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'; printf 'child-err\n' >&2")
@@ -232,10 +232,10 @@ exit 29
 
 #[test]
 fn summary_mode_preserves_child_exit_code() {
-    let temp = unique_temp_dir("codex-exit");
-    let codex = temp.join("codex");
+    let temp = unique_temp_dir("gemini-exit");
+    let gemini = temp.join("gemini");
     write_executable(
-        &codex,
+        &gemini,
         "#!/bin/sh\nprintf '%s\n' '- failures: command exited non-zero'\n",
     );
 
@@ -246,7 +246,7 @@ fn summary_mode_preserves_child_exit_code() {
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_LINES", "1")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'; exit 7")
@@ -264,7 +264,7 @@ fn summary_mode_preserves_child_exit_code() {
 fn tmux_pane_mode_captures_large_tail_and_summarizes() {
     let temp = unique_temp_dir("tmux-pane-summary");
     let tmux = temp.join("tmux");
-    let codex = temp.join("codex");
+    let gemini = temp.join("gemini");
     let args_log = temp.join("tmux-args.log");
     let prompt_log = temp.join("pane-prompt.log");
 
@@ -276,7 +276,7 @@ fn tmux_pane_mode_captures_large_tail_and_summarizes() {
         ),
     );
     write_executable(
-        &codex,
+        &gemini,
         &format!(
             "#!/bin/sh\ncat > '{}'\nprintf '%s\n' '- summary: tmux pane summarized' '- warnings: tail captured'\n",
             prompt_log.display()
@@ -290,7 +290,7 @@ fn tmux_pane_mode_captures_large_tail_and_summarizes() {
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_LINES", "1")
         .arg("--tmux-pane")
         .arg("%17")
         .arg("--tail-lines")
@@ -318,16 +318,16 @@ fn tmux_pane_mode_captures_large_tail_and_summarizes() {
 #[test]
 fn raw_mode_keeps_boundary_output_without_summary() {
     let temp = unique_temp_dir("boundary-raw");
-    let codex = temp.join("codex");
-    let codex_log = temp.join("codex.log");
+    let gemini = temp.join("gemini");
+    let gemini_log = temp.join("gemini.log");
     write_executable(
-        &codex,
+        &gemini,
         &format!(
             "#!/bin/sh
 printf '%s\n' invoked > '{}'
 exit 0
 ",
-            codex_log.display()
+            gemini_log.display()
         ),
     );
 
@@ -338,7 +338,7 @@ exit 0
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "2")
+        .env("OMG_SPARKSHELL_LINES", "2")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'")
@@ -353,8 +353,8 @@ two
 "
     );
     assert!(
-        !codex_log.exists(),
-        "codex should not run at the raw/summary boundary"
+        !gemini_log.exists(),
+        "gemini should not run at the raw/summary boundary"
     );
 
     let _ = fs::remove_dir_all(temp);
@@ -363,10 +363,10 @@ two
 #[test]
 fn summary_mode_uses_combined_stdout_and_stderr_threshold() {
     let temp = unique_temp_dir("combined-threshold");
-    let codex = temp.join("codex");
+    let gemini = temp.join("gemini");
     let prompt_log = temp.join("prompt.log");
     write_executable(
-        &codex,
+        &gemini,
         &format!(
             "#!/bin/sh
 cat > '{}'
@@ -383,7 +383,7 @@ printf '%s\n' '- summary: combined output exceeded threshold'
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "2")
+        .env("OMG_SPARKSHELL_LINES", "2")
         .arg("sh")
         .arg("-c")
         .arg("printf 'one\n' && printf 'warn\nextra\n' >&2")
@@ -403,11 +403,11 @@ extra"
 }
 
 #[test]
-fn summary_failure_when_codex_is_missing_falls_back_to_raw_output() {
-    let empty_path = unique_temp_dir("missing-codex");
+fn summary_failure_when_gemini_is_missing_falls_back_to_raw_output() {
+    let empty_path = unique_temp_dir("missing-gemini");
     let output = Command::new(sparkshell_bin())
         .env("PATH", empty_path.display().to_string())
-        .env("OMX_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_LINES", "1")
         .arg("/bin/sh")
         .arg("-c")
         .arg("printf 'one\ntwo\n'; printf 'child-err\n' >&2")
@@ -432,7 +432,7 @@ two
 fn tmux_pane_mode_uses_default_tail_lines_when_not_overridden() {
     let temp = unique_temp_dir("tmux-default-tail");
     let tmux = temp.join("tmux");
-    let codex = temp.join("codex");
+    let gemini = temp.join("gemini");
     let args_log = temp.join("tmux-args.log");
     write_executable(
         &tmux,
@@ -445,7 +445,7 @@ printf 'line-1\nline-2\nline-3\n'
         ),
     );
     write_executable(
-        &codex,
+        &gemini,
         "#!/bin/sh
 printf '%s\n' '- summary: used default tmux tail'
 ",
@@ -458,7 +458,7 @@ printf '%s\n' '- summary: used default tmux tail'
     );
     let output = Command::new(sparkshell_bin())
         .env("PATH", path)
-        .env("OMX_SPARKSHELL_LINES", "1")
+        .env("OMG_SPARKSHELL_LINES", "1")
         .arg("--tmux-pane")
         .arg("%21")
         .output()

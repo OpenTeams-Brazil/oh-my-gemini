@@ -10,19 +10,19 @@ describe('state-root', () => {
     );
   });
 
-  it('prefers OMX_TEAM_STATE_ROOT when present', () => {
+  it('prefers OMG_TEAM_STATE_ROOT when present', () => {
     assert.equal(
       resolveCanonicalTeamStateRoot('/tmp/demo/project', {
-        OMX_TEAM_STATE_ROOT: '/tmp/shared/team-state',
+        OMG_TEAM_STATE_ROOT: '/tmp/shared/team-state',
       }),
       '/tmp/shared/team-state',
     );
   });
 
-  it('resolves relative OMX_TEAM_STATE_ROOT from the leader cwd', () => {
+  it('resolves relative OMG_TEAM_STATE_ROOT from the leader cwd', () => {
     assert.equal(
       resolveCanonicalTeamStateRoot('/tmp/demo/project', {
-        OMX_TEAM_STATE_ROOT: '../shared/state',
+        OMG_TEAM_STATE_ROOT: '../shared/state',
       }),
       '/tmp/demo/shared/state',
     );

@@ -13,8 +13,8 @@ Ralph runtime state is stored at `.omg/state/{scope}/ralph-state.json` and MUST 
 - Optional linkage fields: `linked_ultrawork`, `linked_ecomode`, `linked_mode`
 - Optional ownership fields:
   - `owner_omg_session_id`
-  - `owner_codex_session_id`
-  - `owner_codex_thread_id` (legacy compatibility only)
+  - `owner_gemini_session_id`
+  - `owner_gemini_thread_id` (legacy compatibility only)
 - Optional tmux anchor fields:
   - `tmux_pane_id`
   - `tmux_pane_set_at`
@@ -59,7 +59,7 @@ starting
 4. If the current authoritative session already owns an active Ralph state, notify-hook MAY backfill missing owner metadata and refresh its tmux anchor fields in place.
 5. Same-Gemini-session continuation MAY migrate a single active Ralph from one session scope into the current authoritative session scope when:
    - the source Ralph is still active and non-terminal,
-   - `owner_codex_session_id` matches the live Gemini payload `session_id`, or reconciliation consults legacy `owner_codex_thread_id` only when that session-id field is absent on the source Ralph,
+   - `owner_gemini_session_id` matches the live Gemini payload `session_id`, or reconciliation consults legacy `owner_gemini_thread_id` only when that session-id field is absent on the source Ralph,
    - the current authoritative session does not already have `ralph-state.json` in that scope,
    - reconciliation is driven by persisted Ralph ownership/state files, not by prompt-keyword parsing.
 6. If the current authoritative session already has `ralph-state.json`, notify-hook MUST NOT auto-revive it, replace it, or migrate another session's Ralph over it just because the current file is inactive/terminal. Explicit user-driven Ralph starts continue to write current scope through the normal mode/state-write path.
@@ -69,7 +69,7 @@ starting
    - the source session is immediately deactivated with audit fields describing the transfer, and if deactivation fails after the destination write, the destination write MUST be rolled back,
    - unrelated sessions MUST remain untouched.
 8. This scope reconciliation MUST run inside `scripts/notify-hook.js` before lifecycle counters, active-scope iteration updates, or tmux prompt injection read the active Ralph scope.
-9. `owner_codex_thread_id` is a legacy compatibility input. A current authoritative Ralph MAY temporarily retain it until a notify payload provides `session_id`; refreshed/current authoritative Ralph state canonicalizes to `owner_codex_session_id` once that session owner is available.
+9. `owner_gemini_thread_id` is a legacy compatibility input. A current authoritative Ralph MAY temporarily retain it until a notify payload provides `session_id`; refreshed/current authoritative Ralph state canonicalizes to `owner_gemini_session_id` once that session owner is available.
 
 ## Consumer compatibility matrix
 

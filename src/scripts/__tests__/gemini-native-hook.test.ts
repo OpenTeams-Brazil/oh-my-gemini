@@ -5,7 +5,7 @@ import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
-import { buildManagedCodexHooksConfig } from "../../config/codex-hooks.js";
+import { buildManagedGeminiHooksConfig } from "../../config/gemini-hooks.js";
 import {
   initTeamState,
   readTeamLeaderAttention,
@@ -16,7 +16,7 @@ import {
   dispatchGeminiNativeHook,
   mapGeminiHookEventToOmxEvent,
   resolveSessionOwnerPidFromAncestry,
-} from "../codex-native-hook.js";
+} from "../gemini-native-hook.js";
 import { writeSessionStart } from "../../hooks/session.js";
 
 async function writeJson(path: string, value: unknown): Promise<void> {
@@ -70,10 +70,10 @@ const DEFAULT_AUTO_NUDGE_RESPONSE =
   "continue with the current task only if it is already authorized";
 
 const TEAM_ENV_KEYS = [
-  "OMX_TEAM_WORKER",
-  "OMX_TEAM_STATE_ROOT",
-  "OMX_TEAM_LEADER_CWD",
-  "OMX_SESSION_ID",
+  "OMG_TEAM_WORKER",
+  "OMG_TEAM_STATE_ROOT",
+  "OMG_TEAM_LEADER_CWD",
+  "OMG_SESSION_ID",
 ] as const;
 
 const priorTeamEnv = new Map<(typeof TEAM_ENV_KEYS)[number], string | undefined>();
@@ -95,9 +95,9 @@ afterEach(() => {
   priorTeamEnv.clear();
 });
 
-describe("codex native hook config", () => {
+describe("gemini native hook config", () => {
   it("builds the expected managed hooks.json shape", () => {
-    const config = buildManagedCodexHooksConfig("/tmp/omg");
+    const config = buildManagedGeminiHooksConfig("/tmp/omg");
     assert.deepEqual(Object.keys(config.hooks), [
       "SessionStart",
       "PreToolUse",
@@ -120,7 +120,7 @@ describe("codex native hook config", () => {
     assert.equal(preToolUse.matcher, "Bash");
     assert.match(
       String(preToolUse.hooks?.[0]?.command || ""),
-      /codex-native-hook\.js"?$/,
+      /gemini-native-hook\.js"?$/,
     );
 
     const postToolUse = config.hooks.PostToolUse[0] as {
@@ -130,7 +130,7 @@ describe("codex native hook config", () => {
     assert.equal(postToolUse.matcher, undefined);
     assert.match(
       String(postToolUse.hooks?.[0]?.command || ""),
-      /codex-native-hook\.js"?$/,
+      /gemini-native-hook\.js"?$/,
     );
     assert.equal(postToolUse.hooks?.[0]?.statusMessage, "Running OMX tool review");
 
@@ -141,11 +141,11 @@ describe("codex native hook config", () => {
   });
 });
 
-describe("codex native hook dispatch", () => {
+describe("gemini native hook dispatch", () => {
   it("emits deterministic JSON stdout when CLI stdin is malformed", () => {
     const stdout = execFileSync(
       process.execPath,
-      [join(process.cwd(), "dist", "scripts", "codex-native-hook.js")],
+      [join(process.cwd(), "dist", "scripts", "gemini-native-hook.js")],
       {
         cwd: process.cwd(),
         input: "{",
@@ -168,7 +168,7 @@ describe("codex native hook dispatch", () => {
     assert.equal(output.hookSpecificOutput?.hookEventName, "Unknown");
     assert.match(
       String(output.hookSpecificOutput?.additionalContext ?? ""),
-      /stdin JSON parsing failed inside codex-native-hook:/,
+      /stdin JSON parsing failed inside gemini-native-hook:/,
     );
   });
 
@@ -213,7 +213,7 @@ describe("codex native hook dispatch", () => {
     try {
       const stateDir = join(cwd, ".omg", "state");
       const canonicalSessionId = "omg-launch-1";
-      const nativeSessionId = "codex-native-1";
+      const nativeSessionId = "gemini-native-1";
       await mkdir(join(stateDir, "sessions", canonicalSessionId), { recursive: true });
       await writeSessionStart(cwd, canonicalSessionId);
       await writeJson(join(stateDir, "sessions", canonicalSessionId, "hud-state.json"), {
@@ -324,10 +324,10 @@ describe("codex native hook dispatch", () => {
     }
   });
 
-  it("resolves the Gemini owner from ancestry without mistaking codex-native-hook wrappers for Gemini", () => {
+  it("resolves the Gemini owner from ancestry without mistaking gemini-native-hook wrappers for Gemini", () => {
     const commands = new Map<number, string>([
-      [2100, 'sh -c node "/repo/dist/scripts/codex-native-hook.js"'],
-      [1100, 'node /usr/local/bin/codex.js'],
+      [2100, 'sh -c node "/repo/dist/scripts/gemini-native-hook.js"'],
+      [1100, 'node /usr/local/bin/gemini.js'],
       [900, 'bash'],
     ]);
     const parents = new Map<number, number | null>([
@@ -700,7 +700,7 @@ set -euo pipefail
 printf '%s\\n' "$*" >> ${JSON.stringify(tmuxLog)}
 case "$1" in
   list-panes)
-    printf '%%1\\tcodex\\tcodex\\n'
+    printf '%%1\\tgemini\\tgemini\\n'
     ;;
   display-message)
     printf '80\\t24\\n'
@@ -715,7 +715,7 @@ esac
       );
       await chmod(join(binDir, "tmux"), 0o755);
       process.env.PATH = `${binDir}:${originalPath}`;
-      process.argv = [originalArgv[0] || 'node', '/tmp/codex-host-binary'];
+      process.argv = [originalArgv[0] || 'node', '/tmp/gemini-host-binary'];
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -733,7 +733,7 @@ esac
       assert.match(tmuxCalls, /split-window/);
       assert.match(tmuxCalls, /resize-pane -t %9 -y 3/);
       assert.match(tmuxCalls, /dist\/cli\/omg\.js' hud --watch --preset=focused/);
-      assert.doesNotMatch(tmuxCalls, /\/tmp\/codex-host-binary' hud --watch/);
+      assert.doesNotMatch(tmuxCalls, /\/tmp\/gemini-host-binary' hud --watch/);
     } finally {
       if (originalTmux === undefined) {
         delete process.env.TMUX;
@@ -1333,7 +1333,7 @@ esac
               '-m "Prevent invalid history from bypassing Lore enforcement"',
               '-m "The native pre-tool-use hook now blocks inline git commit messages that skip Lore trailers or the required OmX co-author trailer."',
               '-m "Constraint: Native PreToolUse can only inspect the Bash command text"',
-              '-m "Tested: node --test dist/scripts/__tests__/codex-native-hook.test.js"',
+              '-m "Tested: node --test dist/scripts/__tests__/gemini-native-hook.test.js"',
             ].join(" "),
           },
         },
@@ -1377,7 +1377,7 @@ esac
               '-m "Prevent invalid history from bypassing Lore enforcement"',
               '-m "The native pre-tool-use hook now blocks inline git commit messages that skip Lore trailers or the required OmX co-author trailer."',
               '-m "Constraint: Native PreToolUse can only inspect the Bash command text"',
-              '-m "Tested: node --test dist/scripts/__tests__/codex-native-hook.test.js"',
+              '-m "Tested: node --test dist/scripts/__tests__/gemini-native-hook.test.js"',
               '-m "Co-authored-by: OmX <omg@oh-my-gemini.dev>"',
             ].join(" "),
           },
@@ -1465,7 +1465,7 @@ esac
       );
       assert.match(
         additionalContext,
-        /OMX_MCP_TRANSPORT_DEBUG=1/,
+        /OMG_MCP_TRANSPORT_DEBUG=1/,
       );
     } finally {
       await rm(cwd, { recursive: true, force: true });
@@ -1506,7 +1506,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-transport" },
+        { ...process.env, OMG_SESSION_ID: "sess-transport" },
       );
       await writeJson(join(cwd, ".omg", "state", "team-state.json"), {
         active: true,
@@ -1543,7 +1543,7 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-team-native-transport-"));
     const previousCwd = process.cwd();
     const canonicalSessionId = "omg-canonical-session";
-    const nativeSessionId = "codex-native-session";
+    const nativeSessionId = "gemini-native-session";
     try {
       process.chdir(cwd);
       await writeSessionStart(cwd, canonicalSessionId);
@@ -1570,7 +1570,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: canonicalSessionId },
+        { ...process.env, OMG_SESSION_ID: canonicalSessionId },
       );
       await writeJson(join(cwd, ".omg", "state", "team-state.json"), {
         active: true,
@@ -1673,7 +1673,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-mcp-dead" },
+        { ...process.env, OMG_SESSION_ID: "sess-mcp-dead" },
       );
 
       const result = await dispatchGeminiNativeHook(
@@ -1756,7 +1756,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-mcp-transport" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-mcp-transport" },
       );
       await writeJson(join(cwd, ".omg", "state", "team-state.json"), {
         active: true,
@@ -1787,7 +1787,7 @@ esac
         hookSpecificOutput: {
           hookEventName: "PostToolUse",
           additionalContext:
-            "Clear MCP transport-death signal detected. Preserve current team/runtime state. Retry via CLI parity with `omg state state_write --input '{\"mode\":\"team\",\"active\":true}' --json`. OMX MCP servers are plain Node stdio processes, so they still shut down when stdin/transport closes. If this happened during team runtime, inspect first with `omg team status <team>` or `omg team api read-stall-state --input '{\"team_name\":\"<team>\"}' --json`, and only force cleanup after capturing needed state. For root-cause debugging, rerun with `OMX_MCP_TRANSPORT_DEBUG=1` to log why the stdio transport closed.",
+            "Clear MCP transport-death signal detected. Preserve current team/runtime state. Retry via CLI parity with `omg state state_write --input '{\"mode\":\"team\",\"active\":true}' --json`. OMX MCP servers are plain Node stdio processes, so they still shut down when stdin/transport closes. If this happened during team runtime, inspect first with `omg team status <team>` or `omg team api read-stall-state --input '{\"team_name\":\"<team>\"}' --json`, and only force cleanup after capturing needed state. For root-cause debugging, rerun with `OMG_MCP_TRANSPORT_DEBUG=1` to log why the stdio transport closed.",
         },
       });
 
@@ -1928,9 +1928,9 @@ esac
 
   it("blocks Stop for a team worker with a non-terminal assigned task via native worker context", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-stop-team-worker-"));
-    const prevTeamWorker = process.env.OMX_TEAM_WORKER;
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    const prevLeaderCwd = process.env.OMX_TEAM_LEADER_CWD;
+    const prevTeamWorker = process.env.OMG_TEAM_WORKER;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    const prevLeaderCwd = process.env.OMG_TEAM_LEADER_CWD;
     try {
       await initTeamState(
         "worker-stop-team",
@@ -1939,7 +1939,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-worker" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-worker" },
       );
       const workerDir = join(cwd, ".omg", "state", "team", "worker-stop-team", "workers", "worker-1");
       await writeJson(join(workerDir, "status.json"), {
@@ -1956,9 +1956,9 @@ esac
         created_at: new Date().toISOString(),
       });
 
-      process.env.OMX_TEAM_WORKER = "worker-stop-team/worker-1";
-      process.env.OMX_TEAM_STATE_ROOT = join(cwd, ".omg", "state");
-      process.env.OMX_TEAM_LEADER_CWD = cwd;
+      process.env.OMG_TEAM_WORKER = "worker-stop-team/worker-1";
+      process.env.OMG_TEAM_STATE_ROOT = join(cwd, ".omg", "state");
+      process.env.OMG_TEAM_LEADER_CWD = cwd;
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -1977,20 +1977,20 @@ esac
         systemMessage: "OMX team worker worker-1 is still assigned task 1 (in_progress).",
       });
     } finally {
-      if (typeof prevTeamWorker === "string") process.env.OMX_TEAM_WORKER = prevTeamWorker;
-      else delete process.env.OMX_TEAM_WORKER;
-      if (typeof prevTeamStateRoot === "string") process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
-      if (typeof prevLeaderCwd === "string") process.env.OMX_TEAM_LEADER_CWD = prevLeaderCwd;
-      else delete process.env.OMX_TEAM_LEADER_CWD;
+      if (typeof prevTeamWorker === "string") process.env.OMG_TEAM_WORKER = prevTeamWorker;
+      else delete process.env.OMG_TEAM_WORKER;
+      if (typeof prevTeamStateRoot === "string") process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
+      if (typeof prevLeaderCwd === "string") process.env.OMG_TEAM_LEADER_CWD = prevLeaderCwd;
+      else delete process.env.OMG_TEAM_LEADER_CWD;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it("does not block Stop for a team worker when assigned task is terminal", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-stop-team-worker-terminal-"));
-    const prevTeamWorker = process.env.OMX_TEAM_WORKER;
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const prevTeamWorker = process.env.OMG_TEAM_WORKER;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState(
         "worker-stop-team-terminal",
@@ -1999,7 +1999,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-worker-terminal" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-worker-terminal" },
       );
       const workerDir = join(cwd, ".omg", "state", "team", "worker-stop-team-terminal", "workers", "worker-1");
       await writeJson(join(workerDir, "status.json"), {
@@ -2016,8 +2016,8 @@ esac
         created_at: new Date().toISOString(),
       });
 
-      process.env.OMX_TEAM_WORKER = "worker-stop-team-terminal/worker-1";
-      process.env.OMX_TEAM_STATE_ROOT = join(cwd, ".omg", "state");
+      process.env.OMG_TEAM_WORKER = "worker-stop-team-terminal/worker-1";
+      process.env.OMG_TEAM_STATE_ROOT = join(cwd, ".omg", "state");
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -2030,10 +2030,10 @@ esac
 
       assert.equal(result.outputJson, null);
     } finally {
-      if (typeof prevTeamWorker === "string") process.env.OMX_TEAM_WORKER = prevTeamWorker;
-      else delete process.env.OMX_TEAM_WORKER;
-      if (typeof prevTeamStateRoot === "string") process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof prevTeamWorker === "string") process.env.OMG_TEAM_WORKER = prevTeamWorker;
+      else delete process.env.OMG_TEAM_WORKER;
+      if (typeof prevTeamStateRoot === "string") process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -2048,7 +2048,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-canonical" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-canonical" },
       );
 
       const result = await dispatchGeminiNativeHook(
@@ -2083,7 +2083,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-release-ready" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-release-ready" },
       );
       await writeReleaseReadinessLeaderAttention(
         "release-ready-team",
@@ -2134,7 +2134,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-general-review" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-general-review" },
       );
       await writeReleaseReadinessLeaderAttention(
         "general-review-team",
@@ -2178,7 +2178,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-canonical-refire" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-canonical-refire" },
       );
 
       await dispatchGeminiNativeHook(
@@ -2227,7 +2227,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-terminal" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-terminal" },
       );
       await writeJson(join(cwd, ".omg", "state", "team", "terminal-team", "phase.json"), {
         current_phase: "complete",
@@ -2263,7 +2263,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-legacy" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-legacy" },
       );
       const manifestPath = join(cwd, ".omg", "state", "team", "legacy-team", "manifest.v2.json");
       const manifest = JSON.parse(await readFile(manifestPath, "utf-8")) as Record<string, unknown>;
@@ -2298,12 +2298,12 @@ esac
   });
 
 
-  it("reads canonical Stop fallback team state from OMX_TEAM_STATE_ROOT when configured", async () => {
+  it("reads canonical Stop fallback team state from OMG_TEAM_STATE_ROOT when configured", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-stop-team-root-"));
     const sharedRoot = join(cwd, "shared-root");
-    const priorTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const priorTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
-      process.env.OMX_TEAM_STATE_ROOT = "shared-root";
+      process.env.OMG_TEAM_STATE_ROOT = "shared-root";
       await initTeamState(
         "canonical-root-team",
         "canonical stop root fallback",
@@ -2311,7 +2311,7 @@ esac
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: "sess-stop-team-root", OMX_TEAM_STATE_ROOT: "shared-root" },
+        { ...process.env, OMG_SESSION_ID: "sess-stop-team-root", OMG_TEAM_STATE_ROOT: "shared-root" },
       );
 
       const result = await dispatchGeminiNativeHook(
@@ -2333,17 +2333,17 @@ esac
       });
       assert.equal(existsSync(join(sharedRoot, "team", "canonical-root-team", "phase.json")), true);
     } finally {
-      if (typeof priorTeamStateRoot === "string") process.env.OMX_TEAM_STATE_ROOT = priorTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof priorTeamStateRoot === "string") process.env.OMG_TEAM_STATE_ROOT = priorTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
-  it("returns Stop continuation output from canonical team state rooted via OMX_TEAM_STATE_ROOT", async () => {
+  it("returns Stop continuation output from canonical team state rooted via OMG_TEAM_STATE_ROOT", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-stop-team-env-root-"));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
-      process.env.OMX_TEAM_STATE_ROOT = "shared-team-state";
+      process.env.OMG_TEAM_STATE_ROOT = "shared-team-state";
       await initTeamState(
         "env-root-team",
         "env root stop fallback",
@@ -2353,8 +2353,8 @@ esac
         undefined,
         {
           ...process.env,
-          OMX_SESSION_ID: "sess-stop-team-env-root",
-          OMX_TEAM_STATE_ROOT: "shared-team-state",
+          OMG_SESSION_ID: "sess-stop-team-env-root",
+          OMG_TEAM_STATE_ROOT: "shared-team-state",
         },
       );
 
@@ -2376,8 +2376,8 @@ esac
         systemMessage: "OMX team pipeline is still active at phase team-exec.",
       });
     } finally {
-      if (typeof previousTeamStateRoot === "string") process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === "string") process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -2894,7 +2894,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto";
+      process.env.OMG_SESSION_ID = "sess-stop-auto";
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -2924,7 +2924,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-once";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-once";
 
       await dispatchGeminiNativeHook(
         {
@@ -2963,17 +2963,17 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "omg-canonical";
+      process.env.OMG_SESSION_ID = "omg-canonical";
       await writeJson(join(stateDir, "session.json"), {
         session_id: "omg-canonical",
-        native_session_id: "codex-native",
+        native_session_id: "gemini-native",
       });
 
       await dispatchGeminiNativeHook(
         {
           hook_event_name: "Stop",
           cwd,
-          session_id: "codex-native",
+          session_id: "gemini-native",
           thread_id: "thread-stop-auto-drift",
           turn_id: "turn-stop-auto-drift-1",
           last_assistant_message: "Keep going and finish the cleanup.",
@@ -3011,7 +3011,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-refire";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-refire";
 
       await dispatchGeminiNativeHook(
         {
@@ -3055,7 +3055,7 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-auto-nudge-permission-"));
     try {
       await mkdir(join(cwd, ".omg", "state"), { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-permission";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-permission";
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -3084,7 +3084,7 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), "omg-native-hook-auto-nudge-if-you-want-"));
     try {
       await mkdir(join(cwd, ".omg", "state"), { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-if-you-want";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-if-you-want";
 
       const result = await dispatchGeminiNativeHook(
         {
@@ -3114,7 +3114,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(join(stateDir, "sessions", "sess-stop-auto-question"), { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-question";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-question";
       await writeJson(join(stateDir, "session.json"), { session_id: "sess-stop-auto-question" });
       await writeJson(join(stateDir, "sessions", "sess-stop-auto-question", "skill-active-state.json"), {
         version: 1,
@@ -3165,7 +3165,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(join(stateDir, "sessions", "sess-stop-auto-interview"), { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-interview";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-interview";
       await writeJson(join(stateDir, "session.json"), { session_id: "sess-stop-auto-interview" });
       await writeJson(join(stateDir, "sessions", "sess-stop-auto-interview", "deep-interview-state.json"), {
         active: true,
@@ -3198,7 +3198,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-mode";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-mode";
       await writeJson(join(stateDir, "deep-interview-state.json"), {
         active: true,
         mode: "deep-interview",
@@ -3227,7 +3227,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-stale-root-mode";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-stale-root-mode";
       await writeJson(join(stateDir, "deep-interview-state.json"), {
         active: true,
         mode: "deep-interview",
@@ -3264,7 +3264,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-stale-root-skill";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-stale-root-skill";
       await writeJson(join(stateDir, "skill-active-state.json"), {
         active: true,
         skill: "deep-interview",
@@ -3301,7 +3301,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(stateDir, { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-stale-root-lock";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-stale-root-lock";
       await writeJson(join(stateDir, "skill-active-state.json"), {
         active: true,
         skill: "deep-interview",
@@ -3344,7 +3344,7 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(join(stateDir, "sessions", "sess-stop-auto-inactive-mode"), { recursive: true });
-      process.env.OMX_SESSION_ID = "sess-stop-auto-inactive-mode";
+      process.env.OMG_SESSION_ID = "sess-stop-auto-inactive-mode";
       await writeJson(join(stateDir, "session.json"), { session_id: "sess-stop-auto-inactive-mode" });
       await writeJson(join(stateDir, "sessions", "sess-stop-auto-inactive-mode", "deep-interview-state.json"), {
         active: false,
@@ -3475,10 +3475,10 @@ esac
     try {
       const stateDir = join(cwd, ".omg", "state");
       await mkdir(join(stateDir, "sessions", "omg-canonical"), { recursive: true });
-      process.env.OMX_SESSION_ID = "omg-canonical";
+      process.env.OMG_SESSION_ID = "omg-canonical";
       await writeJson(join(stateDir, "session.json"), {
         session_id: "omg-canonical",
-        native_session_id: "codex-native",
+        native_session_id: "gemini-native",
       });
       await writeJson(join(stateDir, "sessions", "omg-canonical", "team-state.json"), {
         active: true,
@@ -3498,7 +3498,7 @@ esac
         {
           hook_event_name: "Stop",
           cwd,
-          session_id: "codex-native",
+          session_id: "gemini-native",
           thread_id: "thread-stop-team-drift",
           turn_id: "turn-stop-team-drift-1",
         },

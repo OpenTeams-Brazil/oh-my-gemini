@@ -117,34 +117,34 @@ function withEmptyPath<T>(fn: () => T): T {
 }
 
 function withoutTeamWorkerEnv<T>(fn: () => T): T {
-  const prev = process.env.OMX_TEAM_WORKER;
-  delete process.env.OMX_TEAM_WORKER;
+  const prev = process.env.OMG_TEAM_WORKER;
+  delete process.env.OMG_TEAM_WORKER;
   let restoreImmediately = true;
   try {
     const result = fn();
     if (result instanceof Promise) {
       restoreImmediately = false;
       return result.finally(() => {
-        if (typeof prev === 'string') process.env.OMX_TEAM_WORKER = prev;
-        else delete process.env.OMX_TEAM_WORKER;
+        if (typeof prev === 'string') process.env.OMG_TEAM_WORKER = prev;
+        else delete process.env.OMG_TEAM_WORKER;
       }) as T;
     }
     return result;
   } finally {
     if (restoreImmediately) {
-      if (typeof prev === 'string') process.env.OMX_TEAM_WORKER = prev;
-      else delete process.env.OMX_TEAM_WORKER;
+      if (typeof prev === 'string') process.env.OMG_TEAM_WORKER = prev;
+      else delete process.env.OMG_TEAM_WORKER;
     }
   }
 }
 
 function withMockPromptModeGeminiAllowed<T>(fn: () => T): T {
-  const previous = process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT;
-  process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT = '1';
+  const previous = process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT;
+  process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT = '1';
   let restoreImmediately = true;
   const restore = () => {
-    if (typeof previous === 'string') process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT = previous;
-    else delete process.env.OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT;
+    if (typeof previous === 'string') process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT = previous;
+    else delete process.env.OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT;
   };
   try {
     const result = fn();
@@ -184,8 +184,8 @@ async function writeFakePromptWorkerBinary(
     : `
 const fs = require('fs');
 const path = require('path');
-const stateRoot = process.env.OMX_TEAM_STATE_ROOT;
-const worker = String(process.env.OMX_TEAM_WORKER || '');
+const stateRoot = process.env.OMG_TEAM_STATE_ROOT;
+const worker = String(process.env.OMG_TEAM_WORKER || '');
 const [teamName, workerName] = worker.split('/');
 if (stateRoot && teamName && workerName) {
   const workerDir = path.join(stateRoot, 'team', teamName, 'workers', workerName);
@@ -216,9 +216,9 @@ async function withPromptModeGeminiEnv<T>(
   const nextEnv: Record<string, string | undefined> = {
     PATH: `${binDir}:${process.env.PATH ?? ''}`,
     TMUX: undefined,
-    OMX_TEAM_WORKER_LAUNCH_MODE: 'prompt',
-    OMX_TEAM_WORKER_CLI: 'codex',
-    OMX_TEST_ALLOW_NONTTY_CODEX_PROMPT: '1',
+    OMG_TEAM_WORKER_LAUNCH_MODE: 'prompt',
+    OMG_TEAM_WORKER_CLI: 'gemini',
+    OMG_TEST_ALLOW_NONTTY_GEMINI_PROMPT: '1',
     ...extraEnv,
   };
 
@@ -245,7 +245,7 @@ type MockBinarySpec = {
 
 
 function teamStateTestPath(cwd: string, ...parts: string[]): string {
-  const stateRoot = process.env.OMX_TEAM_STATE_ROOT ?? join(cwd, '.omg', 'state');
+  const stateRoot = process.env.OMG_TEAM_STATE_ROOT ?? join(cwd, '.omg', 'state');
   return join(stateRoot, ...parts);
 }
 
@@ -264,7 +264,7 @@ async function withMockTmuxFixture<T>(
   const previousPath = process.env.PATH;
   const previousEnv = new Map<string, string | undefined>();
   const envOverrides = {
-    OMX_TEAM_STATE_ROOT: undefined,
+    OMG_TEAM_STATE_ROOT: undefined,
     ...(options.env ?? {}),
   };
 
@@ -327,21 +327,21 @@ async function withNativeWindowsPlatform<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
-const ORIGINAL_OMX_TEAM_STATE_ROOT = process.env.OMX_TEAM_STATE_ROOT;
+const ORIGINAL_OMG_TEAM_STATE_ROOT = process.env.OMG_TEAM_STATE_ROOT;
 
 beforeEach(() => {
-  delete process.env.OMX_TEAM_STATE_ROOT;
+  delete process.env.OMG_TEAM_STATE_ROOT;
 });
 
 afterEach(() => {
-  if (typeof ORIGINAL_OMX_TEAM_STATE_ROOT === 'string') process.env.OMX_TEAM_STATE_ROOT = ORIGINAL_OMX_TEAM_STATE_ROOT;
-  else delete process.env.OMX_TEAM_STATE_ROOT;
+  if (typeof ORIGINAL_OMG_TEAM_STATE_ROOT === 'string') process.env.OMG_TEAM_STATE_ROOT = ORIGINAL_OMG_TEAM_STATE_ROOT;
+  else delete process.env.OMG_TEAM_STATE_ROOT;
 });
 
 describe('runtime', () => {
   it('resolveWorkerLaunchArgsFromEnv injects low-complexity default model when missing', () => {
     const args = resolveWorkerLaunchArgsFromEnv(
-      { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
       'explore',
     );
     assert.deepEqual(args, ['--no-alt-screen', '--model', expectedLowComplexityModel()]);
@@ -349,7 +349,7 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv reads low-complexity model from config when present', async () => {
     const previousGeminiHome = process.env.GEMINI_HOME;
-    const tempGeminiHome = await mkdtemp(join(tmpdir(), 'omg-codex-home-'));
+    const tempGeminiHome = await mkdtemp(join(tmpdir(), 'omg-gemini-home-'));
     await writeFile(
       join(tempGeminiHome, '.omg-config.json'),
       JSON.stringify({ models: { team_low_complexity: 'gpt-4.1-mini' } }),
@@ -357,7 +357,7 @@ describe('runtime', () => {
     process.env.GEMINI_HOME = tempGeminiHome;
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
         'explore',
       );
       assert.deepEqual(args, ['--no-alt-screen', '--model', 'gpt-4.1-mini']);
@@ -370,7 +370,7 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv injects the frontier default model for executor workers', () => {
     const args = resolveWorkerLaunchArgsFromEnv(
-      { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
       'executor',
     );
     assert.deepEqual(args, ['--no-alt-screen', '--model', 'gpt-5.4']);
@@ -378,7 +378,7 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv treats *-low aliases as low complexity', () => {
     const args = resolveWorkerLaunchArgsFromEnv(
-      { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
       'executor-low',
     );
     assert.deepEqual(args, ['--no-alt-screen', '--model', expectedLowComplexityModel()]);
@@ -386,18 +386,18 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv preserves explicit model in either syntax', () => {
     assert.deepEqual(
-      resolveWorkerLaunchArgsFromEnv({ OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5' }, 'explore'),
+      resolveWorkerLaunchArgsFromEnv({ OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5' }, 'explore'),
       ['--model', 'gpt-5'],
     );
     assert.deepEqual(
-      resolveWorkerLaunchArgsFromEnv({ OMX_TEAM_WORKER_LAUNCH_ARGS: '--model=gpt-5.3' }, 'explore'),
+      resolveWorkerLaunchArgsFromEnv({ OMG_TEAM_WORKER_LAUNCH_ARGS: '--model=gpt-5.3' }, 'explore'),
       ['--model', 'gpt-5.3'],
     );
   });
 
   it('resolveWorkerLaunchArgsFromEnv uses inherited leader model for all agent types', () => {
     const args = resolveWorkerLaunchArgsFromEnv(
-      { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
       'executor',
       'gpt-4.1',
     );
@@ -406,7 +406,7 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv uses inherited leader model over low-complexity default', () => {
     const args = resolveWorkerLaunchArgsFromEnv(
-      { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
       'explore',
       'gpt-4.1',
     );
@@ -415,7 +415,7 @@ describe('runtime', () => {
 
   it('resolveWorkerLaunchArgsFromEnv prefers explicit env model over inherited leader model', () => {
     assert.deepEqual(
-      resolveWorkerLaunchArgsFromEnv({ OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5' }, 'explore', 'gpt-4.1'),
+      resolveWorkerLaunchArgsFromEnv({ OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gpt-5' }, 'explore', 'gpt-4.1'),
       ['--model', 'gpt-5'],
     );
   });
@@ -426,18 +426,18 @@ describe('runtime', () => {
     console.log = (...args: unknown[]) => { logs.push(args.join(' ')); };
     try {
       const lowArgs = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
         'executor',
         undefined,
         'low',
-        'codex',
+        'gemini',
       );
       const highArgs = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
         'executor',
         undefined,
         'high',
-        'codex',
+        'gemini',
       );
       assert.deepEqual(lowArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="low"', '--model', 'gpt-5.4']);
       assert.deepEqual(highArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="high"', '--model', 'gpt-5.4']);
@@ -454,7 +454,7 @@ describe('runtime', () => {
     console.log = (...args: unknown[]) => { logs.push(args.join(' ')); };
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort=\"high\" --no-alt-screen' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort=\"high\" --no-alt-screen' },
         'explore',
       );
       assert.deepEqual(
@@ -474,8 +474,8 @@ describe('runtime', () => {
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
         {
-          OMX_TEAM_WORKER_CLI: 'claude',
-          OMX_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort="high" --no-alt-screen',
+          OMG_TEAM_WORKER_CLI: 'claude',
+          OMG_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort="high" --no-alt-screen',
         },
         'explore',
       );
@@ -500,8 +500,8 @@ describe('runtime', () => {
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
         {
-          OMX_TEAM_WORKER_CLI: 'gemini',
-          OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gemini-2.0-pro',
+          OMG_TEAM_WORKER_CLI: 'gemini',
+          OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gemini-2.0-pro',
         },
         'executor',
       );
@@ -516,15 +516,15 @@ describe('runtime', () => {
     assert.doesNotMatch(startupLog, /thinking_level=/);
   });
 
-  it('resolveWorkerLaunchArgsFromEnv keeps codex thinking_level logging for mixed CLI maps', () => {
+  it('resolveWorkerLaunchArgsFromEnv keeps gemini thinking_level logging for mixed CLI maps', () => {
     const logs: string[] = [];
     const originalLog = console.log;
     console.log = (...args: unknown[]) => { logs.push(args.join(' ')); };
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
         {
-          OMX_TEAM_WORKER_CLI_MAP: 'codex,claude',
-          OMX_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort="high" --model claude-3-7-sonnet',
+          OMG_TEAM_WORKER_CLI_MAP: 'gemini,claude',
+          OMG_TEAM_WORKER_LAUNCH_ARGS: '-c model_reasoning_effort="high" --model claude-3-7-sonnet',
         },
         'executor',
       );
@@ -540,37 +540,37 @@ describe('runtime', () => {
     const originalLog = console.log;
     console.log = (...args: unknown[]) => { logs.push(args.join(' ')); };
     try {
-      const codexArgs = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+      const geminiArgs = resolveWorkerLaunchArgsFromEnv(
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
         'executor',
         undefined,
         'high',
-        'codex',
+        'gemini',
       );
       const claudeArgs = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen --model claude-3-7-sonnet' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen --model claude-3-7-sonnet' },
         'executor',
         undefined,
         'low',
         'claude',
       );
       const geminiArgs = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--model gemini-2.0-pro' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--model gemini-2.0-pro' },
         'executor',
         undefined,
         'low',
         'gemini',
       );
-      assert.deepEqual(codexArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="high"', '--model', 'gpt-5.4']);
+      assert.deepEqual(geminiArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="high"', '--model', 'gpt-5.4']);
       assert.deepEqual(claudeArgs, ['--no-alt-screen', '-c', 'model_reasoning_effort="low"', '--model', 'claude-3-7-sonnet']);
       assert.deepEqual(geminiArgs, ['-c', 'model_reasoning_effort="low"', '--model', 'gemini-2.0-pro']);
     } finally {
       console.log = originalLog;
     }
-    const codexLog = logs.find((line) => line.includes('thinking_level=high'));
+    const geminiLog = logs.find((line) => line.includes('thinking_level=high'));
     const claudeLog = logs.find((line) => line.includes('model=claude'));
     const geminiLog = logs.find((line) => line.includes('model=gemini'));
-    assert.ok(codexLog);
+    assert.ok(geminiLog);
     assert.ok(claudeLog);
     assert.ok(geminiLog);
     assert.doesNotMatch(claudeLog ?? '', /thinking_level=/);
@@ -623,15 +623,15 @@ describe('runtime', () => {
   });
 
   it('waitForWorkerStartupEvidence ignores Gemini ACK-only startup replies until work is claimed', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-codex-startup-'));
+    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-gemini-startup-'));
     try {
-      await initTeamState('codex-startup', 'startup evidence test', 'executor', 1, cwd);
+      await initTeamState('gemini-startup', 'startup evidence test', 'executor', 1, cwd);
 
-      await sendWorkerMessage('codex-startup', 'worker-1', 'leader-fixed', 'ACK', cwd);
+      await sendWorkerMessage('gemini-startup', 'worker-1', 'leader-fixed', 'ACK', cwd);
       const ackOnly = await waitForWorkerStartupEvidence({
-        teamName: 'codex-startup',
+        teamName: 'gemini-startup',
         workerName: 'worker-1',
-        workerCli: 'codex',
+        workerCli: 'gemini',
         cwd,
         timeoutMs: 25,
         pollMs: 5,
@@ -639,7 +639,7 @@ describe('runtime', () => {
       assert.equal(ackOnly, 'none');
 
       await writeAtomic(
-        join(cwd, '.omg', 'state', 'team', 'codex-startup', 'workers', 'worker-1', 'status.json'),
+        join(cwd, '.omg', 'state', 'team', 'gemini-startup', 'workers', 'worker-1', 'status.json'),
         JSON.stringify({
           state: 'working',
           current_task_id: 'task-1',
@@ -647,9 +647,9 @@ describe('runtime', () => {
         }, null, 2),
       );
       const taskClaim = await waitForWorkerStartupEvidence({
-        teamName: 'codex-startup',
+        teamName: 'gemini-startup',
         workerName: 'worker-1',
-        workerCli: 'codex',
+        workerCli: 'gemini',
         cwd,
         timeoutMs: 25,
         pollMs: 5,
@@ -661,12 +661,12 @@ describe('runtime', () => {
   });
 
   it('waitForWorkerStartupEvidence treats blocked worker status as settled progress even without a claimed task id', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-codex-blocked-startup-'));
+    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-gemini-blocked-startup-'));
     try {
-      await initTeamState('codex-blocked-startup', 'blocked startup evidence test', 'executor', 1, cwd);
+      await initTeamState('gemini-blocked-startup', 'blocked startup evidence test', 'executor', 1, cwd);
 
       await writeAtomic(
-        join(cwd, '.omg', 'state', 'team', 'codex-blocked-startup', 'workers', 'worker-1', 'status.json'),
+        join(cwd, '.omg', 'state', 'team', 'gemini-blocked-startup', 'workers', 'worker-1', 'status.json'),
         JSON.stringify({
           state: 'blocked',
           reason: 'waiting on shared file',
@@ -674,9 +674,9 @@ describe('runtime', () => {
         }, null, 2),
       );
       const progress = await waitForWorkerStartupEvidence({
-        teamName: 'codex-blocked-startup',
+        teamName: 'gemini-blocked-startup',
         workerName: 'worker-1',
-        workerCli: 'codex',
+        workerCli: 'gemini',
         cwd,
         timeoutMs: 25,
         pollMs: 5,
@@ -691,9 +691,9 @@ describe('runtime', () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-startup-no-evidence-'));
     const prevTmux = process.env.TMUX;
     const prevTmuxPane = process.env.TMUX_PANE;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevSkipReadyWait = process.env.OMX_TEAM_SKIP_READY_WAIT;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevSkipReadyWait = process.env.OMG_TEAM_SKIP_READY_WAIT;
     let receiptFailer: NodeJS.Timeout | null = null;
 
     try {
@@ -763,7 +763,7 @@ esac
 `,
           binaries: [
             {
-              name: 'codex',
+              name: 'gemini',
               content: '#!/bin/sh\nsleep 30\n',
             },
           ],
@@ -771,9 +771,9 @@ esac
         async ({ tmuxLogPath }) => {
           process.env.TMUX = 'leader-session';
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'codex';
-          process.env.OMX_TEAM_SKIP_READY_WAIT = '1';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_SKIP_READY_WAIT = '1';
 
           receiptFailer = setInterval(() => {
             void (async () => {
@@ -826,12 +826,12 @@ esac
       else delete process.env.TMUX;
       if (typeof prevTmuxPane === 'string') process.env.TMUX_PANE = prevTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevSkipReadyWait === 'string') process.env.OMX_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
-      else delete process.env.OMX_TEAM_SKIP_READY_WAIT;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevSkipReadyWait === 'string') process.env.OMG_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
+      else delete process.env.OMG_TEAM_SKIP_READY_WAIT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -842,7 +842,7 @@ esac
     console.log = (...args: unknown[]) => { logs.push(args.join(' ')); };
     try {
       const args = resolveWorkerLaunchArgsFromEnv(
-        { OMX_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
+        { OMG_TEAM_WORKER_LAUNCH_ARGS: '--no-alt-screen' },
         'explore',
       );
       assert.deepEqual(args, ['--no-alt-screen', '--model', expectedLowComplexityModel()]);
@@ -854,16 +854,16 @@ esac
 
   it('startTeam rejects nested team invocation inside worker context', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
-    const prev = process.env.OMX_TEAM_WORKER;
-    process.env.OMX_TEAM_WORKER = 'alpha/worker-1';
+    const prev = process.env.OMG_TEAM_WORKER;
+    process.env.OMG_TEAM_WORKER = 'alpha/worker-1';
     try {
       await assert.rejects(
         () => startTeam('nested-a', 'task', 'executor', 1, [{ subject: 's', description: 'd' }], cwd),
         /nested_team_disallowed/,
       );
     } finally {
-      if (typeof prev === 'string') process.env.OMX_TEAM_WORKER = prev;
-      else delete process.env.OMX_TEAM_WORKER;
+      if (typeof prev === 'string') process.env.OMG_TEAM_WORKER = prev;
+      else delete process.env.OMG_TEAM_WORKER;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -889,19 +889,19 @@ sleep 5
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevWorker = process.env.OMX_TEAM_WORKER;
-    const prevStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    const prevLeaderCwd = process.env.OMX_TEAM_LEADER_CWD;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevWorker = process.env.OMG_TEAM_WORKER;
+    const prevStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    const prevLeaderCwd = process.env.OMG_TEAM_LEADER_CWD;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER = 'parent-team/worker-1';
-    process.env.OMX_TEAM_STATE_ROOT = join(cwd, '.omg', 'state');
-    process.env.OMX_TEAM_LEADER_CWD = cwd;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_TEAM_WORKER = 'parent-team/worker-1';
+    process.env.OMG_TEAM_STATE_ROOT = join(cwd, '.omg', 'state');
+    process.env.OMG_TEAM_LEADER_CWD = cwd;
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -925,25 +925,25 @@ sleep 5
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevWorker === 'string') process.env.OMX_TEAM_WORKER = prevWorker;
-      else delete process.env.OMX_TEAM_WORKER;
-      if (typeof prevStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
-      if (typeof prevLeaderCwd === 'string') process.env.OMX_TEAM_LEADER_CWD = prevLeaderCwd;
-      else delete process.env.OMX_TEAM_LEADER_CWD;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevWorker === 'string') process.env.OMG_TEAM_WORKER = prevWorker;
+      else delete process.env.OMG_TEAM_WORKER;
+      if (typeof prevStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
+      if (typeof prevLeaderCwd === 'string') process.env.OMG_TEAM_LEADER_CWD = prevLeaderCwd;
+      else delete process.env.OMG_TEAM_LEADER_CWD;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('startTeam throws when tmux is not available', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-'));
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
     try {
-      process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+      process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
       await assert.rejects(
         () => withoutTeamWorkerEnv(() =>
           withEmptyPath(() =>
@@ -952,18 +952,18 @@ sleep 5
         /requires tmux/i,
       );
     } finally {
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('startTeam rejects duplicate active same-name team state without mutating existing files', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-duplicate-team-'));
-    const prevSessionId = process.env.OMX_SESSION_ID;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+    const prevSessionId = process.env.OMG_SESSION_ID;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
     try {
-      process.env.OMX_SESSION_ID = 'sess-existing-team';
+      process.env.OMG_SESSION_ID = 'sess-existing-team';
       await initTeamState(
         'dup-team',
         'existing task',
@@ -971,7 +971,7 @@ sleep 5
         1,
         cwd,
         undefined,
-        { ...process.env, OMX_SESSION_ID: 'sess-existing-team' },
+        { ...process.env, OMG_SESSION_ID: 'sess-existing-team' },
       );
       await createTask('dup-team', {
         subject: 'existing subject',
@@ -982,8 +982,8 @@ sleep 5
       const beforeConfig = await readTeamConfig('dup-team', cwd);
       assert.ok(beforeConfig);
 
-      process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-      process.env.OMX_SESSION_ID = 'sess-second-team';
+      process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+      process.env.OMG_SESSION_ID = 'sess-second-team';
 
       await assert.rejects(
         () => withoutTeamWorkerEnv(() =>
@@ -1005,10 +1005,10 @@ sleep 5
       assert.equal(existingTask?.subject, 'existing subject');
       assert.equal(existingTask?.description, 'existing description');
     } finally {
-      if (typeof prevSessionId === 'string') process.env.OMX_SESSION_ID = prevSessionId;
-      else delete process.env.OMX_SESSION_ID;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevSessionId === 'string') process.env.OMG_SESSION_ID = prevSessionId;
+      else delete process.env.OMG_SESSION_ID;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -1027,9 +1027,9 @@ sleep 5
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-win32-no-env-'));
     const prevTmux = process.env.TMUX;
     const prevTmuxPane = process.env.TMUX_PANE;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevSkipReadyWait = process.env.OMX_TEAM_SKIP_READY_WAIT;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevSkipReadyWait = process.env.OMG_TEAM_SKIP_READY_WAIT;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -1062,7 +1062,7 @@ case "\${1:-}" in
     exit 0
     ;;
   list-panes)
-    printf "%%1\\tnode\\t'codex'\\n"
+    printf "%%1\\tnode\\t'gemini'\\n"
     exit 0
     ;;
   split-window)
@@ -1092,9 +1092,9 @@ esac
         async ({ tmuxLogPath }) => {
           delete process.env.TMUX;
           delete process.env.TMUX_PANE;
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'gemini';
-          process.env.OMX_TEAM_SKIP_READY_WAIT = '1';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_SKIP_READY_WAIT = '1';
           delete process.env.MSYSTEM;
           delete process.env.OSTYPE;
           delete process.env.WSL_DISTRO_NAME;
@@ -1134,12 +1134,12 @@ esac
       else delete process.env.TMUX;
       if (typeof prevTmuxPane === 'string') process.env.TMUX_PANE = prevTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevSkipReadyWait === 'string') process.env.OMX_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
-      else delete process.env.OMX_TEAM_SKIP_READY_WAIT;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevSkipReadyWait === 'string') process.env.OMG_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
+      else delete process.env.OMG_TEAM_SKIP_READY_WAIT;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -1183,9 +1183,9 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-pane-pid-'));
     const prevTmux = process.env.TMUX;
     const prevTmuxPane = process.env.TMUX_PANE;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevSkipReadyWait = process.env.OMX_TEAM_SKIP_READY_WAIT;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevSkipReadyWait = process.env.OMG_TEAM_SKIP_READY_WAIT;
     let runtime: TeamRuntime | null = null;
 
     try {
@@ -1214,7 +1214,7 @@ case "\${1:-}" in
   list-panes)
     case "$*" in
       *"pane_current_command"*)
-        printf "%%1\tnode\t'codex'\n"
+        printf "%%1\tnode\t'gemini'\n"
         ;;
       *"#{pane_dead} #{pane_pid}"*)
         echo "1 999999"
@@ -1261,14 +1261,14 @@ EOF
     ;;
 esac
 `,
-          binaries: [{ name: 'codex', content: '#!/bin/sh\nexit 0\n' }],
+          binaries: [{ name: 'gemini', content: '#!/bin/sh\nexit 0\n' }],
         },
         async () => {
           delete process.env.TMUX;
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'codex';
-          process.env.OMX_TEAM_SKIP_READY_WAIT = '1';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_SKIP_READY_WAIT = '1';
 
           runtime = await withoutTeamWorkerEnv(() =>
             startTeam(
@@ -1298,12 +1298,12 @@ esac
       else delete process.env.TMUX;
       if (typeof prevTmuxPane === 'string') process.env.TMUX_PANE = prevTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevSkipReadyWait === 'string') process.env.OMX_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
-      else delete process.env.OMX_TEAM_SKIP_READY_WAIT;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevSkipReadyWait === 'string') process.env.OMG_TEAM_SKIP_READY_WAIT = prevSkipReadyWait;
+      else delete process.env.OMG_TEAM_SKIP_READY_WAIT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -1331,10 +1331,10 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-no-startup-evidence-'));
     const previousTmux = process.env.TMUX;
     const previousTmuxPane = process.env.TMUX_PANE;
-    const previousLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const previousWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const previousSkipReadyWait = process.env.OMX_TEAM_SKIP_READY_WAIT;
-    const previousStartupEvidenceTimeout = process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+    const previousLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const previousWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const previousSkipReadyWait = process.env.OMG_TEAM_SKIP_READY_WAIT;
+    const previousStartupEvidenceTimeout = process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
     let runtime: TeamRuntime | null = null;
     const teamName = 'team-no-startup-evidence';
 
@@ -1370,7 +1370,7 @@ case "$1" in
         echo "0 4242"
         ;;
       *"pane_current_command"*)
-        printf "%%1\\tnode\\t'codex'\\n"
+        printf "%%1\\tnode\\t'gemini'\\n"
         ;;
       *"#{pane_pid}"*)
         echo "4242"
@@ -1405,7 +1405,7 @@ esac
 `,
           binaries: [
             {
-              name: 'codex',
+              name: 'gemini',
               content: `#!/usr/bin/env node
 process.stdin.resume();
 setTimeout(() => process.exit(0), 30000);
@@ -1417,10 +1417,10 @@ process.on('SIGTERM', () => process.exit(0));
         async () => {
           delete process.env.TMUX;
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'codex';
-          process.env.OMX_TEAM_SKIP_READY_WAIT = '1';
-          process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_SKIP_READY_WAIT = '1';
+          process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
 
           runtime = await withoutTeamWorkerEnv(() =>
             startTeam(
@@ -1456,16 +1456,16 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.TMUX;
       if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof previousLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof previousWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = previousWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof previousSkipReadyWait === 'string') process.env.OMX_TEAM_SKIP_READY_WAIT = previousSkipReadyWait;
-      else delete process.env.OMX_TEAM_SKIP_READY_WAIT;
+      if (typeof previousLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof previousWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = previousWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof previousSkipReadyWait === 'string') process.env.OMG_TEAM_SKIP_READY_WAIT = previousSkipReadyWait;
+      else delete process.env.OMG_TEAM_SKIP_READY_WAIT;
       if (typeof previousStartupEvidenceTimeout === 'string') {
-        process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
+        process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
       } else {
-        delete process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+        delete process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
       }
       await rm(cwd, { recursive: true, force: true });
     }
@@ -1475,9 +1475,9 @@ process.on('SIGTERM', () => process.exit(0));
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-dead-startup-pane-'));
     const previousTmux = process.env.TMUX;
     const previousTmuxPane = process.env.TMUX_PANE;
-    const previousLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const previousWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const previousStartupEvidenceTimeout = process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+    const previousLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const previousWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const previousStartupEvidenceTimeout = process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
 
     try {
       await withMockTmuxFixture(
@@ -1500,7 +1500,7 @@ case "$1" in
   list-panes)
     case "$*" in
       *"pane_current_command"*)
-        printf "%%1\\tnode\\t'codex'\\n"
+        printf "%%1\\tnode\\t'gemini'\\n"
         ;;
       *"#{pane_dead} #{pane_pid}"*)
         echo "1 4242"
@@ -1532,14 +1532,14 @@ case "$1" in
     ;;
 esac
 `,
-          binaries: [{ name: 'codex', content: '#!/usr/bin/env node\nprocess.stdin.resume();\n' }],
+          binaries: [{ name: 'gemini', content: '#!/usr/bin/env node\nprocess.stdin.resume();\n' }],
         },
         async () => {
           delete process.env.TMUX;
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'codex';
-          process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
 
           await assert.rejects(
             () => withoutTeamWorkerEnv(() =>
@@ -1560,14 +1560,14 @@ esac
       else delete process.env.TMUX;
       if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof previousLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof previousWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = previousWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof previousLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof previousWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = previousWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       if (typeof previousStartupEvidenceTimeout === 'string') {
-        process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
+        process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
       } else {
-        delete process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+        delete process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
       }
       await rm(cwd, { recursive: true, force: true });
     }
@@ -1577,10 +1577,10 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-materialize-before-evidence-'));
     const previousTmux = process.env.TMUX;
     const previousTmuxPane = process.env.TMUX_PANE;
-    const previousLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const previousWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const previousSkipReadyWait = process.env.OMX_TEAM_SKIP_READY_WAIT;
-    const previousStartupEvidenceTimeout = process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+    const previousLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const previousWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const previousSkipReadyWait = process.env.OMG_TEAM_SKIP_READY_WAIT;
+    const previousStartupEvidenceTimeout = process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
 
     try {
       await withMockTmuxFixture(
@@ -1611,7 +1611,7 @@ case "$1" in
         echo "0 4242"
         ;;
       *"pane_current_command"*)
-        printf "%%1\\tnode\\t'codex'\\n"
+        printf "%%1\\tnode\\t'gemini'\\n"
         ;;
       *"-t %2"*"#{pane_pid}"*)
         echo "4242"
@@ -1660,7 +1660,7 @@ esac
 `,
           binaries: [
             {
-              name: 'codex',
+              name: 'gemini',
               content: `#!/usr/bin/env node
 process.stdin.resume();
 setTimeout(() => process.exit(0), 30000);
@@ -1673,10 +1673,10 @@ process.on('SIGTERM', () => process.exit(0));
           const sanitizedTeamName = sanitizeTeamName('team-materialize-before-evidence');
           delete process.env.TMUX;
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'codex';
-          process.env.OMX_TEAM_SKIP_READY_WAIT = '1';
-          process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_SKIP_READY_WAIT = '1';
+          process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = '500';
 
           const teamPromise = withoutTeamWorkerEnv(() =>
             startTeam(
@@ -1733,16 +1733,16 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.TMUX;
       if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof previousLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof previousWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = previousWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof previousSkipReadyWait === 'string') process.env.OMX_TEAM_SKIP_READY_WAIT = previousSkipReadyWait;
-      else delete process.env.OMX_TEAM_SKIP_READY_WAIT;
+      if (typeof previousLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof previousWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = previousWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof previousSkipReadyWait === 'string') process.env.OMG_TEAM_SKIP_READY_WAIT = previousSkipReadyWait;
+      else delete process.env.OMG_TEAM_SKIP_READY_WAIT;
       if (typeof previousStartupEvidenceTimeout === 'string') {
-        process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
+        process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS = previousStartupEvidenceTimeout;
       } else {
-        delete process.env.OMX_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
+        delete process.env.OMG_TEAM_STARTUP_EVIDENCE_TIMEOUT_MS;
       }
       await rm(cwd, { recursive: true, force: true });
     }
@@ -1750,11 +1750,11 @@ process.on('SIGTERM', () => process.exit(0));
 
   it('startTeam rejects dirty leader workspace before provisioning worker worktrees', async () => {
     const repo = await initRepo();
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
     await writeFile(join(repo, 'README.md'), 'dirty\n', 'utf-8');
     await writeFile(join(repo, 'notes.txt'), 'local only\n', 'utf-8');
     try {
-      process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+      process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
       await assert.rejects(
         () => withoutTeamWorkerEnv(() =>
           startTeam(
@@ -1776,8 +1776,8 @@ process.on('SIGTERM', () => process.exit(0));
       assert.doesNotMatch(listedWorktrees, /team-team-dirty-preflight-worker-1/);
       assert.equal(existsSync(join(repo, '.omg', 'state', 'team', 'team-dirty-preflight')), false);
     } finally {
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
       await rm(repo, { recursive: true, force: true });
     }
   });
@@ -1791,7 +1791,7 @@ process.on('SIGTERM', () => process.exit(0));
     await writeFile(
       fakeGeminiPath,
       `#!/usr/bin/env bash
-printf '%s\n' "$@" > "$OMX_GEMINI_ARGV_CAPTURE_PATH"
+printf '%s\n' "$@" > "$OMG_GEMINI_ARGV_CAPTURE_PATH"
 sleep 5
 `,
       { mode: 0o755 },
@@ -1799,17 +1799,17 @@ sleep 5
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevLaunchArgs = process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
-    const prevCapture = process.env.OMX_GEMINI_ARGV_CAPTURE_PATH;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevLaunchArgs = process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
+    const prevCapture = process.env.OMG_GEMINI_ARGV_CAPTURE_PATH;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'gemini';
-    process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.3-codex-spark';
-    process.env.OMX_GEMINI_ARGV_CAPTURE_PATH = capturePath;
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.3-gemini-spark';
+    process.env.OMG_GEMINI_ARGV_CAPTURE_PATH = capturePath;
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -1854,22 +1854,22 @@ sleep 5
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevLaunchArgs === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
-      if (typeof prevCapture === 'string') process.env.OMX_GEMINI_ARGV_CAPTURE_PATH = prevCapture;
-      else delete process.env.OMX_GEMINI_ARGV_CAPTURE_PATH;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevLaunchArgs === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
+      if (typeof prevCapture === 'string') process.env.OMG_GEMINI_ARGV_CAPTURE_PATH = prevCapture;
+      else delete process.env.OMG_GEMINI_ARGV_CAPTURE_PATH;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
-  it('startTeam rejects codex prompt mode even when explicit launch args are provided', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-codex-explicit-launch-'));
+  it('startTeam rejects gemini prompt mode even when explicit launch args are provided', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-gemini-explicit-launch-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     await mkdir(binDir, { recursive: true });
     await writeFile(
       fakeGeminiPath,
@@ -1881,40 +1881,40 @@ process.exit(0);
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevLaunchArgs = process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevLaunchArgs = process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
-    process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.3-codex-spark -c model_reasoning_effort="low"';
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.3-gemini-spark -c model_reasoning_effort="low"';
     try {
       await assert.rejects(
         () => withoutTeamWorkerEnv(() =>
           startTeam(
-            'team-codex-explicit-launch',
-            'codex prompt-mode team bootstrap',
+            'team-gemini-explicit-launch',
+            'gemini prompt-mode team bootstrap',
             'explore',
             1,
             [{ subject: 's', description: 'd', owner: 'worker-1' }],
             cwd,
           )),
-        /prompt_mode_codex_requires_tty/,
+        /prompt_mode_gemini_requires_tty/,
       );
-      assert.equal(existsSync(join(cwd, '.omg', 'state', 'team', 'team-codex-explicit-launch')), false);
+      assert.equal(existsSync(join(cwd, '.omg', 'state', 'team', 'team-gemini-explicit-launch')), false);
     } finally {
       if (typeof prevPath === 'string') process.env.PATH = prevPath;
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevLaunchArgs === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevLaunchArgs === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -1923,7 +1923,7 @@ process.exit(0);
   it('startTeam preserves routed task roles into team state and worker launch args', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-role-routing-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     const captureDir = join(cwd, 'captures');
     const promptsDir = join(cwd, '.gemini', 'prompts');
     await mkdir(binDir, { recursive: true });
@@ -1936,8 +1936,8 @@ process.exit(0);
       `#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const worker = String(process.env.OMX_TEAM_WORKER || 'unknown').replace(/[^a-zA-Z0-9_-]+/g, '__');
-const out = path.join(process.env.OMX_ARGV_CAPTURE_DIR, worker + '.json');
+const worker = String(process.env.OMG_TEAM_WORKER || 'unknown').replace(/[^a-zA-Z0-9_-]+/g, '__');
+const out = path.join(process.env.OMG_ARGV_CAPTURE_DIR, worker + '.json');
 fs.writeFileSync(out, JSON.stringify({ argv: process.argv.slice(2), worker }, null, 2));
 process.stdin.resume();
 setTimeout(() => process.exit(0), 5000);
@@ -1948,15 +1948,15 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevCaptureDir = process.env.OMX_ARGV_CAPTURE_DIR;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevCaptureDir = process.env.OMG_ARGV_CAPTURE_DIR;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
-    process.env.OMX_ARGV_CAPTURE_DIR = captureDir;
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_ARGV_CAPTURE_DIR = captureDir;
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -2031,12 +2031,12 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevCaptureDir === 'string') process.env.OMX_ARGV_CAPTURE_DIR = prevCaptureDir;
-      else delete process.env.OMX_ARGV_CAPTURE_DIR;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevCaptureDir === 'string') process.env.OMG_ARGV_CAPTURE_DIR = prevCaptureDir;
+      else delete process.env.OMG_ARGV_CAPTURE_DIR;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -2044,7 +2044,7 @@ process.on('SIGTERM', () => process.exit(0));
   it('startTeam does not apply mini guidance for exact-match negatives like gpt-5.4-mini-tuned', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-mini-tuned-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     const captureDir = join(cwd, 'captures');
     const promptsDir = join(cwd, '.gemini', 'prompts');
     await mkdir(binDir, { recursive: true });
@@ -2056,8 +2056,8 @@ process.on('SIGTERM', () => process.exit(0));
       `#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const worker = String(process.env.OMX_TEAM_WORKER || 'unknown').replace(/[^a-zA-Z0-9_-]+/g, '__');
-const out = path.join(process.env.OMX_ARGV_CAPTURE_DIR, worker + '.json');
+const worker = String(process.env.OMG_TEAM_WORKER || 'unknown').replace(/[^a-zA-Z0-9_-]+/g, '__');
+const out = path.join(process.env.OMG_ARGV_CAPTURE_DIR, worker + '.json');
 fs.writeFileSync(out, JSON.stringify({ argv: process.argv.slice(2), worker }, null, 2));
 process.stdin.resume();
 setTimeout(() => process.exit(0), 5000);
@@ -2068,17 +2068,17 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevCaptureDir = process.env.OMX_ARGV_CAPTURE_DIR;
-    const prevLaunchArgs = process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevCaptureDir = process.env.OMG_ARGV_CAPTURE_DIR;
+    const prevLaunchArgs = process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
-    process.env.OMX_ARGV_CAPTURE_DIR = captureDir;
-    process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.4-mini-tuned';
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_ARGV_CAPTURE_DIR = captureDir;
+    process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = '--model gpt-5.4-mini-tuned';
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -2126,22 +2126,22 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevCaptureDir === 'string') process.env.OMX_ARGV_CAPTURE_DIR = prevCaptureDir;
-      else delete process.env.OMX_ARGV_CAPTURE_DIR;
-      if (typeof prevLaunchArgs === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_ARGS;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevCaptureDir === 'string') process.env.OMG_ARGV_CAPTURE_DIR = prevCaptureDir;
+      else delete process.env.OMG_ARGV_CAPTURE_DIR;
+      if (typeof prevLaunchArgs === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_ARGS = prevLaunchArgs;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_ARGS;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
-  it('startTeam rejects codex prompt mode without tmux with an explicit non-tty error', async () => {
+  it('startTeam rejects gemini prompt mode without tmux with an explicit non-tty error', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-prompt-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     await mkdir(binDir, { recursive: true });
     await writeFile(
       fakeGeminiPath,
@@ -2155,13 +2155,13 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
 
     try {
       await assert.rejects(
@@ -2174,7 +2174,7 @@ process.on('SIGTERM', () => process.exit(0));
             [{ subject: 's', description: 'd', owner: 'worker-1' }],
             cwd,
           )),
-        /prompt_mode_codex_requires_tty/,
+        /prompt_mode_gemini_requires_tty/,
       );
       assert.equal(existsSync(join(cwd, '.omg', 'state', 'team', 'team-prompt')), false);
     } finally {
@@ -2182,10 +2182,10 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -2194,8 +2194,8 @@ process.on('SIGTERM', () => process.exit(0));
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-relaunch-hud-'));
     const previousTmux = process.env.TMUX;
     const previousTmuxPane = process.env.TMUX_PANE;
-    const previousLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const previousWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const previousLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const previousWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
     let runtime: TeamRuntime | null = null;
     try {
       await withMockTmuxFixture(
@@ -2223,7 +2223,7 @@ case "\${1:-}" in
   list-panes)
     case "$*" in
       *"pane_current_command"* )
-        printf "%%1\\tnode\\t'codex'\\n"
+        printf "%%1\\tnode\\t'gemini'\\n"
         ;;
       *"#{pane_dead} #{pane_pid}"*)
         echo "1 999999"
@@ -2266,8 +2266,8 @@ exit 0
         async ({ tmuxLogPath }) => {
           process.env.TMUX = 'leader-session,stub,0';
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'interactive';
-          process.env.OMX_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'interactive';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
 
           runtime = await withoutTeamWorkerEnv(() =>
             startTeam(
@@ -2318,10 +2318,10 @@ exit 0
       else delete process.env.TMUX;
       if (typeof previousTmuxPane === 'string') process.env.TMUX_PANE = previousTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof previousLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof previousWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = previousWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof previousLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = previousLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof previousWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = previousWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -2330,7 +2330,7 @@ exit 0
     const repo = await initRepo();
     const toolingDir = await mkdtemp(join(tmpdir(), 'omg-runtime-worktree-tools-'));
     const binDir = join(toolingDir, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     const logDir = join(toolingDir, 'worker-logs');
     const stdinLogPath = join(logDir, 'stdin.log');
     const envLogPath = join(logDir, 'env.json');
@@ -2340,12 +2340,12 @@ exit 0
       `#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const logDir = process.env.OMX_TEST_LOG_DIR;
+const logDir = process.env.OMG_TEST_LOG_DIR;
 fs.mkdirSync(logDir, { recursive: true });
 fs.writeFileSync(path.join(logDir, 'env.json'), JSON.stringify({
   cwd: process.cwd(),
-  teamStateRoot: process.env.OMX_TEAM_STATE_ROOT || '',
-  worker: process.env.OMX_TEAM_WORKER || '',
+  teamStateRoot: process.env.OMG_TEAM_STATE_ROOT || '',
+  worker: process.env.OMG_TEAM_WORKER || '',
 }));
 process.stdin.on('data', (chunk) => {
   fs.appendFileSync(path.join(logDir, 'stdin.log'), chunk.toString());
@@ -2359,15 +2359,15 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevLogDir = process.env.OMX_TEST_LOG_DIR;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevLogDir = process.env.OMG_TEST_LOG_DIR;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
-    process.env.OMX_TEST_LOG_DIR = logDir;
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_TEST_LOG_DIR = logDir;
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -2396,7 +2396,7 @@ process.on('SIGTERM', () => process.exit(0));
       );
       assert.match(
         startupLog,
-        /\$OMX_TEAM_STATE_ROOT\/team\/team-detached-worktree-paths\/workers\/worker-1\/inbox\.md/,
+        /\$OMG_TEAM_STATE_ROOT\/team\/team-detached-worktree-paths\/workers\/worker-1\/inbox\.md/,
       );
       assert.doesNotMatch(
         startupLog,
@@ -2422,7 +2422,7 @@ process.on('SIGTERM', () => process.exit(0));
       );
       assert.match(
         mailboxLog,
-        /\$OMX_TEAM_STATE_ROOT\/team\/team-detached-worktree-paths\/mailbox\/worker-1\.json/,
+        /\$OMG_TEAM_STATE_ROOT\/team\/team-detached-worktree-paths\/mailbox\/worker-1\.json/,
       );
 
       await shutdownTeam(runtime.teamName, repo, { force: true });
@@ -2435,12 +2435,12 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevLogDir === 'string') process.env.OMX_TEST_LOG_DIR = prevLogDir;
-      else delete process.env.OMX_TEST_LOG_DIR;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevLogDir === 'string') process.env.OMG_TEST_LOG_DIR = prevLogDir;
+      else delete process.env.OMG_TEST_LOG_DIR;
       await rm(toolingDir, { recursive: true, force: true });
       await rm(repo, { recursive: true, force: true });
     }
@@ -2450,7 +2450,7 @@ process.on('SIGTERM', () => process.exit(0));
     const repo = await initRepo();
     const toolingDir = await mkdtemp(join(tmpdir(), 'omg-runtime-worktree-tools-'));
     const binDir = join(toolingDir, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     await mkdir(binDir, { recursive: true });
     await writeFile(
       fakeGeminiPath,
@@ -2464,13 +2464,13 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -2505,10 +2505,10 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       await rm(toolingDir, { recursive: true, force: true });
       await rm(repo, { recursive: true, force: true });
     }
@@ -2517,7 +2517,7 @@ process.on('SIGTERM', () => process.exit(0));
   it('resumeTeam preserves detached worktree metadata for live prompt workers', async () => {
     const repo = await initRepo();
     const binDir = await mkdtemp(join(tmpdir(), 'omg-runtime-prompt-bin-'));
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     const logDir = await mkdtemp(join(tmpdir(), 'omg-runtime-prompt-logs-'));
     const envLogPath = join(logDir, 'env.json');
     await writeFile(
@@ -2525,12 +2525,12 @@ process.on('SIGTERM', () => process.exit(0));
       `#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const logDir = process.env.OMX_TEST_LOG_DIR;
+const logDir = process.env.OMG_TEST_LOG_DIR;
 fs.mkdirSync(logDir, { recursive: true });
 fs.writeFileSync(path.join(logDir, 'env.json'), JSON.stringify({
   cwd: process.cwd(),
-  teamStateRoot: process.env.OMX_TEAM_STATE_ROOT || '',
-  worker: process.env.OMX_TEAM_WORKER || '',
+  teamStateRoot: process.env.OMG_TEAM_STATE_ROOT || '',
+  worker: process.env.OMG_TEAM_WORKER || '',
 }));
 process.stdin.resume();
 setInterval(() => {}, 1000);
@@ -2541,15 +2541,15 @@ process.on('SIGTERM', () => process.exit(0));
 
     const prevPath = process.env.PATH;
     const prevTmux = process.env.TMUX;
-    const prevLaunchMode = process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevLogDir = process.env.OMX_TEST_LOG_DIR;
+    const prevLaunchMode = process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevLogDir = process.env.OMG_TEST_LOG_DIR;
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
     delete process.env.TMUX;
-    process.env.OMX_TEAM_WORKER_LAUNCH_MODE = 'prompt';
-    process.env.OMX_TEAM_WORKER_CLI = 'codex';
-    process.env.OMX_TEST_LOG_DIR = logDir;
+    process.env.OMG_TEAM_WORKER_LAUNCH_MODE = 'prompt';
+    process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+    process.env.OMG_TEST_LOG_DIR = logDir;
 
     let runtime: TeamRuntime | null = null;
     try {
@@ -2613,12 +2613,12 @@ process.on('SIGTERM', () => process.exit(0));
       else delete process.env.PATH;
       if (typeof prevTmux === 'string') process.env.TMUX = prevTmux;
       else delete process.env.TMUX;
-      if (typeof prevLaunchMode === 'string') process.env.OMX_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
-      else delete process.env.OMX_TEAM_WORKER_LAUNCH_MODE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevLogDir === 'string') process.env.OMX_TEST_LOG_DIR = prevLogDir;
-      else delete process.env.OMX_TEST_LOG_DIR;
+      if (typeof prevLaunchMode === 'string') process.env.OMG_TEAM_WORKER_LAUNCH_MODE = prevLaunchMode;
+      else delete process.env.OMG_TEAM_WORKER_LAUNCH_MODE;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevLogDir === 'string') process.env.OMG_TEST_LOG_DIR = prevLogDir;
+      else delete process.env.OMG_TEST_LOG_DIR;
       await rm(binDir, { recursive: true, force: true });
       await rm(logDir, { recursive: true, force: true });
       await rm(repo, { recursive: true, force: true });
@@ -2628,7 +2628,7 @@ process.on('SIGTERM', () => process.exit(0));
   it('shutdownTeam force-kills prompt workers that ignore SIGTERM', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-prompt-stubborn-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     await mkdir(binDir, { recursive: true });
     await writeFakePromptWorkerBinary(
       fakeGeminiPath,
@@ -2685,7 +2685,7 @@ process.on('SIGTERM', () => {
   it('shutdownTeam reaps detached prompt-worker descendants', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-prompt-descendants-'));
     const binDir = join(cwd, 'bin');
-    const fakeGeminiPath = join(binDir, 'codex');
+    const fakeGeminiPath = join(binDir, 'gemini');
     const helperPidPath = join(cwd, 'helper.pid');
     await mkdir(binDir, { recursive: true });
     await writeFakePromptWorkerBinary(
@@ -2698,7 +2698,7 @@ process.on('SIGTERM', () => {});
 setInterval(() => {}, 1000);
 \`], { detached: true, stdio: 'ignore' });
 helper.unref();
-writeFileSync(process.env.OMX_HELPER_PID_PATH, String(helper.pid));
+writeFileSync(process.env.OMG_HELPER_PID_PATH, String(helper.pid));
 process.stdin.resume();
 setInterval(() => {}, 1000);
 process.on('SIGTERM', () => process.exit(0));
@@ -2708,7 +2708,7 @@ process.on('SIGTERM', () => process.exit(0));
     let runtime: TeamRuntime | null = null;
     let helperPid = 0;
     try {
-      runtime = await withPromptModeGeminiEnv(binDir, { OMX_HELPER_PID_PATH: helperPidPath }, () =>
+      runtime = await withPromptModeGeminiEnv(binDir, { OMG_HELPER_PID_PATH: helperPidPath }, () =>
         withoutTeamWorkerEnv(() =>
           startTeam(
             'team-prompt-descendants',
@@ -2830,8 +2830,8 @@ process.on('SIGTERM', () => process.exit(0));
 
   it('monitorTeam surfaces reclaimed work pickup attempts when an idle worker is available', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-reassign-reclaimed-'));
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     let sleeper1: ReturnType<typeof spawn> | null = null;
     let sleeper2: ReturnType<typeof spawn> | null = null;
     try {
@@ -2875,16 +2875,16 @@ process.on('SIGTERM', () => process.exit(0));
     } finally {
       try { if (sleeper1?.pid) process.kill(sleeper1.pid, 'SIGKILL'); } catch {}
       try { if (sleeper2?.pid) process.kill(sleeper2.pid, 'SIGKILL'); } catch {}
-      if (typeof prevTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof prevTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('monitorTeam reclaims expired task claims and surfaces the recovery in recommendations', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-reclaim-'));
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState('team-runtime-reclaim', 'reclaim test', 'executor', 2, cwd);
       const t = await createTask('team-runtime-reclaim', { subject: 'task', description: 'd', status: 'pending' }, cwd);
@@ -2904,16 +2904,16 @@ process.on('SIGTERM', () => process.exit(0));
       assert.equal(reread?.claim, undefined);
       assert.equal(snapshot?.recommendations.some((r) => r.includes(`task-${t.id}`) && r.includes('Reclaimed expired claim')), true);
     } finally {
-      if (typeof prevTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof prevTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('monitorTeam keeps phase in team-verify when completed code tasks lack verification evidence', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-verify-gate-'));
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState('team-verify-gate', 'verification gate test', 'executor', 1, cwd);
       const task = await createTask(
@@ -2950,8 +2950,8 @@ process.on('SIGTERM', () => process.exit(0));
       assert.ok(second);
       assert.equal(second?.phase, 'complete');
     } finally {
-      if (typeof prevTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof prevTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
@@ -3275,7 +3275,7 @@ process.on('SIGTERM', () => process.exit(0));
     let workerPath = '';
     const fakeBinDir = await mkdtemp(join(tmpdir(), 'omg-runtime-fake-git-'));
     const previousPath = process.env.PATH;
-    const previousFakeMode = process.env.OMX_FAKE_GIT_SUCCESS_NOOP;
+    const previousFakeMode = process.env.OMG_FAKE_GIT_SUCCESS_NOOP;
     try {
       workerPath = await addWorktree(repo, 'wk1-merge-noadvance-branch', 'omg-runtime-wk1-merge-noadvance-');
       await writeFile(join(workerPath, 'feature.txt'), 'new feature\n', 'utf-8');
@@ -3303,7 +3303,7 @@ process.on('SIGTERM', () => process.exit(0));
         join(fakeBinDir, 'git'),
         `#!/usr/bin/env bash
 set -euo pipefail
-if [[ "\${OMX_FAKE_GIT_SUCCESS_NOOP:-}" == "merge" && "\${1:-}" == "merge" ]]; then
+if [[ "\${OMG_FAKE_GIT_SUCCESS_NOOP:-}" == "merge" && "\${1:-}" == "merge" ]]; then
   exit 0
 fi
 exec "${realGit}" "$@"
@@ -3311,7 +3311,7 @@ exec "${realGit}" "$@"
         { mode: 0o755 },
       );
       process.env.PATH = `${fakeBinDir}:${previousPath ?? ''}`;
-      process.env.OMX_FAKE_GIT_SUCCESS_NOOP = 'merge';
+      process.env.OMG_FAKE_GIT_SUCCESS_NOOP = 'merge';
 
       const leaderHeadBefore = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf-8' }).trim();
       await monitorTeam('team-merge-noadvance', repo);
@@ -3331,8 +3331,8 @@ exec "${realGit}" "$@"
     } finally {
       if (typeof previousPath === 'string') process.env.PATH = previousPath;
       else delete process.env.PATH;
-      if (typeof previousFakeMode === 'string') process.env.OMX_FAKE_GIT_SUCCESS_NOOP = previousFakeMode;
-      else delete process.env.OMX_FAKE_GIT_SUCCESS_NOOP;
+      if (typeof previousFakeMode === 'string') process.env.OMG_FAKE_GIT_SUCCESS_NOOP = previousFakeMode;
+      else delete process.env.OMG_FAKE_GIT_SUCCESS_NOOP;
       await rm(fakeBinDir, { recursive: true, force: true });
       if (workerPath) {
         await rm(workerPath, { recursive: true, force: true });
@@ -4214,7 +4214,7 @@ case "$1" in
         exit 0
         ;;
       *"-t leader:0 -F #{pane_id}"*"#{pane_current_command}"*)
-        printf "%%11\\tzsh\\tzsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tcodex\\tcodex\\n%%14\\tcodex\\tcodex\\n"
+        printf "%%11\\tzsh\\tzsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tgemini\\tgemini\\n%%14\\tgemini\\tgemini\\n"
         if [ -f "$restored_marker" ]; then
           printf "%%44\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n"
         fi
@@ -4295,7 +4295,7 @@ case "$1" in
         exit 1
         ;;
       *"-t leader:0 -F #{pane_id}"*"#{pane_current_command}"*)
-        printf "%%11\\tpwsh\\tpwsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tcodex\\tcodex\\n%%14\\tcodex\\tcodex\\n"
+        printf "%%11\\tpwsh\\tpwsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tgemini\\tgemini\\n%%14\\tgemini\\tgemini\\n"
         exit 0
         ;;
       *)
@@ -4375,7 +4375,7 @@ case "$1" in
         exit 1
         ;;
       *"-t leader:0 -F #{pane_id}"*"#{pane_current_command}"*)
-        printf "%%21\\tpwsh\\tpwsh\\n%%22\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%23\\tcodex\\tcodex\\n%%24\\tcodex\\tcodex\\n"
+        printf "%%21\\tpwsh\\tpwsh\\n%%22\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%23\\tgemini\\tgemini\\n%%24\\tgemini\\tgemini\\n"
         exit 0
         ;;
       *)
@@ -4450,7 +4450,7 @@ case "$1" in
         exit 1
         ;;
       *"-t leader:0 -F #{pane_id}"*"#{pane_current_command}"*)
-        printf "%%11\\tzsh\\tzsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tcodex\\tcodex\\n%%14\\tcodex\\tcodex\\n"
+        printf "%%11\\tzsh\\tzsh\\n%%12\\tnode\\tnode /tmp/bin/omg.js hud --watch\\n%%13\\tgemini\\tgemini\\n%%14\\tgemini\\tgemini\\n"
         exit 0
         ;;
       *)
@@ -4657,10 +4657,10 @@ esac
       detached: false,
     });
     let sleeperPid = sleeper.pid ?? 0;
-    const prevTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    const prevLeaderCwd = process.env.OMX_TEAM_LEADER_CWD;
-    delete process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_LEADER_CWD;
+    const prevTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    const prevLeaderCwd = process.env.OMG_TEAM_LEADER_CWD;
+    delete process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_LEADER_CWD;
 
     try {
       await initTeamState('team-prompt-resume', 'prompt resume test', 'executor', 1, cwd);
@@ -4684,10 +4684,10 @@ esac
           // already exited
         }
       }
-      if (typeof prevTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = prevTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
-      if (typeof prevLeaderCwd === 'string') process.env.OMX_TEAM_LEADER_CWD = prevLeaderCwd;
-      else delete process.env.OMX_TEAM_LEADER_CWD;
+      if (typeof prevTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = prevTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
+      if (typeof prevLeaderCwd === 'string') process.env.OMG_TEAM_LEADER_CWD = prevLeaderCwd;
+      else delete process.env.OMG_TEAM_LEADER_CWD;
       await rm(cwd, { recursive: true, force: true });
     }
   });

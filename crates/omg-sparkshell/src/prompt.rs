@@ -169,11 +169,11 @@ fn read_positive_usize_env(name: &str, default: usize) -> usize {
 
 fn truncate_for_prompt(text: &str, label: &str) -> String {
     let max_lines = read_positive_usize_env(
-        "OMX_SPARKSHELL_SUMMARY_MAX_LINES",
+        "OMG_SPARKSHELL_SUMMARY_MAX_LINES",
         DEFAULT_SUMMARY_MAX_LINES,
     );
     let max_bytes = read_positive_usize_env(
-        "OMX_SPARKSHELL_SUMMARY_MAX_BYTES",
+        "OMG_SPARKSHELL_SUMMARY_MAX_BYTES",
         DEFAULT_SUMMARY_MAX_BYTES,
     );
 
@@ -311,8 +311,8 @@ mod tests {
     fn prompt_truncates_large_streams_before_embedding_them() {
         let _guard = env_lock();
         unsafe {
-            env::set_var("OMX_SPARKSHELL_SUMMARY_MAX_LINES", "4");
-            env::set_var("OMX_SPARKSHELL_SUMMARY_MAX_BYTES", "120");
+            env::set_var("OMG_SPARKSHELL_SUMMARY_MAX_LINES", "4");
+            env::set_var("OMG_SPARKSHELL_SUMMARY_MAX_BYTES", "120");
         }
 
         let output = CommandOutput {
@@ -327,8 +327,8 @@ mod tests {
         let prompt = build_summary_prompt(&["find".into(), "src".into()], &output);
 
         unsafe {
-            env::remove_var("OMX_SPARKSHELL_SUMMARY_MAX_LINES");
-            env::remove_var("OMX_SPARKSHELL_SUMMARY_MAX_BYTES");
+            env::remove_var("OMG_SPARKSHELL_SUMMARY_MAX_LINES");
+            env::remove_var("OMG_SPARKSHELL_SUMMARY_MAX_BYTES");
         }
 
         assert!(prompt.contains("STDOUT total lines: 10"));

@@ -1,17 +1,17 @@
 ---
 name: "hud"
-description: "Show or configure the OMX HUD (two-layer statusline)"
+description: "Show or configure the OMG HUD (two-layer statusline)"
 role: "display"
 scope: ".omg/**"
 ---
 
 # HUD Skill
 
-The OMX HUD uses a two-layer architecture:
+The OMG HUD uses a two-layer architecture:
 
 1. **Layer 1 - Gemini built-in statusLine**: Real-time TUI footer showing model, git branch, and context usage. Configured via `[tui] status_line` in `~/.gemini/config.toml`. Zero code required.
 
-2. **Layer 2 - `omg hud` CLI command**: Shows OMX-specific orchestration state (ralph, ultrawork, autopilot, team, pipeline, ecomode, turns). Reads `.omg/state/` files.
+2. **Layer 2 - `omg hud` CLI command**: Shows OMG-specific orchestration state (ralph, ultrawork, autopilot, team, pipeline, ecomode, turns). Reads `.omg/state/` files.
 
 ## Quick Commands
 
@@ -28,17 +28,17 @@ The OMX HUD uses a two-layer architecture:
 
 ### minimal
 ```
-[OMX] ralph:3/10 | turns:42
+[OMG] ralph:3/10 | turns:42
 ```
 
 ### focused (default)
 ```
-[OMX] ralph:3/10 | ultrawork | team:3 workers | turns:42 | last:5s ago
+[OMG] ralph:3/10 | ultrawork | team:3 workers | turns:42 | last:5s ago
 ```
 
 ### full
 ```
-[OMX] ralph:3/10 | ultrawork | autopilot:execution | team:3 workers | pipeline:exec | turns:42 | last:5s ago | total-turns:156
+[OMG] ralph:3/10 | ultrawork | autopilot:execution | team:3 workers | pipeline:exec | turns:42 | last:5s ago | total-turns:156
 ```
 
 ## Setup
@@ -57,9 +57,9 @@ status_line = ["model-with-reasoning", "git-branch", "context-remaining"]
 ```
 
 Available built-in items (Gemini CLI v0.101.0+):
-`model-name`, `model-with-reasoning`, `current-dir`, `project-root`, `git-branch`, `context-remaining`, `context-used`, `five-hour-limit`, `weekly-limit`, `codex-version`, `context-window-size`, `used-tokens`, `total-input-tokens`, `total-output-tokens`, `session-id`
+`model-name`, `model-with-reasoning`, `current-dir`, `project-root`, `git-branch`, `context-remaining`, `context-used`, `five-hour-limit`, `weekly-limit`, `gemini-version`, `context-window-size`, `used-tokens`, `total-input-tokens`, `total-output-tokens`, `session-id`
 
-## Layer 2: OMX Orchestration HUD
+## Layer 2: OMG Orchestration HUD
 
 The `omg hud` command reads these state files:
 - `.omg/state/ralph-state.json` - Ralph loop iteration

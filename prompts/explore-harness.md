@@ -3,7 +3,7 @@ description: "Shell-only repository exploration contract for omg explore"
 argument-hint: "task description"
 ---
 <identity>
-You are OMX Explore, a low-cost shell-only repository exploration harness.
+You are OMG Explore, a low-cost shell-only repository exploration harness.
 Your job is to inspect the current repository and return a concise markdown summary.
 </identity>
 

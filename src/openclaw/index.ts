@@ -6,7 +6,7 @@
  * Usage (from notify hook via wakeOpenClaw):
  *   wakeOpenClaw("session-start", { sessionId, projectPath: directory });
  *
- * Activation requires OMX_OPENCLAW=1 env var and config in .omg-config.json.
+ * Activation requires OMG_OPENCLAW=1 env var and config in .omg-config.json.
  */
 
 export type {
@@ -38,7 +38,7 @@ import { basename } from "path";
 import { getCurrentTmuxSession, sanitizeTmuxAlertText } from "../notifications/tmux.js";
 
 /** Whether debug logging is enabled */
-const DEBUG = process.env.OMX_OPENCLAW_DEBUG === "1";
+const DEBUG = process.env.OMG_OPENCLAW_DEBUG === "1";
 
 /**
  * Build a whitelisted context object from the input context.

@@ -44,7 +44,7 @@ pub const RUNTIME_EVENT_NAMES: &[&str] = &[
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WorkerCli {
-    Codex,
+    Gemini,
     Claude,
     Other(String),
 }
@@ -53,7 +53,7 @@ impl WorkerCli {
     pub fn from_label(label: impl AsRef<str>) -> Self {
         match label.as_ref().trim().to_lowercase().as_str() {
             "claude" => Self::Claude,
-            "codex" => Self::Codex,
+            "gemini" => Self::Gemini,
             other => Self::Other(other.to_string()),
         }
     }
@@ -62,7 +62,7 @@ impl WorkerCli {
 pub fn submit_presses_for_worker_cli(worker_cli: &WorkerCli) -> u8 {
     match worker_cli {
         WorkerCli::Claude => 1,
-        WorkerCli::Codex | WorkerCli::Other(_) => 2,
+        WorkerCli::Gemini | WorkerCli::Other(_) => 2,
     }
 }
 
@@ -564,7 +564,7 @@ mod tests {
     #[test]
     fn worker_cli_submit_policy_matches_current_dispatch_behavior() {
         assert_eq!(submit_presses_for_worker_cli(&WorkerCli::Claude), 1);
-        assert_eq!(submit_presses_for_worker_cli(&WorkerCli::Codex), 2);
+        assert_eq!(submit_presses_for_worker_cli(&WorkerCli::Gemini), 2);
         assert_eq!(
             submit_presses_for_worker_cli(&WorkerCli::from_label("other")),
             2

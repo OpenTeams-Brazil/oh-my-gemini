@@ -12,14 +12,14 @@ This guide covers two supported setup paths:
 export HOOKS_TOKEN="your-openclaw-hooks-token"
 
 # Required for OpenClaw dispatch pipeline
-export OMX_OPENCLAW=1
+export OMG_OPENCLAW=1
 
 # Required in addition for command gateways
-export OMX_OPENCLAW_COMMAND=1
+export OMG_OPENCLAW_COMMAND=1
 
 # Optional global default for command gateway timeout (ms)
 # Precedence: gateway timeout > env override > 5000 default
-export OMX_OPENCLAW_COMMAND_TIMEOUT_MS=120000
+export OMG_OPENCLAW_COMMAND_TIMEOUT_MS=120000
 ```
 
 ## Prompt tuning guide (concise + context-aware)
@@ -197,13 +197,13 @@ These aliases are normalized by OMX into internal OpenClaw gateway mappings.
 ## Option C: Clawdbot agent-command workflow (recommended for dev)
 
 Use this when you want OMX hook events to trigger **agent turns** (not plain
-message/webhook forwarding), e.g. for `#omc-dev`.
+message/webhook forwarding), e.g. for `#omg-dev`.
 
 > Shell safety: template variables (for example `{{instruction}}`) are interpolated into the
 > command string. Keep templates simple and avoid shell metacharacters in user-derived content.
 > For troubleshooting, temporarily remove output redirection and inspect command output.
 >
-> Command gateway timeout precedence: `gateways.<name>.timeout` > `OMX_OPENCLAW_COMMAND_TIMEOUT_MS` > `5000`.
+> Command gateway timeout precedence: `gateways.<name>.timeout` > `OMG_OPENCLAW_COMMAND_TIMEOUT_MS` > `5000`.
 > For `clawdbot agent` workflows, use `120000` (2 minutes) to avoid premature timeout.
 >
 > **Production best practices:**
@@ -211,7 +211,7 @@ message/webhook forwarding), e.g. for `#omc-dev`.
 > - Use `.jsonl` extension with append (`>>`) for structured log aggregation
 > - Use `--reply-to 'channel:CHANNEL_ID'` format for reliable Discord delivery (preferred over aliases)
 
-For Korean-first tmux follow-up operations in `#omc-dev`, see the dev guide section below.
+For Korean-first tmux follow-up operations in `#omg-dev`, see the dev guide section below.
 
 ```json
 {
@@ -268,7 +268,7 @@ For Korean-first tmux follow-up operations in `#omc-dev`, see the dev guide sect
 
 ## Dev Guide: OpenClaw + Clawdbot Agent (Korean follow-up mode)
 
-Use this profile when `#omc-dev` should receive OpenClaw notifications as
+Use this profile when `#omg-dev` should receive OpenClaw notifications as
 **actual clawdbot agent turns**, with proactive follow-up behavior.
 
 ### 1) Force Korean output in hook instructions
@@ -276,8 +276,8 @@ Use this profile when `#omc-dev` should receive OpenClaw notifications as
 - Write all hook instructions in Korean.
 - Explicitly require Korean in each instruction template.
 - **Prefer `--reply-to 'channel:CHANNEL_ID'` format** over channel aliases for reliability.
-  - Example: `--reply-to 'channel:1468539002985644084'` (for #omc-dev)
-  - Channel aliases like `#omc-dev` may fail if the bot doesn't have the channel cached.
+  - Example: `--reply-to 'channel:1468539002985644084'` (for #omg-dev)
+  - Channel aliases like `#omg-dev` may fail if the bot doesn't have the channel cached.
 
 Example instruction style:
 
@@ -285,7 +285,7 @@ Example instruction style:
 OMX 훅={{event}} 프로젝트={{projectName}} 세션={{sessionId}}.
 반드시 한국어로 응답하세요.
 OMX tmux 세션: {{tmuxSession}}.
-SOUL.md 및 #omc-dev 맥락을 참고해 필요한 후속 액션이 있으면 즉시 안내하세요.
+SOUL.md 및 #omg-dev 맥락을 참고해 필요한 후속 액션이 있으면 즉시 안내하세요.
 ```
 
 ### 2) Track which OMX tmux session emitted the hook
@@ -301,11 +301,11 @@ tmux ls | grep '^omg-' || true
 tmux list-panes -a -F '#{session_name}\t#{pane_id}\t#{pane_current_path}' | grep "$(basename "$PWD")" || true
 ```
 
-### 3) SOUL.md + #omc-dev follow-up runbook
+### 3) SOUL.md + #omg-dev follow-up runbook
 
 When a hook suggests active work or pending user action:
 
-1. Read `SOUL.md` and recent `#omc-dev` context.
+1. Read `SOUL.md` and recent `#omg-dev` context.
 2. Follow up in Korean, citing `sessionId` + `tmuxSession`.
 3. If action is required, state concrete next step (for example, reply needed, retry needed, or session check needed).
 4. If delivery looks broken, inspect logs and retry without swallowed output.
@@ -361,8 +361,8 @@ test -n "$HOOKS_TOKEN" && echo "token ok" || echo "token missing"
 curl -sS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:18789 || echo "gateway unreachable"
 
 # gate checks
-test "$OMX_OPENCLAW" = "1" && echo "OMX_OPENCLAW=1" || echo "missing OMX_OPENCLAW=1"
-test "$OMX_OPENCLAW_COMMAND" = "1" && echo "OMX_OPENCLAW_COMMAND=1" || echo "missing OMX_OPENCLAW_COMMAND=1"
+test "$OMG_OPENCLAW" = "1" && echo "OMG_OPENCLAW=1" || echo "missing OMG_OPENCLAW=1"
+test "$OMG_OPENCLAW_COMMAND" = "1" && echo "OMG_OPENCLAW_COMMAND=1" || echo "missing OMG_OPENCLAW_COMMAND=1"
 ```
 
 ## Pass/Fail Diagnostics
@@ -371,8 +371,8 @@ test "$OMX_OPENCLAW_COMMAND" = "1" && echo "OMX_OPENCLAW_COMMAND=1" || echo "mis
 - **404**: wrong path; verify `/hooks/agent` and `/hooks/wake`.
 - **5xx**: gateway runtime issue; inspect logs.
 - **Timeout/connection refused**: host/port/firewall issue.
-- **Command gateway disabled**: set both `OMX_OPENCLAW=1` and `OMX_OPENCLAW_COMMAND=1`.
-- **Command killed by `SIGTERM`**: increase `gateways.<name>.timeout` (recommend `120000` for clawdbot agent) or set `OMX_OPENCLAW_COMMAND_TIMEOUT_MS`.
+- **Command gateway disabled**: set both `OMG_OPENCLAW=1` and `OMG_OPENCLAW_COMMAND=1`.
+- **Command killed by `SIGTERM`**: increase `gateways.<name>.timeout` (recommend `120000` for clawdbot agent) or set `OMG_OPENCLAW_COMMAND_TIMEOUT_MS`.
 - **Hook failures blocking sessions**: ensure command ends with `|| true` to prevent OMX from waiting on clawdbot failures.
 - **Missing logs**: use `.jsonl` extension with append (`>>`) for persistent structured logging.
 - **Discord delivery failures**: use `--reply-to 'channel:CHANNEL_ID'` format instead of channel aliases.

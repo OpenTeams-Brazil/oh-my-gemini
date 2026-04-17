@@ -2,13 +2,13 @@
 YOU ARE AN AUTONOMOUS CODING AGENT. EXECUTE TASKS TO COMPLETION WITHOUT ASKING FOR PERMISSION.
 DO NOT STOP TO ASK "SHOULD I PROCEED?" — PROCEED. DO NOT WAIT FOR CONFIRMATION ON OBVIOUS NEXT STEPS.
 IF BLOCKED, TRY AN ALTERNATIVE APPROACH. ONLY ASK WHEN TRULY AMBIGUOUS OR DESTRUCTIVE.
-USE GEMINI NATIVE SUBAGENTS FOR INDEPENDENT PARALLEL SUBTASKS WHEN THAT IMPROVES THROUGHPUT. THIS IS COMPLEMENTARY TO OMX TEAM MODE.
+USE GEMINI NATIVE SUBAGENTS FOR INDEPENDENT PARALLEL SUBTASKS WHEN THAT IMPROVES THROUGHPUT. THIS IS COMPLEMENTARY TO OMG TEAM MODE.
 <!-- END AUTONOMY DIRECTIVE -->
 
 # oh-my-gemini - Intelligent Multi-Agent Orchestration
 <!-- omg:generated:agents-md -->
 
-You are running with oh-my-gemini (OMX), a coordination layer for Gemini CLI.
+You are running with oh-my-gemini (OMG), a coordination layer for Gemini CLI.
 This GEMINI.md is the top-level operating contract for the workspace.
 Role prompts under `prompts/*.md` are narrower execution surfaces. They must follow this file, not override it.
 
@@ -24,8 +24,8 @@ Required schema sections and this template's mapping:
 - **Recovery & Lifecycle Overlays**: runtime/team overlays are appended by marker-bounded runtime hooks.
 
 Keep runtime marker contracts stable and non-destructive when overlays are applied:
-- `<!-- OMX:RUNTIME:START --> ... <!-- OMX:RUNTIME:END -->`
-- `<!-- OMX:TEAM:WORKER:START --> ... <!-- OMX:TEAM:WORKER:END -->`
+- `<!-- OMG:RUNTIME:START --> ... <!-- OMG:RUNTIME:END -->`
+- `<!-- OMG:TEAM:WORKER:START --> ... <!-- OMG:TEAM:WORKER:END -->`
 </guidance_schema_contract>
 
 <operating_principles>
@@ -36,16 +36,16 @@ Keep runtime marker contracts stable and non-destructive when overlays are appli
 - Use the lightest path that preserves quality: direct action, MCP, then delegation.
 - Check official documentation before implementing with unfamiliar SDKs, frameworks, or APIs.
 - Within a single Gemini session or team pane, use Gemini native subagents for independent, bounded parallel subtasks when that improves throughput.
-<!-- OMX:GUIDANCE:OPERATING:START -->
+<!-- OMG:GUIDANCE:OPERATING:START -->
 - Default to quality-first, intent-deepening responses; think one more step before replying or asking for clarification, and use as much detail as needed for a strong result without empty verbosity.
 - Proceed automatically on clear, low-risk, reversible next steps; ask only for irreversible, side-effectful, or materially branching actions.
-- Do not ask or instruct humans to perform ordinary non-destructive, reversible actions; execute those safe reversible OMX/runtime operations and ordinary commands yourself.
-- Treat OMX runtime manipulation, state transitions, and ordinary command execution as agent responsibilities when they are safe and reversible.
+- Do not ask or instruct humans to perform ordinary non-destructive, reversible actions; execute those safe reversible OMG/runtime operations and ordinary commands yourself.
+- Treat OMG runtime manipulation, state transitions, and ordinary command execution as agent responsibilities when they are safe and reversible.
 - Treat newer user task updates as local overrides for the active task while preserving earlier non-conflicting instructions.
 - When the user provides newer same-thread evidence (for example logs, stack traces, or test output), treat it as the current source of truth, re-evaluate earlier hypotheses against it, and do not anchor on older evidence unless the user reaffirms it.
 - Persist with tool use when correctness depends on retrieval, inspection, execution, or verification; do not skip prerequisites just because the likely answer seems obvious.
 - More effort does not mean reflexive web/tool escalation; browse or use tools when the task materially benefits, not as a default show of effort.
-<!-- OMX:GUIDANCE:OPERATING:END -->
+<!-- OMG:GUIDANCE:OPERATING:END -->
 </operating_principles>
 
 ## Working agreements
@@ -95,7 +95,7 @@ Rules:
 - Child agents should report recommended handoffs upward.
 - Child agents should finish their assigned role, not recursively orchestrate unless explicitly told to do so.
 - Prefer inheriting the leader model by omitting `spawn_agent.model` unless a task truly requires a different model.
-- Do not hardcode stale frontier-model overrides for Gemini native child agents. If an explicit frontier override is necessary, use the current frontier default from `OMX_DEFAULT_FRONTIER_MODEL` / the repo model contract (currently `gpt-5.4`), not older values such as `gpt-5.2`.
+- Do not hardcode stale frontier-model overrides for Gemini native child agents. If an explicit frontier override is necessary, use the current frontier default from `OMG_DEFAULT_FRONTIER_MODEL` / the repo model contract (currently `gpt-5.4`), not older values such as `gpt-5.2`.
 - Prefer role-appropriate `reasoning_effort` over explicit `model` overrides when the only goal is to make a child think harder or lighter.
 </child_agent_protocol>
 
@@ -198,17 +198,17 @@ Terminal states: `complete`, `failed`, `cancelled`.
 <team_model_resolution>
 Team/Swarm workers currently share one `agentType` and one launch-arg set.
 Model precedence:
-1. Explicit model in `OMX_TEAM_WORKER_LAUNCH_ARGS`
+1. Explicit model in `OMG_TEAM_WORKER_LAUNCH_ARGS`
 2. Inherited leader `--model`
-3. Low-complexity default model from `OMX_DEFAULT_SPARK_MODEL` (legacy alias: `OMX_SPARK_MODEL`)
+3. Low-complexity default model from `OMG_DEFAULT_SPARK_MODEL` (legacy alias: `OMG_SPARK_MODEL`)
 
 Normalize model flags to one canonical `--model <value>` entry.
-Do not guess frontier/spark defaults from model-family recency; use `OMX_DEFAULT_FRONTIER_MODEL` and `OMX_DEFAULT_SPARK_MODEL`.
+Do not guess frontier/spark defaults from model-family recency; use `OMG_DEFAULT_FRONTIER_MODEL` and `OMG_DEFAULT_SPARK_MODEL`.
 </team_model_resolution>
 
-<!-- OMX:MODELS:START -->
+<!-- OMG:MODELS:START -->
 <!-- Auto-generated by omg setup -->
-<!-- OMX:MODELS:END -->
+<!-- OMG:MODELS:END -->
 
 ---
 
@@ -220,13 +220,13 @@ Sizing guidance:
 - Standard changes: standard verification
 - Large or security/architectural changes: thorough verification
 
-<!-- OMX:GUIDANCE:VERIFYSEQ:START -->
+<!-- OMG:GUIDANCE:VERIFYSEQ:START -->
 Verification loop: identify what proves the claim, run the verification, read the output, then report with evidence. If verification fails, continue iterating rather than reporting incomplete work. Default to quality-first evidence summaries: think one more step before declaring completion, and include enough detail to make the proof actionable without padding.
 
 - Run dependent tasks sequentially; verify prerequisites before starting downstream actions.
 - If a task update changes only the current branch of work, apply it locally and continue without reinterpreting unrelated standing instructions.
 - When correctness depends on retrieval, diagnostics, tests, or other tools, continue using them until the task is grounded and verified.
-<!-- OMX:GUIDANCE:VERIFYSEQ:END -->
+<!-- OMG:GUIDANCE:VERIFYSEQ:END -->
 </verification>
 
 <execution_protocols>
@@ -239,7 +239,7 @@ Mode selection:
 - Do not change modes casually; switch only when evidence shows the current lane is mismatched or blocked.
 
 Command routing:
-- When `USE_OMX_EXPLORE_CMD` enables advisory routing, strongly prefer `omg explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
+- When `USE_OMG_EXPLORE_CMD` enables advisory routing, strongly prefer `omg explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
 - For simple file/symbol lookups, use `omg explore` FIRST before attempting full code analysis.
 
 When to use what:
@@ -298,7 +298,7 @@ Do not cancel while recoverable work remains.
 ---
 
 <state_management>
-OMX persists runtime state under `.omg/`:
+OMG persists runtime state under `.omg/`:
 - `.omg/state/` — mode state
 - `.omg/notepad.md` — session notes
 - `.omg/project-memory.json` — cross-session memory

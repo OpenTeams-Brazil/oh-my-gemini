@@ -7,7 +7,7 @@ import { tmpdir } from 'os';
 import { initTeamState, createTask, readTeamConfig, saveTeamConfig } from '../state.js';
 
 async function loadRuntimeCliModule() {
-  process.env.OMX_RUNTIME_CLI_DISABLE_AUTO_START = '1';
+  process.env.OMG_RUNTIME_CLI_DISABLE_AUTO_START = '1';
   return await import('../runtime-cli.js');
 }
 
@@ -16,16 +16,16 @@ describe('runtime-cli helpers', () => {
     const runtimeCli = await loadRuntimeCliModule();
 
     assert.deepEqual(
-      runtimeCli.normalizeAgentTypes(['codex', 'gemini'], 2),
-      ['codex', 'gemini'],
+      runtimeCli.normalizeAgentTypes(['gemini', 'gemini'], 2),
+      ['gemini', 'gemini'],
     );
     assert.deepEqual(
       runtimeCli.normalizeAgentTypes(['gemini'], 3),
       ['gemini'],
     );
     assert.throws(
-      () => runtimeCli.normalizeAgentTypes(['codex', 'invalid'], 2),
-      /Expected codex\\|claude\\|gemini/,
+      () => runtimeCli.normalizeAgentTypes(['gemini', 'invalid'], 2),
+      /Expected gemini\\|claude\\|gemini/,
     );
   });
 
@@ -74,11 +74,11 @@ describe('runtime-cli helpers', () => {
     assert.equal(liveBehavior.fixingWithNoWorkers, false);
   });
 
-  it('reads task results from explicit OMX_TEAM_STATE_ROOT during shutdown collection', async () => {
+  it('reads task results from explicit OMG_TEAM_STATE_ROOT during shutdown collection', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-env-root-cwd-'));
     const explicitStateRoot = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-env-root-state-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    process.env.OMX_TEAM_STATE_ROOT = explicitStateRoot;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    process.env.OMG_TEAM_STATE_ROOT = explicitStateRoot;
     try {
       await initTeamState('env-root-results', 'task', 'executor', 1, cwd);
       await createTask('env-root-results', {
@@ -101,8 +101,8 @@ describe('runtime-cli helpers', () => {
         }],
       );
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(explicitStateRoot, { recursive: true, force: true });
       await rm(cwd, { recursive: true, force: true });
     }
@@ -110,8 +110,8 @@ describe('runtime-cli helpers', () => {
 
   it('gracefully shuts down only when the leader explicitly requests shutdown', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-shutdown-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState('shutdown-fallback', 'task', 'executor', 1, cwd);
       await createTask('shutdown-fallback', {
@@ -128,16 +128,16 @@ describe('runtime-cli helpers', () => {
 
       assert.equal(existsSync(teamRoot), false);
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('does not auto-force failed-task shutdown without explicit issue confirmation', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-confirm-issues-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState('shutdown-confirm-required', 'task', 'executor', 1, cwd);
       await createTask('shutdown-confirm-required', {
@@ -157,16 +157,16 @@ describe('runtime-cli helpers', () => {
 
       assert.equal(existsSync(teamRoot), true);
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('does not auto-shutdown merely because monitorTeam reaches complete', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-complete-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
-    delete process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
+    delete process.env.OMG_TEAM_STATE_ROOT;
     try {
       await initTeamState('runtime-cli-complete', 'task', 'executor', 1, cwd);
       await createTask('runtime-cli-complete', {
@@ -186,17 +186,17 @@ describe('runtime-cli helpers', () => {
       assert.equal(existsSync(teamRoot), true);
       assert.equal(typeof runtimeCli.shutdownWithForceFallback, 'function');
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('preserves team state when building terminal output for completed teams', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-preserve-complete-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
-      delete process.env.OMX_TEAM_STATE_ROOT;
+      delete process.env.OMG_TEAM_STATE_ROOT;
       await initTeamState('runtime-cli-preserve-complete', 'task', 'executor', 1, cwd);
       await createTask('runtime-cli-preserve-complete', {
         subject: 'done task',
@@ -231,17 +231,17 @@ describe('runtime-cli helpers', () => {
       assert.match(result.notice, /omg team shutdown runtime-cli-preserve-complete/);
       assert.match(result.notice, /omg team api read-stall-state/);
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('preserves team state when building terminal output for failed teams', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-preserve-failed-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
-      delete process.env.OMX_TEAM_STATE_ROOT;
+      delete process.env.OMG_TEAM_STATE_ROOT;
       await initTeamState('runtime-cli-preserve-failed', 'task', 'executor', 1, cwd);
       await createTask('runtime-cli-preserve-failed', {
         subject: 'failed task',
@@ -276,17 +276,17 @@ describe('runtime-cli helpers', () => {
       assert.match(result.notice, /omg team api read-stall-state/);
       assert.match(result.notice, /omg team shutdown runtime-cli-preserve-failed/);
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });
 
   it('reports cancelled terminal phases without deleting team state', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-runtime-cli-preserve-cancelled-'));
-    const previousTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+    const previousTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
     try {
-      delete process.env.OMX_TEAM_STATE_ROOT;
+      delete process.env.OMG_TEAM_STATE_ROOT;
       await initTeamState('runtime-cli-preserve-cancelled', 'task', 'executor', 1, cwd);
       await createTask('runtime-cli-preserve-cancelled', {
         subject: 'cancelled task',
@@ -312,8 +312,8 @@ describe('runtime-cli helpers', () => {
       assert.match(result.notice, /phase=cancelled/);
       assert.match(result.notice, /omg team shutdown runtime-cli-preserve-cancelled/);
     } finally {
-      if (typeof previousTeamStateRoot === 'string') process.env.OMX_TEAM_STATE_ROOT = previousTeamStateRoot;
-      else delete process.env.OMX_TEAM_STATE_ROOT;
+      if (typeof previousTeamStateRoot === 'string') process.env.OMG_TEAM_STATE_ROOT = previousTeamStateRoot;
+      else delete process.env.OMG_TEAM_STATE_ROOT;
       await rm(cwd, { recursive: true, force: true });
     }
   });

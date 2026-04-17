@@ -183,7 +183,7 @@ async function runDescriptorCommand(
 
 async function loadStateDescriptor(): Promise<McpCliDescriptor> {
   const { buildStateServerTools, handleStateToolCall } = await importWithAutoStartDisabled(
-    "OMX_STATE_SERVER_DISABLE_AUTO_START",
+    "OMG_STATE_SERVER_DISABLE_AUTO_START",
     async () => await import("../mcp/state-server.js"),
   );
   return {
@@ -207,7 +207,7 @@ async function loadMemoryDescriptor(
   title: string,
 ): Promise<McpCliDescriptor> {
   const { buildMemoryServerTools, handleMemoryToolCall } = await importWithAutoStartDisabled(
-    "OMX_MEMORY_SERVER_DISABLE_AUTO_START",
+    "OMG_MEMORY_SERVER_DISABLE_AUTO_START",
     async () => await import("../mcp/memory-server.js"),
   );
   return {
@@ -237,7 +237,7 @@ async function loadMemoryDescriptor(
 
 async function loadTraceDescriptor(): Promise<McpCliDescriptor> {
   const { buildTraceServerTools, handleTraceToolCall } = await importWithAutoStartDisabled(
-    "OMX_TRACE_SERVER_DISABLE_AUTO_START",
+    "OMG_TRACE_SERVER_DISABLE_AUTO_START",
     async () => await import("../mcp/trace-server.js"),
   );
   return {
@@ -254,7 +254,7 @@ async function loadTraceDescriptor(): Promise<McpCliDescriptor> {
 
 async function loadCodeIntelDescriptor(): Promise<McpCliDescriptor> {
   const { buildCodeIntelServerTools, handleCodeIntelToolCall } = await importWithAutoStartDisabled(
-    "OMX_CODE_INTEL_SERVER_DISABLE_AUTO_START",
+    "OMG_CODE_INTEL_SERVER_DISABLE_AUTO_START",
     async () => await import("../mcp/code-intel-server.js"),
   );
   return {
@@ -267,7 +267,7 @@ async function loadCodeIntelDescriptor(): Promise<McpCliDescriptor> {
 
 async function loadWikiDescriptor(): Promise<McpCliDescriptor> {
   const { buildWikiServerTools, handleWikiToolCall } = await importWithAutoStartDisabled(
-    "OMX_WIKI_SERVER_DISABLE_AUTO_START",
+    "OMG_WIKI_SERVER_DISABLE_AUTO_START",
     async () => await import("../mcp/wiki-server.js"),
   );
   return {

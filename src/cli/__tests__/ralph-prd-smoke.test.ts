@@ -48,7 +48,7 @@ async function initRepo(prefix: string): Promise<string> {
 
 async function installFakeGemini(fakeBin: string, launchLog: string): Promise<void> {
   await mkdir(fakeBin, { recursive: true });
-  const fakeGeminiPath = join(fakeBin, 'codex');
+  const fakeGeminiPath = join(fakeBin, 'gemini');
   const fakePsPath = join(fakeBin, 'ps');
   await writeFile(
     fakeGeminiPath,
@@ -67,9 +67,9 @@ function buildEnv(home: string, fakeBin: string): Record<string, string> {
   return {
     HOME: home,
     PATH: `${fakeBin}:/usr/bin:/bin`,
-    OMX_AUTO_UPDATE: '0',
-    OMX_NOTIFY_FALLBACK: '0',
-    OMX_HOOK_DERIVED_SIGNALS: '0',
+    OMG_AUTO_UPDATE: '0',
+    OMG_NOTIFY_FALLBACK: '0',
+    OMG_HOOK_DERIVED_SIGNALS: '0',
   };
 }
 
@@ -86,7 +86,7 @@ describe('omg ralph --prd smoke gate', () => {
     const cwd = await initRepo('omg-ralph-prd-smoke-');
     const home = join(cwd, 'home');
     const fakeBin = join(cwd, 'bin');
-    const launchLog = join(cwd, 'codex-launch.log');
+    const launchLog = join(cwd, 'gemini-launch.log');
     try {
       await mkdir(home, { recursive: true });
       await installFakeGemini(fakeBin, launchLog);
@@ -106,7 +106,7 @@ describe('omg ralph --prd smoke gate', () => {
     const cwd = await initRepo('omg-ralph-prd-smoke-');
     const home = join(cwd, 'home');
     const fakeBin = join(cwd, 'bin');
-    const launchLog = join(cwd, 'codex-launch.log');
+    const launchLog = join(cwd, 'gemini-launch.log');
     try {
       await mkdir(home, { recursive: true });
       await installFakeGemini(fakeBin, launchLog);
@@ -128,7 +128,7 @@ describe('omg ralph --prd smoke gate', () => {
     const cwd = await initRepo('omg-ralph-prd-smoke-');
     const home = join(cwd, 'home');
     const fakeBin = join(cwd, 'bin');
-    const launchLog = join(cwd, 'codex-launch.log');
+    const launchLog = join(cwd, 'gemini-launch.log');
     try {
       await mkdir(home, { recursive: true });
       await installFakeGemini(fakeBin, launchLog);
@@ -156,7 +156,7 @@ describe('omg ralph --prd smoke gate', () => {
     const cwd = await initRepo('omg-ralph-prd-smoke-');
     const home = join(cwd, 'home');
     const fakeBin = join(cwd, 'bin');
-    const launchLog = join(cwd, 'codex-launch.log');
+    const launchLog = join(cwd, 'gemini-launch.log');
     try {
       await mkdir(home, { recursive: true });
       await installFakeGemini(fakeBin, launchLog);

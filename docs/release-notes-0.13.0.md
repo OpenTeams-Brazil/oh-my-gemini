@@ -8,7 +8,7 @@
 
 - **`omg adapt` becomes the next persistent-target foundation** — OMX now has a first-party adapter surface for external targets, starting with OpenClaw and Hermes. Adapter artifacts stay under `.omg/adapters/<target>/...`, link to canonical planning artifacts, and report local/read-only runtime evidence without claiming a bidirectional control plane (#1600, #1599, #1598).
 - **Ralph/session authority is stricter** — Ralph assignment, tmux Ralph nudges, prompt-side activation, PRD CLI semantics, and native Stop handoffs now all respect session ownership more consistently (#1604, #1608, #1591, #1590, #1611).
-- **Cross-platform launch paths fail safer** — explore/codex resolution skips unusable PATH entries, handles pnpm-style POSIX shims under sandboxed PATHs, avoids Windows-to-POSIX wrapper confusion, and cleans detached leader children on signal exit (#1562, #1610, #1605).
+- **Cross-platform launch paths fail safer** — explore/gemini resolution skips unusable PATH entries, handles pnpm-style POSIX shims under sandboxed PATHs, avoids Windows-to-POSIX wrapper confusion, and cleans detached leader children on signal exit (#1562, #1610, #1605).
 - **Hooks, HUD, and notification state are quieter and more accurate** — live-session HUD binding, startup/dispatch regression coverage, Slack mention parsing, macOS stale-polling git-probe reduction, metadata routing, and receiving-agent ownership guidance reduce stale or user-facing noise (#1573, #1595, #1585, #1619, #1611).
 - **Setup and release workflows are more explicit** — wiki setup registration, native-hook doctor coverage, dev-base contribution guidance, and dependency refreshes keep release/operator paths aligned (#1571, #1546, #1567, #1575, #1576, #1577, #1578).
 

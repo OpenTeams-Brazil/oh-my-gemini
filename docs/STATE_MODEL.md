@@ -52,7 +52,7 @@ If root and session disagree for the same mode, session wins for the active exec
 - `src/modes/base.ts` — mode start/update lifecycle
 - `src/mcp/state-server.ts` — MCP state writes/reads/clears
 - `src/hooks/keyword-detector.ts` — prompt keyword activation + state seeding
-- `src/scripts/codex-native-hook.ts` — native hook routing and prompt-submit output
+- `src/scripts/gemini-native-hook.ts` — native hook routing and prompt-submit output
 
 ## Transition flow
 

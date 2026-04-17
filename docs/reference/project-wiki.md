@@ -1,7 +1,7 @@
 # Project wiki (OMX-native backport)
 
 This note captures the approved OMX-native shape for the project wiki backport.
-It is intentionally **not** a literal OMC port.
+It is intentionally **not** a literal OMG port.
 
 ## Core shape
 
@@ -42,7 +42,7 @@ Guardrails that must stay true:
 - punctuation filtering during tokenization
 - CJK + accented-Latin tokenization support
 
-The docs and code should never regress back to `.omc/wiki/`.
+The docs and code should never regress back to `.omg/wiki/`.
 
 ## Lifecycle + hook contract
 

@@ -1,7 +1,7 @@
 /**
- * Task Size Detector — ported from OMC src/hooks/task-size-detector/index.ts
+ * Task Size Detector — ported from OMG src/hooks/task-size-detector/index.ts
  *
- * IMPORTANT: In OMC, this module runs at prompt time via bridge.ts hook interception
+ * IMPORTANT: In OMG, this module runs at prompt time via bridge.ts hook interception
  * (mandatory enforcement). In OMX, Gemini CLI does not support pre-tool hooks, so this
  * module serves as:
  *   1. Instruction generator — feeds generateKeywordDetectionSection() in emulator.ts

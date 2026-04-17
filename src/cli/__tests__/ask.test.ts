@@ -120,10 +120,10 @@ describe('omg ask', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-ask-contract-'));
     try {
       const res = runOmx(wd, ['ask', 'claude', 'pass-through'], {
-        OMX_ASK_ADVISOR_SCRIPT: 'dist/scripts/fixtures/ask-advisor-stub.js',
-        OMX_ASK_STUB_STDOUT: 'artifact-path-from-stub.md\n',
-        OMX_ASK_STUB_STDERR: 'stub-warning-line\n',
-        OMX_ASK_STUB_EXIT_CODE: '7',
+        OMG_ASK_ADVISOR_SCRIPT: 'dist/scripts/fixtures/ask-advisor-stub.js',
+        OMG_ASK_STUB_STDOUT: 'artifact-path-from-stub.md\n',
+        OMG_ASK_STUB_STDERR: 'stub-warning-line\n',
+        OMG_ASK_STUB_EXIT_CODE: '7',
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
 
@@ -139,9 +139,9 @@ describe('omg ask', () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-ask-relative-'));
     try {
       const res = runOmx(wd, ['ask', 'gemini', 'relative-check'], {
-        OMX_ASK_ADVISOR_SCRIPT: 'dist/scripts/fixtures/ask-advisor-stub.js',
-        OMX_ASK_STUB_STDOUT: 'relative-override-ok\n',
-        OMX_ASK_STUB_EXIT_CODE: '0',
+        OMG_ASK_ADVISOR_SCRIPT: 'dist/scripts/fixtures/ask-advisor-stub.js',
+        OMG_ASK_STUB_STDOUT: 'relative-override-ok\n',
+        OMG_ASK_STUB_EXIT_CODE: '0',
       });
       if (shouldSkipForSpawnPermissions(res.error)) return;
 

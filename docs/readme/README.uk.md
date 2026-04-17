@@ -15,7 +15,7 @@
 **Документація:** [Початок роботи](../getting-started.html) · [Агенти](../agents.html) · [Навички](../skills.html) · [Інтеграції](../integrations.html) · [Demo](../../DEMO.md) · [Посібник OpenClaw](../openclaw-integration.uk.md)
 **Спільнота:** [Discord](https://discord.gg/PUwSMR9XNk) — спільний сервер OMX/спільноти для oh-my-gemini та суміжних інструментів.
 
-OMX — це шар робочих процесів для [OpenAI Gemini CLI](https://github.com/openai/codex).
+OMX — це шар робочих процесів для [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 Він залишає Gemini рушієм виконання й допомагає:
 - запускати потужнішу сесію Gemini за замовчуванням
@@ -51,7 +51,7 @@ OMX — це шар робочих процесів для [OpenAI Gemini CLI](h
 Якщо ви хочете отримати стандартний досвід OMX, почніть тут:
 
 ```bash
-npm install -g @openai/codex oh-my-gemini
+npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg --madmax --high
 ```
@@ -83,7 +83,7 @@ $team 3:executor "execute the approved plan in parallel"
 ### Вимоги
 
 - Node.js 20+
-- встановлений Gemini CLI: `npm install -g @openai/codex`
+- встановлений Gemini CLI: `npm install -g @openai/gemini`
 - налаштована автентифікація Gemini
 - `tmux` на macOS/Linux, якщо пізніше знадобиться стійкий командний рушій
 - `psmux` на нативному Windows, якщо пізніше знадобиться командний режим для Windows

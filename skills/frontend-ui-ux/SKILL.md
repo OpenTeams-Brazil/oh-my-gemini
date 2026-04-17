@@ -18,9 +18,9 @@ Routes to the designer agent or Gemini MCP for frontend work.
 ### Preferred: MCP Direct
 Before first MCP tool use, call `ToolSearch("mcp")` to discover deferred MCP tools.
 Use `mcp__g__ask_gemini` with `agent_role: "designer"` for design tasks.
-If ToolSearch finds no MCP tools, use the Codex agent fallback below.
+If ToolSearch finds no MCP tools, use the Gemini agent fallback below.
 
-### Fallback: Codex Agent
+### Fallback: Gemini Agent
 ```
 delegate(role="designer", tier="STANDARD", task="{{ARGUMENTS}}")
 ```

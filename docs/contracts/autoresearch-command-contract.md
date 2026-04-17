@@ -5,8 +5,8 @@
 ## CLI
 
 ```bash
-omg autoresearch <mission-dir> [codex-args...]
-omg autoresearch --resume <run-id> [codex-args...]
+omg autoresearch <mission-dir> [gemini-args...]
+omg autoresearch --resume <run-id> [gemini-args...]
 omg autoresearch --help
 ```
 

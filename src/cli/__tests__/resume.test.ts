@@ -31,17 +31,17 @@ function runOmx(
 }
 
 describe('omg resume', () => {
-  it('forwards --last to codex resume through the normal launch wrapper', async () => {
+  it('forwards --last to gemini resume through the normal launch wrapper', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-resume-cli-'));
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
-      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-codex:%s\\n\' \"$*\"\n');
+      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-gemini:%s\\n\' \"$*\"\n');
       await chmod(fakeGeminiPath, 0o755);
       await writeFile(fakePsPath, '#!/bin/sh\nexit 0\n');
       await chmod(fakePsPath, 0o755);
@@ -49,29 +49,29 @@ describe('omg resume', () => {
       const result = runOmx(wd, ['resume', '--last'], {
         HOME: home,
         PATH: `${fakeBin}:/usr/bin:/bin`,
-        OMX_AUTO_UPDATE: '0',
-        OMX_NOTIFY_FALLBACK: '0',
-        OMX_HOOK_DERIVED_SIGNALS: '0',
+        OMG_AUTO_UPDATE: '0',
+        OMG_NOTIFY_FALLBACK: '0',
+        OMG_HOOK_DERIVED_SIGNALS: '0',
       });
 
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
-      assert.match(result.stdout, /fake-codex:resume --last\b/);
+      assert.match(result.stdout, /fake-gemini:resume --last\b/);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
   });
 
-  it('passes resume --help through to codex instead of printing top-level omg help', async () => {
+  it('passes resume --help through to gemini instead of printing top-level omg help', async () => {
     const wd = await mkdtemp(join(tmpdir(), 'omg-resume-cli-'));
     try {
       const home = join(wd, 'home');
       const fakeBin = join(wd, 'bin');
-      const fakeGeminiPath = join(fakeBin, 'codex');
+      const fakeGeminiPath = join(fakeBin, 'gemini');
       const fakePsPath = join(fakeBin, 'ps');
 
       await mkdir(home, { recursive: true });
       await mkdir(fakeBin, { recursive: true });
-      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-codex:%s\\n\' \"$*\"\n');
+      await writeFile(fakeGeminiPath, '#!/bin/sh\nprintf \'fake-gemini:%s\\n\' \"$*\"\n');
       await chmod(fakeGeminiPath, 0o755);
       await writeFile(fakePsPath, '#!/bin/sh\nexit 0\n');
       await chmod(fakePsPath, 0o755);
@@ -79,13 +79,13 @@ describe('omg resume', () => {
       const result = runOmx(wd, ['resume', '--help'], {
         HOME: home,
         PATH: `${fakeBin}:/usr/bin:/bin`,
-        OMX_AUTO_UPDATE: '0',
-        OMX_NOTIFY_FALLBACK: '0',
-        OMX_HOOK_DERIVED_SIGNALS: '0',
+        OMG_AUTO_UPDATE: '0',
+        OMG_NOTIFY_FALLBACK: '0',
+        OMG_HOOK_DERIVED_SIGNALS: '0',
       });
 
       assert.equal(result.status, 0, result.error || result.stderr || result.stdout);
-      assert.match(result.stdout, /fake-codex:resume --help\b/);
+      assert.match(result.stdout, /fake-gemini:resume --help\b/);
       assert.doesNotMatch(result.stdout, /Unknown command: resume/);
     } finally {
       await rm(wd, { recursive: true, force: true });

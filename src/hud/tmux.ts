@@ -66,7 +66,7 @@ export function buildHudWatchCommand(omgBin: string, preset?: string, sessionId?
     ? ` --preset=${preset}`
     : '';
   const safeSessionId = typeof sessionId === 'string' ? sessionId.trim() : '';
-  const sessionPrefix = safeSessionId ? `OMX_SESSION_ID=${shellEscapeSingle(safeSessionId)} ` : '';
+  const sessionPrefix = safeSessionId ? `OMG_SESSION_ID=${shellEscapeSingle(safeSessionId)} ` : '';
   return `${sessionPrefix}node ${shellEscapeSingle(omgBin)} hud --watch${safePreset}`;
 }
 

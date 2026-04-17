@@ -9,7 +9,7 @@ Verdict: **GO** ✅
 
 ## Scope reviewed
 
-- `$team` keyword detection and prompt-routing seam (`src/hooks/keyword-detector.ts`, `src/hooks/__tests__/keyword-detector.test.ts`, `src/scripts/codex-native-hook.ts`, `src/scripts/__tests__/codex-native-hook.test.ts`)
+- `$team` keyword detection and prompt-routing seam (`src/hooks/keyword-detector.ts`, `src/hooks/__tests__/keyword-detector.test.ts`, `src/scripts/gemini-native-hook.ts`, `src/scripts/__tests__/gemini-native-hook.test.ts`)
 - `startTeam` duplicate same-name team guard (`src/team/runtime.ts`, `src/team/__tests__/runtime.test.ts`)
 - release metadata and release docs (`package.json`, `package-lock.json`, `Cargo.toml`, `Cargo.lock`, `CHANGELOG.md`, `RELEASE_BODY.md`, `docs/release-notes-0.12.3.md`)
 

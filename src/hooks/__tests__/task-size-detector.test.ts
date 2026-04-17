@@ -386,8 +386,8 @@ describe('task-size-detector', () => {
       assert.equal(isHeavyMode('analyze'), false);
     });
 
-    it('returns false for codex', () => {
-      assert.equal(isHeavyMode('codex'), false);
+    it('returns false for gemini', () => {
+      assert.equal(isHeavyMode('gemini'), false);
     });
 
     it('returns false for gemini', () => {
@@ -408,7 +408,7 @@ describe('task-size-detector', () => {
     });
 
     it('does not contain lightweight modes', () => {
-      const lightweight = ['cancel', 'plan', 'tdd', 'ultrathink', 'deepsearch', 'analyze', 'codex', 'gemini'];
+      const lightweight = ['cancel', 'plan', 'tdd', 'ultrathink', 'deepsearch', 'analyze', 'gemini', 'gemini'];
       for (const mode of lightweight) {
         assert.ok(!HEAVY_MODE_KEYWORDS.has(mode), `Expected HEAVY_MODE_KEYWORDS NOT to contain "${mode}"`);
       }

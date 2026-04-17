@@ -179,15 +179,15 @@ describe('getDefaultTemplate', () => {
     assert.ok(tmpl.includes('{{event}}'));
   });
 
-  it('session-idle template uses "Codex" not "Claude"', () => {
+  it('session-idle template uses "Gemini" not "Claude"', () => {
     const tmpl = getDefaultTemplate('session-idle');
-    assert.ok(tmpl.includes('Codex'));
+    assert.ok(tmpl.includes('Gemini'));
     assert.ok(!tmpl.includes('Claude'));
   });
 
-  it('ask-user-question template uses "Codex" not "Claude"', () => {
+  it('ask-user-question template uses "Gemini" not "Claude"', () => {
     const tmpl = getDefaultTemplate('ask-user-question');
-    assert.ok(tmpl.includes('Codex'));
+    assert.ok(tmpl.includes('Gemini'));
     assert.ok(!tmpl.includes('Claude'));
   });
 

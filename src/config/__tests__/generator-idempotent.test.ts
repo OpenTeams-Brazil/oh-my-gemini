@@ -68,9 +68,9 @@ function assertSingleOmxBlock(toml: string): void {
     "[features] should appear once",
   );
   assert.equal(
-    count(toml, /^codex_hooks = true$/gm),
+    count(toml, /^gemini_hooks = true$/gm),
     1,
-    "codex_hooks should appear once",
+    "gemini_hooks should appear once",
   );
   assert.equal(
     count(toml, /^notify\s*=/gm),
@@ -89,9 +89,9 @@ function assertSingleOmxBlock(toml: string): void {
   );
   assert.equal(count(toml, /^\[env\]$/gm), 1, "[env] should appear once");
   assert.equal(
-    count(toml, /^USE_OMX_EXPLORE_CMD = "1"$/gm),
+    count(toml, /^USE_OMG_EXPLORE_CMD = "1"$/gm),
     1,
-    "USE_OMX_EXPLORE_CMD should appear once",
+    "USE_OMG_EXPLORE_CMD should appear once",
   );
 }
 
@@ -106,7 +106,7 @@ describe("config generator idempotency (#384)", () => {
       assertSingleOmxBlock(toml);
       assert.match(toml, /^multi_agent = true$/m);
       assert.match(toml, /^child_agents_md = true$/m);
-      assert.match(toml, /^codex_hooks = true$/m);
+      assert.match(toml, /^gemini_hooks = true$/m);
     } finally {
       await rm(wd, { recursive: true, force: true });
     }
@@ -392,25 +392,25 @@ describe("config generator idempotency (#384)", () => {
     assert.doesNotMatch(toml, /^\[tui\]$/m);
     assert.match(toml, /^\[mcp_servers\.omg_state\]$/m);
     assert.match(toml, /^\[env\]$/m);
-    assert.match(toml, /^USE_OMX_EXPLORE_CMD = "1"$/m);
+    assert.match(toml, /^USE_OMG_EXPLORE_CMD = "1"$/m);
   });
 
-  it('seeds USE_OMX_EXPLORE_CMD=1 into generated config by default', () => {
+  it('seeds USE_OMG_EXPLORE_CMD=1 into generated config by default', () => {
     const toml = buildMergedConfig('', '/tmp/omg');
 
     assert.match(toml, /^\[env\]$/m);
-    assert.match(toml, /^USE_OMX_EXPLORE_CMD = "1"$/m);
+    assert.match(toml, /^USE_OMG_EXPLORE_CMD = "1"$/m);
   });
 
   it('preserves existing [env] keys and explicit explore routing opt-outs', () => {
     const toml = buildMergedConfig(
-      ['[env]', 'FOO = "bar"', 'USE_OMX_EXPLORE_CMD = "0"', ''].join('\n'),
+      ['[env]', 'FOO = "bar"', 'USE_OMG_EXPLORE_CMD = "0"', ''].join('\n'),
       '/tmp/omg',
     );
 
     assert.match(toml, /^\[env\]$/m);
     assert.match(toml, /^FOO = "bar"$/m);
-    assert.match(toml, /^USE_OMX_EXPLORE_CMD = "0"$/m);
+    assert.match(toml, /^USE_OMG_EXPLORE_CMD = "0"$/m);
   });
 
   it("replaces an existing OMX notify entry without leaving orphan fragments behind", async () => {
@@ -458,15 +458,15 @@ describe("config generator idempotency (#384)", () => {
     }
   });
 
-  it("can override gpt-5.3-codex to gpt-5.4 and seed 1M context defaults", async () => {
+  it("can override gpt-5.3-gemini to gpt-5.4 and seed 1M context defaults", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-idem-"));
     try {
-      const toml = buildMergedConfig('model = \"gpt-5.3-codex\"\n', wd, {
+      const toml = buildMergedConfig('model = \"gpt-5.3-gemini\"\n', wd, {
         modelOverride: "gpt-5.4",
       });
 
       assert.match(toml, /^model = "gpt-5\.4"$/m);
-      assert.doesNotMatch(toml, /^model = "gpt-5\.3-codex"$/m);
+      assert.doesNotMatch(toml, /^model = "gpt-5\.3-gemini"$/m);
       assert.match(toml, /^model_context_window = 1000000$/m);
       assert.match(toml, /^model_auto_compact_token_limit = 900000$/m);
     } finally {

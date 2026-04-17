@@ -20,11 +20,11 @@ For project scope, `.gitignore` keeps generated `.gemini/hooks.json` out of sour
 - **OMX plugin hooks**: `.omg/hooks/*.mjs`
 - **tmux/runtime fallbacks**: `omg tmux-hook`, notify-hook, derived watcher, idle/session-end reporters
 
-OMX only owns the wrapper entries that invoke `dist/scripts/codex-native-hook.js`. User-managed hook entries in the same `.gemini/hooks.json` file are preserved across `omg setup` refreshes and `omg uninstall`.
+OMX only owns the wrapper entries that invoke `dist/scripts/gemini-native-hook.js`. User-managed hook entries in the same `.gemini/hooks.json` file are preserved across `omg setup` refreshes and `omg uninstall`.
 
 ## Mapping matrix
 
-| OMC / OMX surface | Native Gemini source | OMX runtime target | Status | Notes |
+| OMG / OMX surface | Native Gemini source | OMX runtime target | Status | Notes |
 | --- | --- | --- | --- | --- |
 | `session-start` | `SessionStart` | `session-start` | native | Native adapter refreshes session bookkeeping, restores startup developer context, and ensures `.omg/` is gitignored at the repo root |
 | wiki startup context | `SessionStart` | `session-start` | native | Wiki session-start context can append a compact `.omg/wiki/` summary when wiki pages exist; startup writes stay config-gated |
@@ -43,7 +43,7 @@ OMX only owns the wrapper entries that invoke `dist/scripts/codex-native-hook.js
 | `PostToolUseFailure` | none | runtime-only | runtime-fallback | Fold into runtime/fallback handling until native support exists |
 | non-Bash tool interception | none | runtime-only | runtime-fallback | Current Gemini native tool hooks expose Bash only |
 | code simplifier stop follow-up | none | runtime-only | runtime-fallback | Cleanup follow-up stays on runtime/fallback surfaces, not native Stop |
-| `SubagentStop` | none | runtime-only | not-supported-yet | OMC-specific lifecycle extension |
+| `SubagentStop` | none | runtime-only | not-supported-yet | OMG-specific lifecycle extension |
 | `session-end` | none | `session-end` | runtime-fallback | Still emitted from runtime/notify path, not native Gemini hooks |
 | wiki session capture | none | `session-end` | runtime-fallback | Wiki session-log capture runs from the existing runtime session-end cleanup path, not from a native Gemini hook |
 | `session-idle` | none | `session-idle` | runtime-fallback | Still emitted from runtime/notify path, not native Gemini hooks |
@@ -52,7 +52,7 @@ OMX only owns the wrapper entries that invoke `dist/scripts/codex-native-hook.js
 
 The approved OMX-native wiki backport keeps lifecycle ownership intentionally narrow:
 
-- **Storage** lives under `.omg/wiki/`, not `.omc/wiki/`.
+- **Storage** lives under `.omg/wiki/`, not `.omg/wiki/`.
 - **SessionStart** may surface bounded wiki context from `.omg/wiki/` when the wiki already exists, but it should stay read-mostly and must not block the native hook path on expensive writes or index rebuilds.
 - **SessionEnd** remains a runtime/notify-path responsibility for best-effort, non-blocking session capture into `.omg/wiki/`.
 - **PreCompact parity is intentionally deferred** in v1 unless a clearly OMX-native compaction seam exists.
@@ -78,7 +78,7 @@ When validating hooks, keep the proof boundary explicit:
 
 1. **Native Gemini hook proof**
    - `omg setup` wrote `.gemini/hooks.json`
-   - native Gemini event invoked `dist/scripts/codex-native-hook.js`
+   - native Gemini event invoked `dist/scripts/gemini-native-hook.js`
 2. **OMX plugin proof**
    - plugin dispatch/log evidence exists under `.omg/logs/hooks-*.jsonl`
 3. **Fallback proof**

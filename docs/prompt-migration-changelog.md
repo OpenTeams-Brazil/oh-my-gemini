@@ -107,7 +107,7 @@ Behavior note: this follow-up is additive and wording-focused; no task-state mod
 
 Skill docs are operational runbooks. The migration focused on:
 - Removing Claude-era paths/terminology
-- Aligning config guidance with Gemini-first paths (`~/.gemini/…`, `CODEX_HOME`)
+- Aligning config guidance with Gemini-first paths (`~/.gemini/…`, `GEMINI_HOME`)
 - Preserving each skill's contract/intent while improving correctness for Gemini CLI users
 
 ### Behavior Notes

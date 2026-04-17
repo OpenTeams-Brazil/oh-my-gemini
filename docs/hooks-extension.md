@@ -3,14 +3,14 @@
 OMX supports an additive hooks extension point for user plugins under `.omg/hooks/*.mjs`.
 
 Native Gemini hook ownership is documented separately in
-[Gemini native hook mapping](./codex-native-hooks.md). In short:
+[Gemini native hook mapping](./gemini-native-hooks.md). In short:
 
 - `.gemini/hooks.json` = native Gemini hook registrations installed by `omg setup`
 - `.omg/hooks/*.mjs` = OMX plugin hooks dispatched by runtime/native events
 - `omg tmux-hook` / notify-hook / derived watcher = tmux/runtime fallback surfaces
 
 `omg setup` treats `.gemini/hooks.json` as a shared-ownership file: it refreshes only the OMX-managed
-wrapper entries that invoke `dist/scripts/codex-native-hook.js` and preserves user hook entries in the
+wrapper entries that invoke `dist/scripts/gemini-native-hook.js` and preserves user hook entries in the
 same file. `omg uninstall` removes only those OMX-managed wrappers and leaves `.gemini/hooks.json` in
 place when user hooks remain.
 
@@ -37,13 +37,13 @@ Plugins are **enabled by default**.
 Disable plugin dispatch explicitly:
 
 ```bash
-export OMX_HOOK_PLUGINS=0
+export OMG_HOOK_PLUGINS=0
 ```
 
 Optional timeout tuning (default: 1500ms):
 
 ```bash
-export OMX_HOOK_PLUGIN_TIMEOUT_MS=1500
+export OMG_HOOK_PLUGIN_TIMEOUT_MS=1500
 ```
 
 ## Native event pipeline (v1)
@@ -51,7 +51,7 @@ export OMX_HOOK_PLUGIN_TIMEOUT_MS=1500
 Native/derived plugin events come from two places:
 
 1. Existing lifecycle/notify paths
-2. Native Gemini hook entrypoint dispatch (`dist/scripts/codex-native-hook.js`)
+2. Native Gemini hook entrypoint dispatch (`dist/scripts/gemini-native-hook.js`)
 
 Current event vocabulary exposed to OMX plugins:
 
@@ -83,7 +83,7 @@ Envelope fields include:
 Best-effort derived events are gated and disabled by default.
 
 ```bash
-export OMX_HOOK_DERIVED_SIGNALS=1
+export OMG_HOOK_DERIVED_SIGNALS=1
 ```
 
 Derived signals include:
@@ -100,7 +100,7 @@ Derived events are labeled with:
 
 ## Team-safety behavior
 
-In team-worker sessions (`OMX_TEAM_WORKER` set), plugin side effects are skipped by default.
+In team-worker sessions (`OMG_TEAM_WORKER` set), plugin side effects are skipped by default.
 This keeps the lead session as the canonical side-effect emitter and avoids duplicate sends.
 
 ## Plugin contract

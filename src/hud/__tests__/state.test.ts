@@ -357,7 +357,7 @@ describe('additional HUD mode state readers', () => {
     await withTempRepo('omg-hud-notify-native-meta-', async (cwd) => {
       const rootStateDir = join(cwd, '.omg', 'state');
       const canonicalSessionId = 'omg-canonical-session';
-      const nativeSessionId = 'codex-native-session';
+      const nativeSessionId = 'gemini-native-session';
       const canonicalDir = join(rootStateDir, 'sessions', canonicalSessionId);
       const nativeDir = join(rootStateDir, 'sessions', nativeSessionId);
       await mkdir(canonicalDir, { recursive: true });
@@ -374,7 +374,7 @@ describe('additional HUD mode state readers', () => {
     });
   });
 
-  it('prefers OMX_SESSION_ID over stale session.json for hud notify state', async () => {
+  it('prefers OMG_SESSION_ID over stale session.json for hud notify state', async () => {
     await withTempRepo('omg-hud-notify-env-session-', async (cwd) => {
       const rootStateDir = join(cwd, '.omg', 'state');
       const activeSessionId = 'sess-active';
@@ -391,14 +391,14 @@ describe('additional HUD mode state readers', () => {
       await writeFile(join(activeDir, 'hud-state.json'), JSON.stringify({ last_turn_at: 'active', turn_count: 5 }));
       await writeFile(join(staleDir, 'hud-state.json'), JSON.stringify({ last_turn_at: 'stale', turn_count: 1 }));
 
-      const previousSessionId = process.env.OMX_SESSION_ID;
-      process.env.OMX_SESSION_ID = activeSessionId;
+      const previousSessionId = process.env.OMG_SESSION_ID;
+      process.env.OMG_SESSION_ID = activeSessionId;
       try {
         const state = await readHudNotifyState(cwd);
         assert.deepEqual(state, { last_turn_at: 'active', turn_count: 5 });
       } finally {
-        if (typeof previousSessionId === 'string') process.env.OMX_SESSION_ID = previousSessionId;
-        else delete process.env.OMX_SESSION_ID;
+        if (typeof previousSessionId === 'string') process.env.OMG_SESSION_ID = previousSessionId;
+        else delete process.env.OMG_SESSION_ID;
       }
     });
   });
@@ -528,7 +528,7 @@ describe('readAllState canonical skill precedence', () => {
     });
   });
 
-  it('binds canonical HUD state to OMX_SESSION_ID instead of stale session.json/root fallback', async () => {
+  it('binds canonical HUD state to OMG_SESSION_ID instead of stale session.json/root fallback', async () => {
     await withTempRepo('omg-hud-canonical-env-session-', async (cwd) => {
       const rootStateDir = join(cwd, '.omg', 'state');
       const activeSessionId = 'sess-active';
@@ -557,8 +557,8 @@ describe('readAllState canonical skill precedence', () => {
         team_name: 'env-authority',
       }));
 
-      const previousSessionId = process.env.OMX_SESSION_ID;
-      process.env.OMX_SESSION_ID = activeSessionId;
+      const previousSessionId = process.env.OMG_SESSION_ID;
+      process.env.OMG_SESSION_ID = activeSessionId;
       try {
         const state = await readAllState(cwd);
         assert.equal(state.session, null);
@@ -570,13 +570,13 @@ describe('readAllState canonical skill precedence', () => {
         });
         assert.equal(state.hudNotify, null);
       } finally {
-        if (typeof previousSessionId === 'string') process.env.OMX_SESSION_ID = previousSessionId;
-        else delete process.env.OMX_SESSION_ID;
+        if (typeof previousSessionId === 'string') process.env.OMG_SESSION_ID = previousSessionId;
+        else delete process.env.OMG_SESSION_ID;
       }
     });
   });
 
-  it('preserves root fallback when no usable session or OMX_SESSION_ID exists', async () => {
+  it('preserves root fallback when no usable session or OMG_SESSION_ID exists', async () => {
     await withTempRepo('omg-hud-canonical-root-fallback-', async (cwd) => {
       const rootStateDir = join(cwd, '.omg', 'state');
       await mkdir(rootStateDir, { recursive: true });
@@ -597,8 +597,8 @@ describe('readAllState canonical skill precedence', () => {
         active_skills: [{ skill: 'ralph', phase: 'executing', active: true }],
       }));
 
-      const previousSessionId = process.env.OMX_SESSION_ID;
-      delete process.env.OMX_SESSION_ID;
+      const previousSessionId = process.env.OMG_SESSION_ID;
+      delete process.env.OMG_SESSION_ID;
       try {
         const state = await readAllState(cwd);
         assert.deepEqual(state.ralph, {
@@ -608,7 +608,7 @@ describe('readAllState canonical skill precedence', () => {
           current_phase: 'executing',
         });
       } finally {
-        if (typeof previousSessionId === 'string') process.env.OMX_SESSION_ID = previousSessionId;
+        if (typeof previousSessionId === 'string') process.env.OMG_SESSION_ID = previousSessionId;
       }
     });
   });

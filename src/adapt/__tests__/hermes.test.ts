@@ -20,7 +20,7 @@ let processCwdFixtureRoot: string;
 let suppliedCwd: string;
 let originalCwd: string;
 const originalEnv = {
-  root: process.env.OMX_ADAPT_HERMES_ROOT,
+  root: process.env.OMG_ADAPT_HERMES_ROOT,
   home: process.env.HERMES_HOME,
 };
 
@@ -84,19 +84,19 @@ beforeEach(async () => {
   processCwdFixtureBase = await mkdtemp(join(tmpdir(), "omg-adapt-hermes-process-cwd-"));
   processCwdFixtureRoot = join(
     processCwdFixtureBase,
-    "hermes-codex-skill-omg-aware-prd",
+    "hermes-gemini-skill-omg-aware-prd",
     "external",
     "hermes-agent",
   );
-  process.env.OMX_ADAPT_HERMES_ROOT = hermesRoot;
+  process.env.OMG_ADAPT_HERMES_ROOT = hermesRoot;
   process.env.HERMES_HOME = hermesHome;
 });
 
 afterEach(async () => {
   if (originalEnv.root === undefined) {
-    delete process.env.OMX_ADAPT_HERMES_ROOT;
+    delete process.env.OMG_ADAPT_HERMES_ROOT;
   } else {
-    process.env.OMX_ADAPT_HERMES_ROOT = originalEnv.root;
+    process.env.OMG_ADAPT_HERMES_ROOT = originalEnv.root;
   }
 
   if (originalEnv.home === undefined) {
@@ -128,7 +128,7 @@ describe("hermes adapter integration", () => {
   });
 
   it("anchors sibling-default Hermes discovery to the supplied cwd for programmatic probes", async () => {
-    delete process.env.OMX_ADAPT_HERMES_ROOT;
+    delete process.env.OMG_ADAPT_HERMES_ROOT;
     delete process.env.HERMES_HOME;
 
     mkdirSync(join(processCwdFixtureRoot, "acp_adapter"), { recursive: true });
@@ -140,7 +140,7 @@ describe("hermes adapter integration", () => {
     const tempSiblingRoot = join(
       suppliedCwd,
       "..",
-      "hermes-codex-skill-omg-aware-prd",
+      "hermes-gemini-skill-omg-aware-prd",
       "external",
       "hermes-agent",
     );

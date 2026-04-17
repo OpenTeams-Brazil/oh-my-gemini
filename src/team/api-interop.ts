@@ -479,7 +479,7 @@ function resolveTeamWorkingDirectoryFromMetadata(teamName: string, candidateCwd:
 function resolveTeamWorkingDirectory(teamName: string, preferredCwd: string): string {
   const normalizedTeamName = String(teamName || '').trim();
   if (!normalizedTeamName) return preferredCwd;
-  const envTeamStateRoot = process.env.OMX_TEAM_STATE_ROOT;
+  const envTeamStateRoot = process.env.OMG_TEAM_STATE_ROOT;
   if (typeof envTeamStateRoot === 'string' && envTeamStateRoot.trim() !== '') {
     return stateRootToWorkingDirectory(envTeamStateRoot.trim());
   }

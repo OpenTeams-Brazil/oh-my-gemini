@@ -3,7 +3,7 @@ import { execFileSync } from 'child_process';
 import { resolveTmuxBinaryForPlatform } from '../utils/platform-command.js';
 
 export const DEFAULT_ALLOWED_MODES = ['ralph', 'ultrawork', 'team'];
-export const DEFAULT_MARKER = '[OMX_TMUX_INJECT]';
+export const DEFAULT_MARKER = '[OMG_TMUX_INJECT]';
 const PLACEHOLDER_TARGET_VALUES = new Set([
   'replace-with-tmux-pane-id',
   'replace-with-tmux-session-name',
@@ -185,18 +185,18 @@ export function isPaneRunningShell(paneCurrentCommand: any): boolean {
 }
 
 // Gemini agent commands — do NOT include 'claude' (that's Claude Code CLI, a different tool)
-const AGENT_COMMANDS = new Set(['node', 'codex', 'npx']);
+const AGENT_COMMANDS = new Set(['node', 'gemini', 'npx']);
 
 function isHudStartCommand(startCommand: string): boolean {
   return /\bomg\b.*\bhud\b.*--watch/i.test(startCommand);
 }
 
 /**
- * Canonical codex pane resolver. Finds the tmux pane running a codex/claude agent.
+ * Canonical gemini pane resolver. Finds the tmux pane running a gemini/claude agent.
  *
  * Resolution order:
  * 1. TMUX_PANE env var — but only if the pane looks like a real agent pane, not HUD
- * 2. Scan all panes in the same tmux session for one started with codex
+ * 2. Scan all panes in the same tmux session for one started with gemini
  * 3. Fail closed instead of guessing a shell or HUD pane
  *
  * All callers (auto-nudge, ralph steer, team dispatch, tmux injection) should
@@ -220,7 +220,7 @@ export function resolveGeminiPane(): string {
     }
     if (!SHELL_COMMANDS.has(base)) {
       // Not a shell and not a known agent (e.g. claude CLI) — fall through to
-      // session scan so we can still reject HUD or locate a codex pane.
+      // session scan so we can still reject HUD or locate a gemini pane.
     }
   } catch {
     // Fall through to session scan instead of guessing.
@@ -243,7 +243,7 @@ export function resolveGeminiPane(): string {
       const paneId = parts[0];
       const startCmd = (parts[2] || '').toLowerCase();
       if (!paneId) continue;
-      if (startCmd.includes('codex') && !isHudStartCommand(startCmd)) {
+      if (startCmd.includes('gemini') && !isHudStartCommand(startCmd)) {
         return paneId;
       }
     }

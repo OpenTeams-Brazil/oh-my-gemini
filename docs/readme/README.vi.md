@@ -14,7 +14,7 @@
 **Website:** https://yeachan-heo.github.io/oh-my-gemini-website/
 **Tài liệu:** [Bắt đầu](../getting-started.html) · [Agent](../agents.html) · [Skill](../skills.html) · [Tích hợp](../integrations.html) · [Demo](../../DEMO.md) · [Hướng dẫn OpenClaw](../openclaw-integration.md)
 
-OMX là lớp workflow mở rộng cho [OpenAI Gemini CLI](https://github.com/openai/codex).
+OMX là lớp workflow mở rộng cho [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 Gemini vẫn là engine chính, OMX giúp bạn:
 - cấu hình Gemini tốt hơn ngay từ phiên đầu tiên
@@ -27,7 +27,7 @@ Gemini vẫn là engine chính, OMX giúp bạn:
 Nếu bạn muốn trải nghiệm OMX nhanh nhất, bắt đầu từ đây:
 
 ```bash
-npm install -g @openai/codex oh-my-gemini
+npm install -g @openai/gemini oh-my-gemini
 omg setup
 omg --madmax --high
 ```
@@ -59,7 +59,7 @@ Nếu bạn chỉ muốn dùng Gemini thuần mà không cần thêm workflow, t
 ### Yêu cầu
 
 - Node.js 20+
-- Gemini CLI đã cài: `npm install -g @openai/codex`
+- Gemini CLI đã cài: `npm install -g @openai/gemini`
 - Gemini đã xác thực (auth)
 - `tmux` trên macOS/Linux nếu muốn dùng team runtime
 - `psmux` trên Windows nếu muốn dùng team mode

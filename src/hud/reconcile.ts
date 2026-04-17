@@ -79,7 +79,7 @@ export async function reconcileHudForPromptSubmit(
   const readHudConfigFn = deps.readHudConfig ?? readHudConfig;
   const hudConfig = await readHudConfigFn(cwd).catch(() => null);
   const preset = hudConfig?.preset;
-  const hudCmd = buildHudWatchCommand(omgBin, preset, env.OMX_SESSION_ID?.trim() || undefined);
+  const hudCmd = buildHudWatchCommand(omgBin, preset, env.OMG_SESSION_ID?.trim() || undefined);
 
   if (hudPaneIds.length === 1) {
     const resized = resizePane(hudPaneIds[0], desiredHeight);

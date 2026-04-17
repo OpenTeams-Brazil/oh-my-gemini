@@ -16,20 +16,20 @@ if [[ $# -gt 0 ]]; then
 fi
 
 if [[ "\$cmd" == "capture-pane" ]]; then
-  if [[ "\${OMX_FAIL_CAPTURE:-0}" == "1" ]]; then
+  if [[ "\${OMG_FAIL_CAPTURE:-0}" == "1" ]]; then
     exit 1
   fi
 
   token=""
-  if [[ -n "\${OMX_CAPTURE_SEQ_FILE:-}" && -f "\${OMX_CAPTURE_SEQ_FILE}" ]]; then
-    token="\$(head -n 1 "\${OMX_CAPTURE_SEQ_FILE}" || true)"
+  if [[ -n "\${OMG_CAPTURE_SEQ_FILE:-}" && -f "\${OMG_CAPTURE_SEQ_FILE}" ]]; then
+    token="\$(head -n 1 "\${OMG_CAPTURE_SEQ_FILE}" || true)"
     if [[ -n "\$token" ]]; then
-      tail -n +2 "\${OMX_CAPTURE_SEQ_FILE}" > "\${OMX_CAPTURE_SEQ_FILE}.tmp" || true
-      mv "\${OMX_CAPTURE_SEQ_FILE}.tmp" "\${OMX_CAPTURE_SEQ_FILE}"
+      tail -n +2 "\${OMG_CAPTURE_SEQ_FILE}" > "\${OMG_CAPTURE_SEQ_FILE}.tmp" || true
+      mv "\${OMG_CAPTURE_SEQ_FILE}.tmp" "\${OMG_CAPTURE_SEQ_FILE}"
     fi
   fi
   if [[ -z "\$token" ]]; then
-    token="\${OMX_CAPTURE_TOKEN:-IDLE}"
+    token="\${OMG_CAPTURE_TOKEN:-IDLE}"
   fi
 
   case "\$token" in
@@ -52,7 +52,7 @@ if [[ "\$cmd" == "capture-pane" ]]; then
 fi
 
 if [[ "\$cmd" == "send-keys" ]]; then
-  if [[ "\${OMX_FAIL_SEND_KEYS:-0}" == "1" ]]; then
+  if [[ "\${OMG_FAIL_SEND_KEYS:-0}" == "1" ]]; then
     exit 1
   fi
   exit 0
@@ -78,10 +78,10 @@ async function withFakeTmux(run: (ctx: {
   const captureSeqPath = join(root, 'capture-seq.txt');
 
   const prevPath = process.env.PATH;
-  const prevCaptureSeq = process.env.OMX_CAPTURE_SEQ_FILE;
-  const prevCaptureToken = process.env.OMX_CAPTURE_TOKEN;
-  const prevFailSendKeys = process.env.OMX_FAIL_SEND_KEYS;
-  const prevFailCapture = process.env.OMX_FAIL_CAPTURE;
+  const prevCaptureSeq = process.env.OMG_CAPTURE_SEQ_FILE;
+  const prevCaptureToken = process.env.OMG_CAPTURE_TOKEN;
+  const prevFailSendKeys = process.env.OMG_FAIL_SEND_KEYS;
+  const prevFailCapture = process.env.OMG_FAIL_CAPTURE;
 
   try {
     await mkdir(binDir, { recursive: true });
@@ -89,10 +89,10 @@ async function withFakeTmux(run: (ctx: {
     await chmod(tmuxPath, 0o755);
 
     process.env.PATH = `${binDir}:${prevPath ?? ''}`;
-    process.env.OMX_CAPTURE_SEQ_FILE = captureSeqPath;
-    process.env.OMX_CAPTURE_TOKEN = 'IDLE';
-    delete process.env.OMX_FAIL_SEND_KEYS;
-    delete process.env.OMX_FAIL_CAPTURE;
+    process.env.OMG_CAPTURE_SEQ_FILE = captureSeqPath;
+    process.env.OMG_CAPTURE_TOKEN = 'IDLE';
+    delete process.env.OMG_FAIL_SEND_KEYS;
+    delete process.env.OMG_FAIL_CAPTURE;
 
     await run({
       tmuxLogPath,
@@ -104,17 +104,17 @@ async function withFakeTmux(run: (ctx: {
     if (typeof prevPath === 'string') process.env.PATH = prevPath;
     else delete process.env.PATH;
 
-    if (typeof prevCaptureSeq === 'string') process.env.OMX_CAPTURE_SEQ_FILE = prevCaptureSeq;
-    else delete process.env.OMX_CAPTURE_SEQ_FILE;
+    if (typeof prevCaptureSeq === 'string') process.env.OMG_CAPTURE_SEQ_FILE = prevCaptureSeq;
+    else delete process.env.OMG_CAPTURE_SEQ_FILE;
 
-    if (typeof prevCaptureToken === 'string') process.env.OMX_CAPTURE_TOKEN = prevCaptureToken;
-    else delete process.env.OMX_CAPTURE_TOKEN;
+    if (typeof prevCaptureToken === 'string') process.env.OMG_CAPTURE_TOKEN = prevCaptureToken;
+    else delete process.env.OMG_CAPTURE_TOKEN;
 
-    if (typeof prevFailSendKeys === 'string') process.env.OMX_FAIL_SEND_KEYS = prevFailSendKeys;
-    else delete process.env.OMX_FAIL_SEND_KEYS;
+    if (typeof prevFailSendKeys === 'string') process.env.OMG_FAIL_SEND_KEYS = prevFailSendKeys;
+    else delete process.env.OMG_FAIL_SEND_KEYS;
 
-    if (typeof prevFailCapture === 'string') process.env.OMX_FAIL_CAPTURE = prevFailCapture;
-    else delete process.env.OMX_FAIL_CAPTURE;
+    if (typeof prevFailCapture === 'string') process.env.OMG_FAIL_CAPTURE = prevFailCapture;
+    else delete process.env.OMG_FAIL_CAPTURE;
 
     await rm(root, { recursive: true, force: true });
   }
@@ -235,7 +235,7 @@ describe('idle-nudge', () => {
 
   it('does not count nudges when sendToWorker fails', async () => {
     await withFakeTmux(async () => {
-      process.env.OMX_FAIL_SEND_KEYS = '1';
+      process.env.OMG_FAIL_SEND_KEYS = '1';
 
       await withMockedNow(10_000, async () => {
         const tracker = new NudgeTracker({ delayMs: 0, maxCount: 3, message: 'nudge' });
@@ -249,7 +249,7 @@ describe('idle-nudge', () => {
 
   it('returns empty capture and non-idle when capture-pane command fails', async () => {
     await withFakeTmux(async () => {
-      process.env.OMX_FAIL_CAPTURE = '1';
+      process.env.OMG_FAIL_CAPTURE = '1';
       const captured = await capturePane('%2');
       assert.equal(captured, '');
 

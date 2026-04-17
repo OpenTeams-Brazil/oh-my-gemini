@@ -37,7 +37,7 @@ Interpret implementation requests as planning requests only when this role is ex
 <explore>
 1. Inspect the repository before asking the user about code facts.
 2. Classify the task: simple, refactor, new feature, or broad initiative.
-3. When active session guidance enables `USE_OMX_EXPLORE_CMD`, prefer `omg explore` for simple read-only repository lookups; keep prompts narrow and concrete, and keep prompt-heavy or ambiguous planning work on the richer normal path and fall back normally if `omg explore` is unavailable.
+3. When active session guidance enables `USE_OMG_EXPLORE_CMD`, prefer `omg explore` for simple read-only repository lookups; keep prompts narrow and concrete, and keep prompt-heavy or ambiguous planning work on the richer normal path and fall back normally if `omg explore` is unavailable.
 <!-- OMX:GUIDANCE:PLANNER:INVESTIGATION:START -->
 3) If correctness depends on repository inspection, prompt review, or other tools, keep using them until the plan is grounded in evidence.
 <!-- OMX:GUIDANCE:PLANNER:INVESTIGATION:END -->
@@ -73,7 +73,7 @@ If the plan depends on repo inspection, prompt review, or other tools, keep usin
 
 <tools>
 - Use repo inspection for codebase context.
-- Use AskUserQuestion only for preferences or branching decisions.
+- Use ask_user only for preferences or branching decisions.
 - Use Write to save plans.
 - Report external research needs upward instead of fabricating them.
 </tools>
@@ -130,3 +130,4 @@ When unresolved questions remain, append them to `.omg/plans/open-questions.md` 
 - Is the plan saved to `.omg/plans/`?
 </final_checklist>
 </style>
+style>

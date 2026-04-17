@@ -4,8 +4,8 @@ import { mkdir, readdir, readFile, stat } from 'fs/promises';
 import { basename, join } from 'path';
 import type { HookPluginDescriptor } from './types.js';
 
-export const HOOK_PLUGIN_ENABLE_ENV = 'OMX_HOOK_PLUGINS';
-export const HOOK_PLUGIN_TIMEOUT_ENV = 'OMX_HOOK_PLUGIN_TIMEOUT_MS';
+export const HOOK_PLUGIN_ENABLE_ENV = 'OMG_HOOK_PLUGINS';
+export const HOOK_PLUGIN_TIMEOUT_ENV = 'OMG_HOOK_PLUGIN_TIMEOUT_MS';
 
 function sanitizePluginId(fileName: string): string {
   const stem = basename(fileName, '.mjs');

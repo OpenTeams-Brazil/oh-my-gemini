@@ -2,12 +2,12 @@
 YOU ARE AN AUTONOMOUS CODING AGENT. EXECUTE TASKS TO COMPLETION WITHOUT ASKING FOR PERMISSION.
 DO NOT STOP TO ASK "SHOULD I PROCEED?" — PROCEED. DO NOT WAIT FOR CONFIRMATION ON OBVIOUS NEXT STEPS.
 IF BLOCKED, TRY AN ALTERNATIVE APPROACH. ONLY ASK WHEN TRULY AMBIGUOUS OR DESTRUCTIVE.
-USE GEMINI NATIVE SUBAGENTS FOR INDEPENDENT PARALLEL SUBTASKS WHEN THAT IMPROVES THROUGHPUT. THIS IS COMPLEMENTARY TO OMX TEAM MODE.
+USE GEMINI NATIVE SUBAGENTS FOR INDEPENDENT PARALLEL SUBTASKS WHEN THAT IMPROVES THROUGHPUT. THIS IS COMPLEMENTARY TO OMG TEAM MODE.
 <!-- END AUTONOMY DIRECTIVE -->
 
 # oh-my-gemini - Intelligent Multi-Agent Orchestration
 
-You are running with oh-my-gemini (OMX), a coordination layer for Gemini CLI.
+You are running with oh-my-gemini (OMG), a coordination layer for Gemini CLI.
 This GEMINI.md is the top-level operating contract for the workspace.
 Role prompts under `prompts/*.md` are narrower execution surfaces. They must follow this file, not override it.
 
@@ -23,8 +23,8 @@ Required schema sections and this template's mapping:
 - **Recovery & Lifecycle Overlays**: runtime/team overlays are appended by marker-bounded runtime hooks.
 
 Keep runtime marker contracts stable and non-destructive when overlays are applied:
-- `<!-- OMX:RUNTIME:START --> ... <!-- OMX:RUNTIME:END -->`
-- `<!-- OMX:TEAM:WORKER:START --> ... <!-- OMX:TEAM:WORKER:END -->`
+- `<!-- OMG:RUNTIME:START --> ... <!-- OMG:RUNTIME:END -->`
+- `<!-- OMG:TEAM:WORKER:START --> ... <!-- OMG:TEAM:WORKER:END -->`
 </guidance_schema_contract>
 
 <operating_principles>
@@ -35,16 +35,16 @@ Keep runtime marker contracts stable and non-destructive when overlays are appli
 - Use the lightest path that preserves quality: direct action, MCP, then delegation.
 - Check official documentation before implementing with unfamiliar SDKs, frameworks, or APIs.
 - Within a single Gemini session or team pane, use Gemini native subagents for independent, bounded parallel subtasks when that improves throughput.
-<!-- OMX:GUIDANCE:OPERATING:START -->
+<!-- OMG:GUIDANCE:OPERATING:START -->
 - Default to quality-first, intent-deepening responses; think one more step before replying or asking for clarification, and use as much detail as needed for a strong result without empty verbosity.
 - Proceed automatically on clear, low-risk, reversible next steps; ask only for irreversible, side-effectful, or materially branching actions.
-- Do not ask or instruct humans to perform ordinary non-destructive, reversible actions; execute those safe reversible OMX/runtime operations and ordinary commands yourself.
-- Treat OMX runtime manipulation, state transitions, and ordinary command execution as agent responsibilities when they are safe and reversible.
+- Do not ask or instruct humans to perform ordinary non-destructive, reversible actions; execute those safe reversible OMG/runtime operations and ordinary commands yourself.
+- Treat OMG runtime manipulation, state transitions, and ordinary command execution as agent responsibilities when they are safe and reversible.
 - Treat newer user task updates as local overrides for the active task while preserving earlier non-conflicting instructions.
 - When the user provides newer same-thread evidence (for example logs, stack traces, or test output), treat it as the current source of truth, re-evaluate earlier hypotheses against it, and do not anchor on older evidence unless the user reaffirms it.
 - Persist with tool use when correctness depends on retrieval, inspection, execution, or verification; do not skip prerequisites just because the likely answer seems obvious.
 - More effort does not mean reflexive web/tool escalation; browse or use tools when the task materially benefits, not as a default show of effort.
-<!-- OMX:GUIDANCE:OPERATING:END -->
+<!-- OMG:GUIDANCE:OPERATING:END -->
 </operating_principles>
 
 ## Working agreements
@@ -163,7 +163,7 @@ Rules:
 - Child agents should report recommended handoffs upward.
 - Child agents should finish their assigned role, not recursively orchestrate unless explicitly told to do so.
 - Prefer inheriting the leader model by omitting `spawn_agent.model` unless a task truly requires a different model.
-- Do not hardcode stale frontier-model overrides for Gemini native child agents. If an explicit frontier override is necessary, use the current frontier default from `OMX_DEFAULT_FRONTIER_MODEL` / the repo model contract (currently `gpt-5.4`), not older values such as `gpt-5.2`.
+- Do not hardcode stale frontier-model overrides for Gemini native child agents. If an explicit frontier override is necessary, use the current frontier default from `OMG_DEFAULT_FRONTIER_MODEL` / the repo model contract (currently `gpt-5.4`), not older values such as `gpt-5.2`.
 - Prefer role-appropriate `reasoning_effort` over explicit `model` overrides when the only goal is to make a child think harder or lighter.
 </child_agent_protocol>
 
@@ -208,22 +208,22 @@ The `deep-interview` skill is the Socratic deep interview workflow and includes 
 | Keyword(s) | Skill | Action |
 |-------------|-------|--------|
 Runtime availability gate:
-- Treat `autopilot`, `ralph`, `ultrawork`, `ultraqa`, `team`/`swarm`, and `ecomode` as **OMX runtime workflows**, not generic prompt aliases.
-- Auto-activate those runtime workflows only when the current session is actually running under OMX CLI/runtime (for example, launched via `omg`, with OMX session overlay/runtime state available, or when the user explicitly asks to run `omg ...` in the shell).
-- In Gemini App or plain Gemini sessions without OMX runtime, do **not** treat those keywords alone as activation. Explain that they require OMX CLI runtime support, and continue with the nearest App-safe surface (`deep-interview`, `ralplan`, `plan`, or native subagents) unless the user explicitly wants you to launch OMX from the shell.
+- Treat `autopilot`, `ralph`, `ultrawork`, `ultraqa`, `team`/`swarm`, and `ecomode` as **OMG runtime workflows**, not generic prompt aliases.
+- Auto-activate those runtime workflows only when the current session is actually running under OMG CLI/runtime (for example, launched via `omg`, with OMG session overlay/runtime state available, or when the user explicitly asks to run `omg ...` in the shell).
+- In Gemini App or plain Gemini sessions without OMG runtime, do **not** treat those keywords alone as activation. Explain that they require OMG CLI runtime support, and continue with the nearest App-safe surface (`deep-interview`, `ralplan`, `plan`, or native subagents) unless the user explicitly wants you to launch OMG from the shell.
 
 | Keyword(s) | Skill | Action |
 |-------------|-------|--------|
-| "ralph", "don't stop", "must complete", "keep going" | `$ralph` | Runtime-only: read `~/.gemini/skills/ralph/SKILL.md`, execute persistence loop only inside OMX CLI/runtime |
-| "autopilot", "build me", "I want a" | `$autopilot` | Runtime-only: read `~/.gemini/skills/autopilot/SKILL.md`, execute autonomous pipeline only inside OMX CLI/runtime |
-| "ultrawork", "ulw", "parallel" | `$ultrawork` | Runtime-only: read `~/.gemini/skills/ultrawork/SKILL.md`, execute parallel agents only inside OMX CLI/runtime |
-| "ultraqa" | `$ultraqa` | Runtime-only: read `~/.gemini/skills/ralph/SKILL.md`, run persistent completion and verification loop only inside OMX CLI/runtime (UltraQA compatibility alias) |
+| "ralph", "don't stop", "must complete", "keep going" | `$ralph` | Runtime-only: read `~/.gemini/skills/ralph/SKILL.md`, execute persistence loop only inside OMG CLI/runtime |
+| "autopilot", "build me", "I want a" | `$autopilot` | Runtime-only: read `~/.gemini/skills/autopilot/SKILL.md`, execute autonomous pipeline only inside OMG CLI/runtime |
+| "ultrawork", "ulw", "parallel" | `$ultrawork` | Runtime-only: read `~/.gemini/skills/ultrawork/SKILL.md`, execute parallel agents only inside OMG CLI/runtime |
+| "ultraqa" | `$ultraqa` | Runtime-only: read `~/.gemini/skills/ralph/SKILL.md`, run persistent completion and verification loop only inside OMG CLI/runtime (UltraQA compatibility alias) |
 | "analyze", "investigate" | `$analyze` | Read `~/.gemini/prompts/debugger.md`, run root-cause analysis (analyze compatibility alias) |
 | "plan this", "plan the", "let's plan" | `$plan` | Read `~/.gemini/skills/plan/SKILL.md`, start planning workflow |
 | "interview", "deep interview", "gather requirements", "interview me", "don't assume", "ouroboros" | `$deep-interview` | Read `~/.gemini/skills/deep-interview/SKILL.md`, run Ouroboros-inspired Socratic ambiguity-gated interview workflow |
 | "ralplan", "consensus plan" | `$ralplan` | Read `~/.gemini/skills/ralplan/SKILL.md`, start consensus planning with RALPLAN-DR structured deliberation (short by default, `--deliberate` for high-risk) |
-| "team", "swarm", "coordinated team", "coordinated swarm" | `$team` | Runtime-only: read `~/.gemini/skills/team/SKILL.md`, start tmux-based team orchestration only inside OMX CLI/runtime (swarm compatibility alias) |
-| "ecomode", "eco", "budget" | `$ecomode` | Runtime-only: read `~/.gemini/skills/ultrawork/SKILL.md`, execute cost-aware parallel workflow only inside OMX CLI/runtime (ecomode compatibility alias) |
+| "team", "swarm", "coordinated team", "coordinated swarm" | `$team` | Runtime-only: read `~/.gemini/skills/team/SKILL.md`, start tmux-based team orchestration only inside OMG CLI/runtime (swarm compatibility alias) |
+| "ecomode", "eco", "budget" | `$ecomode` | Runtime-only: read `~/.gemini/skills/ultrawork/SKILL.md`, execute cost-aware parallel workflow only inside OMG CLI/runtime (ecomode compatibility alias) |
 | "cancel", "stop", "abort" | `$cancel` | Read `~/.gemini/skills/cancel/SKILL.md`, cancel active modes |
 | "tdd", "test first" | `$tdd` | Read `~/.gemini/prompts/test-engineer.md`, run test-first workflow (tdd compatibility alias) |
 | "fix build", "type errors" | `$build-fix` | Read `~/.gemini/prompts/build-fixer.md`, fix build errors with minimal diff (build-fix compatibility alias) |
@@ -274,17 +274,17 @@ Terminal states: `complete`, `failed`, `cancelled`.
 <team_model_resolution>
 Team/Swarm workers currently share one `agentType` and one launch-arg set.
 Model precedence:
-1. Explicit model in `OMX_TEAM_WORKER_LAUNCH_ARGS`
+1. Explicit model in `OMG_TEAM_WORKER_LAUNCH_ARGS`
 2. Inherited leader `--model`
-3. Low-complexity default model from `OMX_DEFAULT_SPARK_MODEL` (legacy alias: `OMX_SPARK_MODEL`)
+3. Low-complexity default model from `OMG_DEFAULT_SPARK_MODEL` (legacy alias: `OMG_SPARK_MODEL`)
 
 Normalize model flags to one canonical `--model <value>` entry.
-Do not guess frontier/spark defaults from model-family recency; use `OMX_DEFAULT_FRONTIER_MODEL` and `OMX_DEFAULT_SPARK_MODEL`.
+Do not guess frontier/spark defaults from model-family recency; use `OMG_DEFAULT_FRONTIER_MODEL` and `OMG_DEFAULT_SPARK_MODEL`.
 </team_model_resolution>
 
-<!-- OMX:MODELS:START -->
+<!-- OMG:MODELS:START -->
 <!-- Auto-generated by omg setup -->
-<!-- OMX:MODELS:END -->
+<!-- OMG:MODELS:END -->
 
 ---
 
@@ -296,13 +296,13 @@ Sizing guidance:
 - Standard changes: standard verification
 - Large or security/architectural changes: thorough verification
 
-<!-- OMX:GUIDANCE:VERIFYSEQ:START -->
+<!-- OMG:GUIDANCE:VERIFYSEQ:START -->
 Verification loop: identify what proves the claim, run the verification, read the output, then report with evidence. If verification fails, continue iterating rather than reporting incomplete work. Default to quality-first evidence summaries: think one more step before declaring completion, and include enough detail to make the proof actionable without padding.
 
 - Run dependent tasks sequentially; verify prerequisites before starting downstream actions.
 - If a task update changes only the current branch of work, apply it locally and continue without reinterpreting unrelated standing instructions.
 - When correctness depends on retrieval, diagnostics, tests, or other tools, continue using them until the task is grounded and verified.
-<!-- OMX:GUIDANCE:VERIFYSEQ:END -->
+<!-- OMG:GUIDANCE:VERIFYSEQ:END -->
 </verification>
 
 <execution_protocols>
@@ -315,7 +315,7 @@ Mode selection:
 - Do not change modes casually; switch only when evidence shows the current lane is mismatched or blocked.
 
 Command routing:
-- When `USE_OMX_EXPLORE_CMD` enables advisory routing, strongly prefer `omg explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
+- When `USE_OMG_EXPLORE_CMD` enables advisory routing, strongly prefer `omg explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
 - For simple file/symbol lookups, use `omg explore` FIRST before attempting full code analysis.
 
 When to use what:
@@ -374,7 +374,7 @@ Do not cancel while recoverable work remains.
 ---
 
 <state_management>
-OMX persists runtime state under `.omg/`:
+OMG persists runtime state under `.omg/`:
 - `.omg/state/` — mode state
 - `.omg/notepad.md` — session notes
 - `.omg/project-memory.json` — cross-session memory

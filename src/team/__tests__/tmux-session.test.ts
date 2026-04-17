@@ -52,7 +52,7 @@ import {
 } from '../tmux-session.js';
 import { HUD_RESIZE_RECONCILE_DELAY_SECONDS, HUD_TMUX_TEAM_HEIGHT_LINES } from '../../hud/constants.js';
 import * as tmuxSessionModule from '../tmux-session.js';
-import { OMX_ENTRY_PATH_ENV, OMX_STARTUP_CWD_ENV } from '../../utils/paths.js';
+import { OMG_ENTRY_PATH_ENV, OMG_STARTUP_CWD_ENV } from '../../utils/paths.js';
 
 function withEmptyPath<T>(fn: () => T): T {
   const prev = process.env.PATH;
@@ -111,7 +111,7 @@ const VIEWPORT_SCROLLBACK_READY_CAPTURE = `${VIEWPORT_WITHOUT_VISIBLE_PROMPT_CAP
 › support lane on multi-image attach`;
 
 const QUEUED_AFTER_TOOL_CALL_CAPTURE = `• Messages to be submitted after next tool call (press esc to interrupt and send immediately)
-  ↳ Read $OMX_TEAM_STATE_ROOT/team/demo/workers/worker-1/inbox.md, work now, report progress
+  ↳ Read $OMG_TEAM_STATE_ROOT/team/demo/workers/worker-1/inbox.md, work now, report progress
 
 › Write tests for @filename`;
 
@@ -155,7 +155,7 @@ describe('sanitizeTeamName', () => {
 describe('chooseTeamLeaderPaneId', () => {
   it('keeps preferred pane when it is not HUD', () => {
     const panes = [
-      { paneId: '%1', currentCommand: 'node', startCommand: "'codex'" },
+      { paneId: '%1', currentCommand: 'node', startCommand: "'gemini'" },
       { paneId: '%2', currentCommand: 'node', startCommand: "node omg hud --watch" },
     ];
     assert.equal(chooseTeamLeaderPaneId(panes, '%1'), '%1');
@@ -164,7 +164,7 @@ describe('chooseTeamLeaderPaneId', () => {
   it('switches away from HUD preferred pane to first non-HUD pane', () => {
     const panes = [
       { paneId: '%2', currentCommand: 'node', startCommand: "node omg hud --watch" },
-      { paneId: '%1', currentCommand: 'node', startCommand: "'codex'" },
+      { paneId: '%1', currentCommand: 'node', startCommand: "'gemini'" },
     ];
     assert.equal(chooseTeamLeaderPaneId(panes, '%2'), '%1');
   });
@@ -353,7 +353,7 @@ describe('sendToWorker validation', () => {
 
   it('rejects injection marker', async () => {
     await assert.rejects(
-      sendToWorker('omg-team-x', 1, `hello [OMX_TMUX_INJECT]`),
+      sendToWorker('omg-team-x', 1, `hello [OMG_TMUX_INJECT]`),
       /marker/i
     );
   });
@@ -404,7 +404,7 @@ esac
 
   it('ignores stale queued-next-tool-call banner text that only survives in scrollback history', async () => {
     await withMockTmuxFixture(
-      'omg-tmux-codex-stale-queued-scrollback-',
+      'omg-tmux-gemini-stale-queued-scrollback-',
       (logPath) => `#!/bin/sh
 set -eu
 state_dir="$(dirname "${logPath}")"
@@ -457,7 +457,7 @@ esac
 
   it('keeps nudging Gemini when the visible pane still shows a live queued-next-tool-call banner', async () => {
     await withMockTmuxFixture(
-      'omg-tmux-codex-visible-queued-submit-',
+      'omg-tmux-gemini-visible-queued-submit-',
       (logPath) => `#!/bin/sh
 set -eu
 state_dir="$(dirname "${logPath}")"
@@ -526,7 +526,7 @@ esac
 
   it('fails closed when the visible queued-next-tool-call banner never clears after the final submit round', async () => {
     await withMockTmuxFixture(
-      'omg-tmux-codex-stuck-queued-submit-',
+      'omg-tmux-gemini-stuck-queued-submit-',
       (logPath) => `#!/bin/sh
 set -eu
 state_dir="$(dirname "${logPath}")"
@@ -733,11 +733,11 @@ describe('paneLooksReady gate: status-only is not ready (#391)', () => {
 describe('buildWorkerStartupCommand', () => {
   it('auto-selects gemini worker CLI from gemini model', () => {
     const prevShell = process.env.SHELL;
-    const prevCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    delete process.env.OMX_TEAM_WORKER_CLI; // auto
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    delete process.env.OMG_TEAM_WORKER_CLI; // auto
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand(
         'alpha',
@@ -759,20 +759,20 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('auto-selects claude worker CLI from claude model', () => {
     const prevShell = process.env.SHELL;
-    const prevCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    delete process.env.OMX_TEAM_WORKER_CLI; // auto
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    delete process.env.OMG_TEAM_WORKER_CLI; // auto
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'claude-3-7-sonnet']);
       assert.match(cmd, /exec .*claude/);
@@ -782,25 +782,25 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
-  it('respects explicit OMX_TEAM_WORKER_CLI override', () => {
+  it('respects explicit OMG_TEAM_WORKER_CLI override', () => {
     const prevShell = process.env.SHELL;
-    const prevCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
-      process.env.OMX_TEAM_WORKER_CLI = 'codex';
-      const codexCmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'claude-3-7-sonnet']);
-      assert.match(codexCmd, /exec .*codex/);
+      process.env.OMG_TEAM_WORKER_CLI = 'gemini';
+      const geminiCmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'claude-3-7-sonnet']);
+      assert.match(geminiCmd, /exec .*gemini/);
 
-      process.env.OMX_TEAM_WORKER_CLI = 'claude';
+      process.env.OMG_TEAM_WORKER_CLI = 'claude';
       const claudeCmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'gpt-5']);
       assert.match(claudeCmd, /exec .*claude/);
       assert.equal((claudeCmd.match(/--dangerously-skip-permissions/g) || []).length, 1);
@@ -808,18 +808,18 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('applies claude skip-permissions when worker CLI is provided by plan override', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand(
         'alpha',
@@ -836,18 +836,18 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('drops all explicit launch args for claude workers', () => {
     const prevShell = process.env.SHELL;
-    const prevCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_TEAM_WORKER_CLI = 'claude';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_TEAM_WORKER_CLI = 'claude';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, [
         '--dangerously-bypass-approvals-and-sandbox',
@@ -863,21 +863,21 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('does not pass bypass flags in claude mode', () => {
     const prevArgv = process.argv;
     const prevShell = process.env.SHELL;
-    const prevCli = process.env.OMX_TEAM_WORKER_CLI;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevCli = process.env.OMG_TEAM_WORKER_CLI;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_TEAM_WORKER_CLI = 'claude';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_TEAM_WORKER_CLI = 'claude';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.argv = [...prevArgv, '--madmax'];
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1);
@@ -888,40 +888,40 @@ describe('buildWorkerStartupCommand', () => {
       process.argv = prevArgv;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('uses zsh with ~/.zshrc and non-login shell exec semantics', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/zsh';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = withMockedExistsSync((candidate) => candidate === '/bin/zsh', () =>
         buildWorkerStartupCommand('alpha', 2),
       );
-      assert.match(cmd, /OMX_TEAM_WORKER=alpha\/worker-2/);
+      assert.match(cmd, /OMG_TEAM_WORKER=alpha\/worker-2/);
       assert.match(cmd, /'\/bin\/zsh' -c/);
       assert.doesNotMatch(cmd, /'\/bin\/zsh' -lc\b/);
       assert.match(cmd, /source ~\/\.zshrc/);
-      assert.match(cmd, /exec .*codex/);
+      assert.match(cmd, /exec .*gemini/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('accepts Homebrew zsh as a supported worker shell without falling back', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/opt/homebrew/bin/zsh';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = withMockedExistsSync((candidate) => candidate === '/opt/homebrew/bin/zsh', () =>
         buildWorkerStartupCommand('alpha', 2),
@@ -932,35 +932,35 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('uses bash with ~/.bashrc and preserves launch args', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'gpt-5']);
       assert.match(cmd, /source ~\/\.bashrc/);
-      assert.match(cmd, /exec .*codex/);
+      assert.match(cmd, /exec .*gemini/);
       assert.match(cmd, /--model/);
       assert.match(cmd, /gpt-5/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('injects canonical team state env vars when provided', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand(
         'alpha',
@@ -968,30 +968,30 @@ describe('buildWorkerStartupCommand', () => {
         [],
         '/tmp/worker-cwd',
         {
-          OMX_TEAM_STATE_ROOT: '/tmp/leader/.omg/state',
-          OMX_TEAM_LEADER_CWD: '/tmp/leader',
+          OMG_TEAM_STATE_ROOT: '/tmp/leader/.omg/state',
+          OMG_TEAM_LEADER_CWD: '/tmp/leader',
         },
       );
-      assert.match(cmd, /OMX_TEAM_STATE_ROOT=\/tmp\/leader\/\.omg\/state/);
-      assert.match(cmd, /OMX_TEAM_LEADER_CWD=\/tmp\/leader/);
+      assert.match(cmd, /OMG_TEAM_STATE_ROOT=\/tmp\/leader\/\.omg\/state/);
+      assert.match(cmd, /OMG_TEAM_LEADER_CWD=\/tmp\/leader/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('inherits only allowlisted ambient proxy env vars for tmux startup commands', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevHttpsProxy = process.env.HTTPS_PROXY;
     const prevHttpProxy = process.env.HTTP_PROXY;
     const prevNoProxy = process.env.NO_PROXY;
     const prevLowerHttpsProxy = process.env.https_proxy;
     const prevCustom = process.env.AWS_SECRET_ACCESS_KEY;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.HTTPS_PROXY = 'https://upper-proxy.example:443';
     process.env.HTTP_PROXY = 'http://upper-proxy.example:80';
     process.env.NO_PROXY = 'localhost,127.0.0.1';
@@ -1007,8 +1007,8 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevHttpsProxy === 'string') process.env.HTTPS_PROXY = prevHttpsProxy;
       else delete process.env.HTTPS_PROXY;
       if (typeof prevHttpProxy === 'string') process.env.HTTP_PROXY = prevHttpProxy;
@@ -1024,10 +1024,10 @@ describe('buildWorkerStartupCommand', () => {
 
   it('preserves explicit worker env precedence over inherited ambient proxy vars', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevHttpsProxy = process.env.HTTPS_PROXY;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.HTTPS_PROXY = 'https://ambient-proxy.example:443';
     try {
       const cmd = buildWorkerStartupCommand(
@@ -1042,8 +1042,8 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevHttpsProxy === 'string') process.env.HTTPS_PROXY = prevHttpsProxy;
       else delete process.env.HTTPS_PROXY;
     }
@@ -1053,17 +1053,17 @@ describe('buildWorkerStartupCommand', () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-worker-startup-posix-'));
     const prevPath = process.env.PATH;
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.PATH = fakeBin;
     process.env.SHELL = '/bin/fish';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const nodePath = join(fakeBin, 'node');
-      const codexPath = join(fakeBin, 'codex');
+      const geminiPath = join(fakeBin, 'gemini');
       await writeFile(nodePath, '#!/bin/sh\n');
-      await writeFile(codexPath, '#!/bin/sh\n');
+      await writeFile(geminiPath, '#!/bin/sh\n');
       await chmod(nodePath, 0o755);
-      await chmod(codexPath, 0o755);
+      await chmod(geminiPath, 0o755);
 
       const { buildWorkerStartupCommand: buildFreshWorkerStartupCommand } = await import(`../tmux-session.js?posix-path=${Date.now()}`);
       const cmd = buildFreshWorkerStartupCommand(
@@ -1072,21 +1072,21 @@ describe('buildWorkerStartupCommand', () => {
         ['-c', 'model_reasoning_effort="low"'],
         process.cwd(),
         {},
-        'codex',
+        'gemini',
       );
 
-      assert.match(cmd, new RegExp(escapeRegExp(`OMX_LEADER_NODE_PATH=${nodePath}`)));
-      assert.match(cmd, new RegExp(escapeRegExp(`OMX_LEADER_CLI_PATH=${codexPath}`)));
-      assert.match(cmd, new RegExp(escapeRegExp(`export PATH='\\''${fakeBin}'\\'':$PATH; exec ${codexPath}`)));
+      assert.match(cmd, new RegExp(escapeRegExp(`OMG_LEADER_NODE_PATH=${nodePath}`)));
+      assert.match(cmd, new RegExp(escapeRegExp(`OMG_LEADER_CLI_PATH=${geminiPath}`)));
+      assert.match(cmd, new RegExp(escapeRegExp(`export PATH='\\''${fakeBin}'\\'':$PATH; exec ${geminiPath}`)));
       assert.doesNotMatch(cmd, /export PATH='\\''node'\\'':\$PATH/);
-      assert.doesNotMatch(cmd, / exec codex(?:\s|')/);
+      assert.doesNotMatch(cmd, / exec gemini(?:\s|')/);
     } finally {
       if (typeof prevPath === 'string') process.env.PATH = prevPath;
       else delete process.env.PATH;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       await rm(fakeBin, { recursive: true, force: true });
     }
   });
@@ -1095,8 +1095,8 @@ describe('buildWorkerStartupCommand', () => {
     const prevArgv = process.argv;
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.argv = [...prevArgv, '--dangerously-bypass-approvals-and-sandbox'];
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, ['--dangerously-bypass-approvals-and-sandbox']);
@@ -1106,8 +1106,8 @@ describe('buildWorkerStartupCommand', () => {
       process.argv = prevArgv;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
@@ -1115,8 +1115,8 @@ describe('buildWorkerStartupCommand', () => {
     const prevArgv = process.argv;
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.argv = [...prevArgv, '--madmax'];
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1);
@@ -1126,43 +1126,43 @@ describe('buildWorkerStartupCommand', () => {
       process.argv = prevArgv;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('preserves reasoning override args in worker command', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, ['-c', 'model_reasoning_effort="xhigh"']);
-      assert.match(cmd, /exec .*codex/);
+      assert.match(cmd, /exec .*gemini/);
       assert.match(cmd, /'-c'/);
       assert.match(cmd, /'model_reasoning_effort=\"xhigh\"'/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
-  it('forces codex bypass under explicit launch-arg profiles', () => {
+  it('forces gemini bypass under explicit launch-arg profiles', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const profiles = [
         ['--model', 'gpt-5', '-c', 'model_reasoning_effort="high"'],
-        ['--model', 'gpt-5.3-codex-spark', '-c', 'model_reasoning_effort="low"'],
+        ['--model', 'gpt-5.3-gemini-spark', '-c', 'model_reasoning_effort="low"'],
       ];
 
       for (const launchArgs of profiles) {
-        const cmd = buildWorkerStartupCommand('alpha', 1, launchArgs, process.cwd(), {}, 'codex');
-        assert.match(cmd, /exec .*codex/);
+        const cmd = buildWorkerStartupCommand('alpha', 1, launchArgs, process.cwd(), {}, 'gemini');
+        assert.match(cmd, /exec .*gemini/);
         assert.equal((cmd.match(/--dangerously-bypass-approvals-and-sandbox/g) || []).length, 1);
         assert.match(cmd, /--model/);
         assert.match(cmd, new RegExp(launchArgs[1]!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -1171,39 +1171,39 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
-  it('supports worker-specific reasoning overrides for codex and strips them for claude workers', () => {
+  it('supports worker-specific reasoning overrides for gemini and strips them for claude workers', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/bin/bash';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
-      const codexCmd = buildWorkerStartupCommand('alpha', 1, ['-c', 'model_reasoning_effort="low"'], process.cwd(), {}, 'codex');
+      const geminiCmd = buildWorkerStartupCommand('alpha', 1, ['-c', 'model_reasoning_effort="low"'], process.cwd(), {}, 'gemini');
       const claudeCmd = buildWorkerStartupCommand('alpha', 2, ['-c', 'model_reasoning_effort="high"'], process.cwd(), {}, 'claude');
-      assert.match(codexCmd, /exec .*codex/);
-      assert.match(codexCmd, /'model_reasoning_effort="low"'/);
+      assert.match(geminiCmd, /exec .*gemini/);
+      assert.match(geminiCmd, /'model_reasoning_effort="low"'/);
       assert.match(claudeCmd, /exec .*claude/);
       assert.equal((claudeCmd.match(/--dangerously-skip-permissions/g) || []).length, 1);
       assert.doesNotMatch(claudeCmd, /model_reasoning_effort/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('injects model_instructions_file override by default', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    const prevInstr = process.env.OMX_MODEL_INSTRUCTIONS_FILE;
-    delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
-    delete process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevInstr = process.env.OMG_MODEL_INSTRUCTIONS_FILE;
+    delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
+    delete process.env.OMG_MODEL_INSTRUCTIONS_FILE;
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, [], '/tmp/project');
       assert.match(cmd, /'-c'/);
@@ -1212,60 +1212,60 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-      if (typeof prevInstr === 'string') process.env.OMX_MODEL_INSTRUCTIONS_FILE = prevInstr;
-      else delete process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevInstr === 'string') process.env.OMG_MODEL_INSTRUCTIONS_FILE = prevInstr;
+      else delete process.env.OMG_MODEL_INSTRUCTIONS_FILE;
     }
   });
 
 
-  it('uses per-worker OMX_MODEL_INSTRUCTIONS_FILE from extraEnv when building process launch spec', () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    const prevInstr = process.env.OMX_MODEL_INSTRUCTIONS_FILE;
-    delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    delete process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+  it('uses per-worker OMG_MODEL_INSTRUCTIONS_FILE from extraEnv when building process launch spec', () => {
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevInstr = process.env.OMG_MODEL_INSTRUCTIONS_FILE;
+    delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    delete process.env.OMG_MODEL_INSTRUCTIONS_FILE;
     try {
       const spec = buildWorkerProcessLaunchSpec(
         'alpha',
         1,
         ['-c', 'model_reasoning_effort="low"'],
         '/tmp/project',
-        { OMX_MODEL_INSTRUCTIONS_FILE: '/tmp/project/.omg/state/team/alpha/workers/worker-1/GEMINI.md' },
-        'codex',
+        { OMG_MODEL_INSTRUCTIONS_FILE: '/tmp/project/.omg/state/team/alpha/workers/worker-1/GEMINI.md' },
+        'gemini',
       );
       const joined = spec.args.join(' ');
       assert.match(joined, /model_reasoning_effort="low"/);
       assert.match(joined, /model_instructions_file="\/tmp\/project\/.omg\/state\/team\/alpha\/workers\/worker-1\/AGENTS\.md"/);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-      if (typeof prevInstr === 'string') process.env.OMX_MODEL_INSTRUCTIONS_FILE = prevInstr;
-      else delete process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevInstr === 'string') process.env.OMG_MODEL_INSTRUCTIONS_FILE = prevInstr;
+      else delete process.env.OMG_MODEL_INSTRUCTIONS_FILE;
     }
   });
 
   it('does not inject model_instructions_file override when disabled', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, [], '/tmp/project');
       assert.doesNotMatch(cmd, /model_instructions_file=/);
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('does not inject model_instructions_file when already provided in launch args', () => {
     const prevShell = process.env.SHELL;
     process.env.SHELL = '/bin/bash';
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
     try {
       const cmd = buildWorkerStartupCommand(
         'alpha',
@@ -1279,20 +1279,20 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('translates model_instructions_file path for MSYS2/Git Bash environments', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    const prevInstructions = process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevInstructions = process.env.OMG_MODEL_INSTRUCTIONS_FILE;
     const prevMsystem = process.env.MSYSTEM;
     const origPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
     process.env.SHELL = '/bin/bash';
-    delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
-    process.env.OMX_MODEL_INSTRUCTIONS_FILE = 'C:\\repo\\GEMINI.md';
+    delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT; // default enabled
+    process.env.OMG_MODEL_INSTRUCTIONS_FILE = 'C:\\repo\\GEMINI.md';
     process.env.MSYSTEM = 'MINGW64';
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
@@ -1302,10 +1302,10 @@ describe('buildWorkerStartupCommand', () => {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-      if (typeof prevInstructions === 'string') process.env.OMX_MODEL_INSTRUCTIONS_FILE = prevInstructions;
-      else delete process.env.OMX_MODEL_INSTRUCTIONS_FILE;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevInstructions === 'string') process.env.OMG_MODEL_INSTRUCTIONS_FILE = prevInstructions;
+      else delete process.env.OMG_MODEL_INSTRUCTIONS_FILE;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
     }
@@ -1313,9 +1313,9 @@ describe('buildWorkerStartupCommand', () => {
 
   it('ignores unsupported SHELL values and resolves a supported worker shell', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/usr/bin/fish';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, [], process.cwd());
       assert.doesNotMatch(cmd, /fish/, 'worker shell must not inherit unsupported fish SHELL');
@@ -1323,34 +1323,34 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('never emits fish-style PATH manipulation for unsupported SHELL values', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/usr/bin/fish';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = buildWorkerStartupCommand('alpha', 1, [], process.cwd());
       assert.doesNotMatch(cmd, /set -x PATH/, 'must not emit fish PATH syntax');
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('uses /bin/sh on MSYS2/Windows regardless of zsh availability', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevMsystem = process.env.MSYSTEM;
     const origPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
     process.env.SHELL = '/bin/zsh';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.MSYSTEM = 'MINGW64';
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
@@ -1362,8 +1362,8 @@ describe('buildWorkerStartupCommand', () => {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
     }
@@ -1374,8 +1374,8 @@ describe('buildWorkerStartupCommand', () => {
     const prevPath = process.env.PATH;
     const prevPathext = process.env.PATHEXT;
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    const prevLeaderNodePath = process.env.OMX_LEADER_NODE_PATH;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevLeaderNodePath = process.env.OMG_LEADER_NODE_PATH;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -1384,16 +1384,16 @@ describe('buildWorkerStartupCommand', () => {
     process.env.PATH = fakeBin;
     process.env.PATHEXT = '.PS1';
     process.env.SHELL = '/bin/zsh';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
-    process.env.OMX_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
     delete process.env.MSYSTEM;
     delete process.env.OSTYPE;
     delete process.env.WSL_DISTRO_NAME;
     delete process.env.WSL_INTEROP;
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
-      const codexPs1Path = join(fakeBin, 'codex.ps1');
-      await writeFile(codexPs1Path, '');
+      const geminiPs1Path = join(fakeBin, 'gemini.ps1');
+      await writeFile(geminiPs1Path, '');
 
       const cmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'gpt-5'], 'C:\\repo');
       assert.doesNotMatch(cmd, /\/bin\/sh -lc/, 'native Windows workers must not launch through POSIX sh');
@@ -1402,8 +1402,8 @@ describe('buildWorkerStartupCommand', () => {
       const encoded = cmd.replace(/^powershell\.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand /, '');
       const decoded = Buffer.from(encoded, 'base64').toString('utf16le');
       assert.match(decoded, /\$env:PATH = 'C:\\Program Files\\nodejs;' \+ \$env:PATH/);
-      assert.match(decoded, /\$env:OMX_TEAM_WORKER = 'alpha\/worker-1'/);
-      assert.match(decoded, new RegExp(escapeRegExp(`'-File' '${codexPs1Path}'`)));
+      assert.match(decoded, /\$env:OMG_TEAM_WORKER = 'alpha\/worker-1'/);
+      assert.match(decoded, new RegExp(escapeRegExp(`'-File' '${geminiPs1Path}'`)));
       assert.match(decoded, /'--model' 'gpt-5'/);
       assert.match(decoded, /'--dangerously-bypass-approvals-and-sandbox'/);
     } finally {
@@ -1414,10 +1414,10 @@ describe('buildWorkerStartupCommand', () => {
       else delete process.env.PATHEXT;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-      if (typeof prevLeaderNodePath === 'string') process.env.OMX_LEADER_NODE_PATH = prevLeaderNodePath;
-      else delete process.env.OMX_LEADER_NODE_PATH;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevLeaderNodePath === 'string') process.env.OMG_LEADER_NODE_PATH = prevLeaderNodePath;
+      else delete process.env.OMG_LEADER_NODE_PATH;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -1436,8 +1436,8 @@ describe('buildWorkerStartupCommand', () => {
     const prevPath = process.env.PATH;
     const prevPathext = process.env.PATHEXT;
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    const prevLeaderNodePath = process.env.OMX_LEADER_NODE_PATH;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevLeaderNodePath = process.env.OMG_LEADER_NODE_PATH;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -1446,34 +1446,34 @@ describe('buildWorkerStartupCommand', () => {
     process.env.PATH = fakeBin;
     process.env.PATHEXT = '.CMD;.PS1';
     process.env.SHELL = '/bin/zsh';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
-    process.env.OMX_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
     delete process.env.MSYSTEM;
     delete process.env.OSTYPE;
     delete process.env.WSL_DISTRO_NAME;
     delete process.env.WSL_INTEROP;
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
-      const codexCmdPath = join(fakeBin, 'codex.cmd');
-      const codexJsPath = join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const geminiCmdPath = join(fakeBin, 'gemini.cmd');
+      const geminiJsPath = join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin', 'gemini.js');
       await mkdir(fakeBin, { recursive: true });
-      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin'), { recursive: true });
-      await writeFile(codexCmdPath, '@echo off\r\n');
-      await writeFile(codexJsPath, '');
+      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin'), { recursive: true });
+      await writeFile(geminiCmdPath, '@echo off\r\n');
+      await writeFile(geminiJsPath, '');
 
       const cmd = buildWorkerStartupCommand('alpha', 1, ['--model', 'gpt-5'], 'C:\\repo');
       const prefix = 'powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -EncodedCommand ';
       assert.ok(cmd.startsWith(prefix));
 
       const decoded = Buffer.from(cmd.slice(prefix.length), 'base64').toString('utf16le');
-      assert.match(decoded, new RegExp(escapeRegExp(`$env:OMX_LEADER_CLI_PATH = '${codexJsPath}'`)));
+      assert.match(decoded, new RegExp(escapeRegExp(`$env:OMG_LEADER_CLI_PATH = '${geminiJsPath}'`)));
       assert.match(
         decoded,
         new RegExp(
-          escapeRegExp(`& '${process.execPath}' '${codexJsPath}' '--model' 'gpt-5' '--dangerously-bypass-approvals-and-sandbox'`),
+          escapeRegExp(`& '${process.execPath}' '${geminiJsPath}' '--model' 'gpt-5' '--dangerously-bypass-approvals-and-sandbox'`),
         ),
       );
-      assert.doesNotMatch(decoded, new RegExp(escapeRegExp(codexCmdPath)));
+      assert.doesNotMatch(decoded, new RegExp(escapeRegExp(geminiCmdPath)));
     } finally {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
       if (typeof prevPath === 'string') process.env.PATH = prevPath;
@@ -1482,10 +1482,10 @@ describe('buildWorkerStartupCommand', () => {
       else delete process.env.PATHEXT;
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-      if (typeof prevLeaderNodePath === 'string') process.env.OMX_LEADER_NODE_PATH = prevLeaderNodePath;
-      else delete process.env.OMX_LEADER_NODE_PATH;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevLeaderNodePath === 'string') process.env.OMG_LEADER_NODE_PATH = prevLeaderNodePath;
+      else delete process.env.OMG_LEADER_NODE_PATH;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -1500,9 +1500,9 @@ describe('buildWorkerStartupCommand', () => {
 
   it('falls back to bash when SHELL is unsupported and zsh candidates are unavailable', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/opt/custom/fish';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = withMockedExistsSync((candidate) => candidate === '/opt/custom/fish' || candidate === '/bin/bash', () =>
         buildWorkerStartupCommand('alpha', 1, [], process.cwd()),
@@ -1513,16 +1513,16 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('falls back to /bin/sh when no supported shell candidates exist', () => {
     const prevShell = process.env.SHELL;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     process.env.SHELL = '/opt/custom/fish';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const cmd = withMockedExistsSync((candidate) => candidate === '/opt/custom/fish', () =>
         buildWorkerStartupCommand('alpha', 1, [], process.cwd()),
@@ -1533,8 +1533,8 @@ describe('buildWorkerStartupCommand', () => {
     } finally {
       if (typeof prevShell === 'string') process.env.SHELL = prevShell;
       else delete process.env.SHELL;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 });
@@ -1544,22 +1544,22 @@ describe('team worker CLI helpers', () => {
     assert.equal(resolveTeamWorkerCli(['--model', 'claude-3-7-sonnet'], {}), 'claude');
     assert.equal(resolveTeamWorkerCli(['--model=claude-sonnet-4-6'], {}), 'claude');
     assert.equal(resolveTeamWorkerCli(['--model', 'gemini-2.0-pro'], {}), 'gemini');
-    assert.equal(resolveTeamWorkerCli(['--model', 'gpt-5'], {}), 'codex');
-    assert.equal(resolveTeamWorkerCli([], {}), 'codex');
+    assert.equal(resolveTeamWorkerCli(['--model', 'gpt-5'], {}), 'gemini');
+    assert.equal(resolveTeamWorkerCli([], {}), 'gemini');
   });
 
   it('resolveTeamWorkerCli accepts explicit gemini override', () => {
-    assert.equal(resolveTeamWorkerCli([], { OMX_TEAM_WORKER_CLI: 'gemini' }), 'gemini');
+    assert.equal(resolveTeamWorkerCli([], { OMG_TEAM_WORKER_CLI: 'gemini' }), 'gemini');
   });
 
   it('resolveTeamWorkerCliPlan accepts gemini in CLI map', () => {
-    const plan = resolveTeamWorkerCliPlan(3, [], { OMX_TEAM_WORKER_CLI_MAP: 'codex,gemini,claude' });
-    assert.deepEqual(plan, ['codex', 'gemini', 'claude']);
+    const plan = resolveTeamWorkerCliPlan(3, [], { OMG_TEAM_WORKER_CLI_MAP: 'gemini,gemini,claude' });
+    assert.deepEqual(plan, ['gemini', 'gemini', 'claude']);
   });
 
-  it('translateWorkerLaunchArgsForCli preserves args for codex', () => {
+  it('translateWorkerLaunchArgsForCli preserves args for gemini', () => {
     const args = ['--model', 'gpt-5', '-c', 'model_reasoning_effort="xhigh"'];
-    assert.deepEqual(translateWorkerLaunchArgsForCli('codex', args), args);
+    assert.deepEqual(translateWorkerLaunchArgsForCli('gemini', args), args);
   });
 
   it('translateWorkerLaunchArgsForCli returns only skip-permissions for claude', () => {
@@ -1597,7 +1597,7 @@ describe('team worker CLI helpers', () => {
 
   it('translateWorkerLaunchArgsForCli omits non-gemini default models for gemini workers', () => {
     assert.deepEqual(
-      translateWorkerLaunchArgsForCli('gemini', ['--model', 'gpt-5.3-codex-spark'], 'Read worker inbox'),
+      translateWorkerLaunchArgsForCli('gemini', ['--model', 'gpt-5.3-gemini-spark'], 'Read worker inbox'),
       ['--approval-mode', 'yolo', '-i', 'Read worker inbox'],
     );
   });
@@ -1620,16 +1620,16 @@ describe('team worker CLI helpers', () => {
     const plan = resolveTeamWorkerCliPlan(
       4,
       [],
-      { OMX_TEAM_WORKER_CLI_MAP: 'codex,codex,gemini,claude' },
+      { OMG_TEAM_WORKER_CLI_MAP: 'gemini,gemini,gemini,claude' },
     );
-    assert.deepEqual(plan, ['codex', 'codex', 'gemini', 'claude']);
+    assert.deepEqual(plan, ['gemini', 'gemini', 'gemini', 'claude']);
   });
 
   it('resolveTeamWorkerCliPlan accepts single-value map and expands to all workers', () => {
     const plan = resolveTeamWorkerCliPlan(
       3,
       [],
-      { OMX_TEAM_WORKER_CLI_MAP: 'claude' },
+      { OMG_TEAM_WORKER_CLI_MAP: 'claude' },
     );
     assert.deepEqual(plan, ['claude', 'claude', 'claude']);
   });
@@ -1638,18 +1638,18 @@ describe('team worker CLI helpers', () => {
     const plan = resolveTeamWorkerCliPlan(
       2,
       ['--model', 'claude-3-7-sonnet'],
-      { OMX_TEAM_WORKER_CLI_MAP: 'auto,codex' },
+      { OMG_TEAM_WORKER_CLI_MAP: 'auto,gemini' },
     );
-    assert.deepEqual(plan, ['claude', 'codex']);
+    assert.deepEqual(plan, ['claude', 'gemini']);
   });
 
-  it('resolveTeamWorkerCliPlan auto entries ignore OMX_TEAM_WORKER_CLI override', () => {
+  it('resolveTeamWorkerCliPlan auto entries ignore OMG_TEAM_WORKER_CLI override', () => {
     const plan = resolveTeamWorkerCliPlan(
       1,
       ['--model', 'claude-3-7-sonnet'],
       {
-        OMX_TEAM_WORKER_CLI: 'codex',
-        OMX_TEAM_WORKER_CLI_MAP: 'auto',
+        OMG_TEAM_WORKER_CLI: 'gemini',
+        OMG_TEAM_WORKER_CLI_MAP: 'auto',
       },
     );
     assert.deepEqual(plan, ['claude']);
@@ -1657,35 +1657,35 @@ describe('team worker CLI helpers', () => {
 
   it('resolveTeamWorkerCliPlan rejects map lengths that do not match workerCount', () => {
     assert.throws(
-      () => resolveTeamWorkerCliPlan(4, [], { OMX_TEAM_WORKER_CLI_MAP: 'codex,claude' }),
+      () => resolveTeamWorkerCliPlan(4, [], { OMG_TEAM_WORKER_CLI_MAP: 'gemini,claude' }),
       /expected 1 or 4/i,
     );
   });
 
   it('resolveTeamWorkerCliPlan rejects empty entries in CLI map', () => {
     assert.throws(
-      () => resolveTeamWorkerCliPlan(2, [], { OMX_TEAM_WORKER_CLI_MAP: 'codex,' }),
+      () => resolveTeamWorkerCliPlan(2, [], { OMG_TEAM_WORKER_CLI_MAP: 'gemini,' }),
       /empty entries are not allowed/i,
     );
   });
 
-  it('resolveTeamWorkerCliPlan reports invalid entry errors with OMX_TEAM_WORKER_CLI_MAP', () => {
+  it('resolveTeamWorkerCliPlan reports invalid entry errors with OMG_TEAM_WORKER_CLI_MAP', () => {
     assert.throws(
-      () => resolveTeamWorkerCliPlan(1, [], { OMX_TEAM_WORKER_CLI_MAP: 'claudee' }),
-      /OMX_TEAM_WORKER_CLI_MAP/i,
+      () => resolveTeamWorkerCliPlan(1, [], { OMG_TEAM_WORKER_CLI_MAP: 'claudee' }),
+      /OMG_TEAM_WORKER_CLI_MAP/i,
     );
   });
 
   it('resolveWorkerCliForSend prioritizes explicit worker CLI over map/global', () => {
     assert.equal(
-      resolveWorkerCliForSend(2, 'claude', [], { OMX_TEAM_WORKER_CLI_MAP: 'codex,codex' }),
+      resolveWorkerCliForSend(2, 'claude', [], { OMG_TEAM_WORKER_CLI_MAP: 'gemini,gemini' }),
       'claude',
     );
   });
 
   it('resolveWorkerCliForSend resolves per-worker map entry by index', () => {
     assert.equal(
-      resolveWorkerCliForSend(2, undefined, [], { OMX_TEAM_WORKER_CLI_MAP: 'codex,claude' }),
+      resolveWorkerCliForSend(2, undefined, [], { OMG_TEAM_WORKER_CLI_MAP: 'gemini,claude' }),
       'claude',
     );
   });
@@ -1697,8 +1697,8 @@ describe('team worker CLI helpers', () => {
     assert.equal(plan.allowAdaptiveRetry, false);
   });
 
-  it('buildWorkerSubmitPlan preserves queue-first behavior for busy codex workers', () => {
-    const plan = buildWorkerSubmitPlan('auto', 'codex', true, true);
+  it('buildWorkerSubmitPlan preserves queue-first behavior for busy gemini workers', () => {
+    const plan = buildWorkerSubmitPlan('auto', 'gemini', true, true);
     assert.equal(plan.queueFirstRound, true);
     assert.equal(plan.submitKeyPressesPerRound, 2);
     assert.equal(plan.allowAdaptiveRetry, true);
@@ -1708,66 +1708,66 @@ describe('team worker CLI helpers', () => {
 describe('team worker launch mode helpers', () => {
   it('resolveTeamWorkerLaunchMode defaults to interactive and accepts prompt', () => {
     assert.equal(resolveTeamWorkerLaunchMode({}), 'interactive');
-    assert.equal(resolveTeamWorkerLaunchMode({ OMX_TEAM_WORKER_LAUNCH_MODE: 'interactive' }), 'interactive');
-    assert.equal(resolveTeamWorkerLaunchMode({ OMX_TEAM_WORKER_LAUNCH_MODE: 'prompt' }), 'prompt');
-    assert.equal(resolveTeamWorkerLaunchMode({ OMX_TEAM_WORKER_LAUNCH_MODE: ' PROMPT ' }), 'prompt');
+    assert.equal(resolveTeamWorkerLaunchMode({ OMG_TEAM_WORKER_LAUNCH_MODE: 'interactive' }), 'interactive');
+    assert.equal(resolveTeamWorkerLaunchMode({ OMG_TEAM_WORKER_LAUNCH_MODE: 'prompt' }), 'prompt');
+    assert.equal(resolveTeamWorkerLaunchMode({ OMG_TEAM_WORKER_LAUNCH_MODE: ' PROMPT ' }), 'prompt');
   });
 
   it('resolveTeamWorkerLaunchMode rejects unsupported values', () => {
     assert.throws(
-      () => resolveTeamWorkerLaunchMode({ OMX_TEAM_WORKER_LAUNCH_MODE: 'tmux' }),
-      /Invalid OMX_TEAM_WORKER_LAUNCH_MODE value/i,
+      () => resolveTeamWorkerLaunchMode({ OMG_TEAM_WORKER_LAUNCH_MODE: 'tmux' }),
+      /Invalid OMG_TEAM_WORKER_LAUNCH_MODE value/i,
     );
   });
 
   it('buildWorkerProcessLaunchSpec returns command/args/env for prompt process spawn', () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const spec = buildWorkerProcessLaunchSpec(
         'alpha-team',
         2,
-        ['--model', 'gpt-5.3-codex'],
+        ['--model', 'gpt-5.3-gemini'],
         '/tmp/workspace',
-        { OMX_TEAM_STATE_ROOT: '/tmp/workspace/.omg/state' },
-        'codex',
+        { OMG_TEAM_STATE_ROOT: '/tmp/workspace/.omg/state' },
+        'gemini',
       );
       // command is now the resolved absolute path (or bare binary if which fails)
-      assert.equal(spec.workerCli, 'codex');
+      assert.equal(spec.workerCli, 'gemini');
       assert.ok(typeof spec.command === 'string' && spec.command.length > 0, 'command must be a non-empty string');
-      assert.deepEqual(spec.args, ['--model', 'gpt-5.3-codex', '--dangerously-bypass-approvals-and-sandbox']);
-      assert.equal(spec.env.OMX_TEAM_WORKER, 'alpha-team/worker-2');
-      assert.equal(spec.env.OMX_TEAM_STATE_ROOT, '/tmp/workspace/.omg/state');
+      assert.deepEqual(spec.args, ['--model', 'gpt-5.3-gemini', '--dangerously-bypass-approvals-and-sandbox']);
+      assert.equal(spec.env.OMG_TEAM_WORKER, 'alpha-team/worker-2');
+      assert.equal(spec.env.OMG_TEAM_STATE_ROOT, '/tmp/workspace/.omg/state');
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
-  it('buildWorkerProcessLaunchSpec does not force codex bypass for read-only roles', () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+  it('buildWorkerProcessLaunchSpec does not force gemini bypass for read-only roles', () => {
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const spec = buildWorkerProcessLaunchSpec(
         'alpha-team',
         2,
-        ['--model', 'gpt-5.3-codex-spark'],
+        ['--model', 'gpt-5.3-gemini-spark'],
         '/tmp/workspace',
-        { OMX_TEAM_STATE_ROOT: '/tmp/workspace/.omg/state' },
-        'codex',
+        { OMG_TEAM_STATE_ROOT: '/tmp/workspace/.omg/state' },
+        'gemini',
         undefined,
         'explore',
       );
-      assert.deepEqual(spec.args, ['--model', 'gpt-5.3-codex-spark']);
+      assert.deepEqual(spec.args, ['--model', 'gpt-5.3-gemini-spark']);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
   it('buildWorkerProcessLaunchSpec includes leader node and CLI path env vars', () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     try {
       const spec = buildWorkerProcessLaunchSpec(
         'beta-team',
@@ -1775,21 +1775,21 @@ describe('team worker launch mode helpers', () => {
         [],
         '/tmp/workspace',
         {},
-        'codex',
+        'gemini',
       );
       assert.ok(
-        typeof spec.env.OMX_LEADER_NODE_PATH === 'string' && spec.env.OMX_LEADER_NODE_PATH.length > 0,
-        'OMX_LEADER_NODE_PATH must be set',
+        typeof spec.env.OMG_LEADER_NODE_PATH === 'string' && spec.env.OMG_LEADER_NODE_PATH.length > 0,
+        'OMG_LEADER_NODE_PATH must be set',
       );
       assert.ok(
-        typeof spec.env.OMX_LEADER_CLI_PATH === 'string' && spec.env.OMX_LEADER_CLI_PATH.length > 0,
-        'OMX_LEADER_CLI_PATH must be set',
+        typeof spec.env.OMG_LEADER_CLI_PATH === 'string' && spec.env.OMG_LEADER_CLI_PATH.length > 0,
+        'OMG_LEADER_CLI_PATH must be set',
       );
       // command matches the resolved CLI path stored in env
-      assert.equal(spec.command, spec.env.OMX_LEADER_CLI_PATH);
+      assert.equal(spec.command, spec.env.OMG_LEADER_CLI_PATH);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     }
   });
 
@@ -1797,7 +1797,7 @@ describe('team worker launch mode helpers', () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-worker-spec-win32-'));
     const prevPath = process.env.PATH;
     const prevPathext = process.env.PATHEXT;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -1805,15 +1805,15 @@ describe('team worker launch mode helpers', () => {
     const origPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
     process.env.PATH = fakeBin;
     process.env.PATHEXT = '.PS1';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     delete process.env.MSYSTEM;
     delete process.env.OSTYPE;
     delete process.env.WSL_DISTRO_NAME;
     delete process.env.WSL_INTEROP;
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
-      const codexPs1Path = join(fakeBin, 'codex.ps1');
-      await writeFile(codexPs1Path, '');
+      const geminiPs1Path = join(fakeBin, 'gemini.ps1');
+      await writeFile(geminiPs1Path, '');
 
       const spec = buildWorkerProcessLaunchSpec(
         'beta-team',
@@ -1821,23 +1821,23 @@ describe('team worker launch mode helpers', () => {
         ['--model', 'gpt-5'],
         'C:\\workspace',
         {},
-        'codex',
+        'gemini',
       );
 
       assert.match(spec.command, /powershell(?:\.exe)?$/i);
       assert.deepEqual(spec.args.slice(0, 5), ['-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File']);
-      assert.equal(spec.args[5], codexPs1Path);
+      assert.equal(spec.args[5], geminiPs1Path);
       assert.deepEqual(spec.args.slice(6), ['--model', 'gpt-5', '--dangerously-bypass-approvals-and-sandbox']);
-      assert.equal(spec.env.OMX_LEADER_CLI_PATH, codexPs1Path);
-      assert.notEqual(spec.command, codexPs1Path);
+      assert.equal(spec.env.OMG_LEADER_CLI_PATH, geminiPs1Path);
+      assert.notEqual(spec.command, geminiPs1Path);
     } finally {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
       if (typeof prevPath === 'string') process.env.PATH = prevPath;
       else delete process.env.PATH;
       if (typeof prevPathext === 'string') process.env.PATHEXT = prevPathext;
       else delete process.env.PATHEXT;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -1855,7 +1855,7 @@ describe('team worker launch mode helpers', () => {
     const fakeBin = join(fakeRoot, 'node_modules', '.bin');
     const prevPath = process.env.PATH;
     const prevPathext = process.env.PATHEXT;
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -1863,19 +1863,19 @@ describe('team worker launch mode helpers', () => {
     const origPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
     process.env.PATH = fakeBin;
     process.env.PATHEXT = '.CMD;.PS1';
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     delete process.env.MSYSTEM;
     delete process.env.OSTYPE;
     delete process.env.WSL_DISTRO_NAME;
     delete process.env.WSL_INTEROP;
     Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
     try {
-      const codexCmdPath = join(fakeBin, 'codex.cmd');
-      const codexJsPath = join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const geminiCmdPath = join(fakeBin, 'gemini.cmd');
+      const geminiJsPath = join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin', 'gemini.js');
       await mkdir(fakeBin, { recursive: true });
-      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin'), { recursive: true });
-      await writeFile(codexCmdPath, '@echo off\r\n');
-      await writeFile(codexJsPath, '');
+      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin'), { recursive: true });
+      await writeFile(geminiCmdPath, '@echo off\r\n');
+      await writeFile(geminiJsPath, '');
 
       const spec = buildWorkerProcessLaunchSpec(
         'beta-team',
@@ -1883,21 +1883,21 @@ describe('team worker launch mode helpers', () => {
         ['--model', 'gpt-5'],
         'C:\\workspace',
         {},
-        'codex',
+        'gemini',
       );
 
       assert.equal(spec.command, process.execPath);
-      assert.deepEqual(spec.args, [codexJsPath, '--model', 'gpt-5', '--dangerously-bypass-approvals-and-sandbox']);
-      assert.equal(spec.env.OMX_LEADER_CLI_PATH, codexJsPath);
-      assert.notEqual(spec.env.OMX_LEADER_CLI_PATH, codexCmdPath);
+      assert.deepEqual(spec.args, [geminiJsPath, '--model', 'gpt-5', '--dangerously-bypass-approvals-and-sandbox']);
+      assert.equal(spec.env.OMG_LEADER_CLI_PATH, geminiJsPath);
+      assert.notEqual(spec.env.OMG_LEADER_CLI_PATH, geminiCmdPath);
     } finally {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
       if (typeof prevPath === 'string') process.env.PATH = prevPath;
       else delete process.env.PATH;
       if (typeof prevPathext === 'string') process.env.PATHEXT = prevPathext;
       else delete process.env.PATHEXT;
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -1911,11 +1911,11 @@ describe('team worker launch mode helpers', () => {
   });
 
   it('buildWorkerProcessLaunchSpec injects the active provider env_key from GEMINI_HOME config.toml', async () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevGeminiHome = process.env.GEMINI_HOME;
     const prevProviderEnv = process.env.CUSTOM_PROVIDER_API_KEY;
     const geminiHome = await mkdtemp(join(tmpdir(), 'omg-team-provider-env-'));
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.GEMINI_HOME = geminiHome;
     process.env.CUSTOM_PROVIDER_API_KEY = 'test-secret';
 
@@ -1938,13 +1938,13 @@ describe('team worker launch mode helpers', () => {
         [],
         '/tmp/workspace',
         {},
-        'codex',
+        'gemini',
       );
 
       assert.equal(spec.env.CUSTOM_PROVIDER_API_KEY, 'test-secret');
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevGeminiHome === 'string') process.env.GEMINI_HOME = prevGeminiHome;
       else delete process.env.GEMINI_HOME;
       if (typeof prevProviderEnv === 'string') process.env.CUSTOM_PROVIDER_API_KEY = prevProviderEnv;
@@ -1953,12 +1953,12 @@ describe('team worker launch mode helpers', () => {
     }
   });
 
-  it('buildWorkerProcessLaunchSpec does not inject the active provider env_key for non-codex workers', async () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+  it('buildWorkerProcessLaunchSpec does not inject the active provider env_key for non-gemini workers', async () => {
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevGeminiHome = process.env.GEMINI_HOME;
     const prevProviderEnv = process.env.CUSTOM_PROVIDER_API_KEY;
     const geminiHome = await mkdtemp(join(tmpdir(), 'omg-team-provider-env-'));
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.GEMINI_HOME = geminiHome;
     process.env.CUSTOM_PROVIDER_API_KEY = 'test-secret';
 
@@ -1987,8 +1987,8 @@ describe('team worker launch mode helpers', () => {
       assert.equal(spec.workerCli, 'claude');
       assert.equal(spec.env.CUSTOM_PROVIDER_API_KEY, undefined);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevGeminiHome === 'string') process.env.GEMINI_HOME = prevGeminiHome;
       else delete process.env.GEMINI_HOME;
       if (typeof prevProviderEnv === 'string') process.env.CUSTOM_PROVIDER_API_KEY = prevProviderEnv;
@@ -1998,13 +1998,13 @@ describe('team worker launch mode helpers', () => {
   });
 
   it('buildWorkerProcessLaunchSpec reads provider env from worker GEMINI_HOME override', async () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevGeminiHome = process.env.GEMINI_HOME;
     const prevPrimaryProviderEnv = process.env.PRIMARY_PROVIDER_API_KEY;
     const prevWorkerProviderEnv = process.env.WORKER_PROVIDER_API_KEY;
     const leaderGeminiHome = await mkdtemp(join(tmpdir(), 'omg-team-provider-env-leader-'));
     const workerGeminiHome = await mkdtemp(join(tmpdir(), 'omg-team-provider-env-worker-'));
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.GEMINI_HOME = leaderGeminiHome;
     process.env.PRIMARY_PROVIDER_API_KEY = 'leader-secret';
     process.env.WORKER_PROVIDER_API_KEY = 'worker-secret';
@@ -2040,15 +2040,15 @@ describe('team worker launch mode helpers', () => {
         [],
         '/tmp/workspace',
         { GEMINI_HOME: workerGeminiHome },
-        'codex',
+        'gemini',
       );
 
       assert.equal(spec.env.GEMINI_HOME, workerGeminiHome);
       assert.equal(spec.env.WORKER_PROVIDER_API_KEY, 'worker-secret');
       assert.equal(spec.env.PRIMARY_PROVIDER_API_KEY, undefined);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevGeminiHome === 'string') process.env.GEMINI_HOME = prevGeminiHome;
       else delete process.env.GEMINI_HOME;
       if (typeof prevPrimaryProviderEnv === 'string') process.env.PRIMARY_PROVIDER_API_KEY = prevPrimaryProviderEnv;
@@ -2061,9 +2061,9 @@ describe('team worker launch mode helpers', () => {
   });
 
   it('buildWorkerProcessLaunchSpec keeps the worker env contract unchanged for ambient proxy vars', () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevHttpsProxy = process.env.HTTPS_PROXY;
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.HTTPS_PROXY = 'https://ambient-proxy.example:443';
     try {
       const spec = buildWorkerProcessLaunchSpec(
@@ -2072,19 +2072,19 @@ describe('team worker launch mode helpers', () => {
         [],
         '/tmp/workspace',
         {},
-        'codex',
+        'gemini',
       );
       assert.equal(spec.env.HTTPS_PROXY, undefined);
     } finally {
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevHttpsProxy === 'string') process.env.HTTPS_PROXY = prevHttpsProxy;
       else delete process.env.HTTPS_PROXY;
     }
   });
 
   it('buildWorkerProcessLaunchSpec resolves relative worker GEMINI_HOME against the worker cwd', async () => {
-    const prevBypass = process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+    const prevBypass = process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
     const prevGeminiHome = process.env.GEMINI_HOME;
     const prevLeaderProviderEnv = process.env.LEADER_PROVIDER_API_KEY;
     const prevWorkerProviderEnv = process.env.WORKER_PROVIDER_API_KEY;
@@ -2093,7 +2093,7 @@ describe('team worker launch mode helpers', () => {
     const workerCwd = await mkdtemp(join(tmpdir(), 'omg-team-provider-relative-worker-'));
     const leaderGeminiHome = join(leaderCwd, '.gemini');
     const workerGeminiHome = join(workerCwd, '.gemini');
-    process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
+    process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = '0';
     process.env.GEMINI_HOME = leaderGeminiHome;
     process.env.LEADER_PROVIDER_API_KEY = 'leader-secret';
     process.env.WORKER_PROVIDER_API_KEY = 'worker-secret';
@@ -2134,7 +2134,7 @@ describe('team worker launch mode helpers', () => {
         [],
         workerCwd,
         { GEMINI_HOME: '.gemini' },
-        'codex',
+        'gemini',
       );
 
       assert.equal(spec.env.GEMINI_HOME, '.gemini');
@@ -2142,8 +2142,8 @@ describe('team worker launch mode helpers', () => {
       assert.equal(spec.env.LEADER_PROVIDER_API_KEY, undefined);
     } finally {
       process.chdir(originalCwd);
-      if (typeof prevBypass === 'string') process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
-      else delete process.env.OMX_BYPASS_DEFAULT_SYSTEM_PROMPT;
+      if (typeof prevBypass === 'string') process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT = prevBypass;
+      else delete process.env.OMG_BYPASS_DEFAULT_SYSTEM_PROMPT;
       if (typeof prevGeminiHome === 'string') process.env.GEMINI_HOME = prevGeminiHome;
       else delete process.env.GEMINI_HOME;
       if (typeof prevLeaderProviderEnv === 'string') process.env.LEADER_PROVIDER_API_KEY = prevLeaderProviderEnv;
@@ -2357,8 +2357,8 @@ esac
   });
 
   it('waitForWorkerReady leaves the Claude bypass prompt untouched when auto-accept is disabled', async () => {
-    const previousAutoAccept = process.env.OMX_TEAM_AUTO_ACCEPT_BYPASS;
-    process.env.OMX_TEAM_AUTO_ACCEPT_BYPASS = '0';
+    const previousAutoAccept = process.env.OMG_TEAM_AUTO_ACCEPT_BYPASS;
+    process.env.OMG_TEAM_AUTO_ACCEPT_BYPASS = '0';
     try {
       await withMockTmuxFixture(
         'omg-tmux-claude-bypass-blocked-',
@@ -2384,8 +2384,8 @@ esac
         },
       );
     } finally {
-      if (typeof previousAutoAccept === 'string') process.env.OMX_TEAM_AUTO_ACCEPT_BYPASS = previousAutoAccept;
-      else delete process.env.OMX_TEAM_AUTO_ACCEPT_BYPASS;
+      if (typeof previousAutoAccept === 'string') process.env.OMG_TEAM_AUTO_ACCEPT_BYPASS = previousAutoAccept;
+      else delete process.env.OMG_TEAM_AUTO_ACCEPT_BYPASS;
     }
   });
 
@@ -2401,7 +2401,7 @@ describe('native Windows HUD reconciliation', () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-win32-no-env-'));
     const prevTmux = process.env.TMUX;
     const prevTmuxPane = process.env.TMUX_PANE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -2431,7 +2431,7 @@ case "\${1:-}" in
     exit 0
     ;;
   list-panes)
-    printf "%%1\\tnode\\t'codex'\\n"
+    printf "%%1\\tnode\\t'gemini'\\n"
     exit 0
     ;;
   split-window)
@@ -2461,7 +2461,7 @@ esac
 
           delete process.env.TMUX;
           delete process.env.TMUX_PANE;
-          process.env.OMX_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
           delete process.env.MSYSTEM;
           delete process.env.OSTYPE;
           delete process.env.WSL_DISTRO_NAME;
@@ -2486,8 +2486,8 @@ esac
       else delete process.env.TMUX;
       if (typeof prevTmuxPane === 'string') process.env.TMUX_PANE = prevTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -2504,7 +2504,7 @@ esac
     const cwd = await mkdtemp(join(tmpdir(), 'omg-team-win32-hud-'));
     const prevTmux = process.env.TMUX;
     const prevTmuxPane = process.env.TMUX_PANE;
-    const prevWorkerCli = process.env.OMX_TEAM_WORKER_CLI;
+    const prevWorkerCli = process.env.OMG_TEAM_WORKER_CLI;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -2534,7 +2534,7 @@ case "\${1:-}" in
     exit 0
     ;;
   list-panes)
-    printf "%%1\\tnode\\t'codex'\\n"
+    printf "%%1\\tnode\\t'gemini'\\n"
     exit 0
     ;;
   split-window)
@@ -2567,7 +2567,7 @@ esac
 
           process.env.TMUX = 'leader-session,stub,0';
           process.env.TMUX_PANE = '%1';
-          process.env.OMX_TEAM_WORKER_CLI = 'gemini';
+          process.env.OMG_TEAM_WORKER_CLI = 'gemini';
           delete process.env.MSYSTEM;
           delete process.env.OSTYPE;
           delete process.env.WSL_DISTRO_NAME;
@@ -2593,8 +2593,8 @@ esac
       else delete process.env.TMUX;
       if (typeof prevTmuxPane === 'string') process.env.TMUX_PANE = prevTmuxPane;
       else delete process.env.TMUX_PANE;
-      if (typeof prevWorkerCli === 'string') process.env.OMX_TEAM_WORKER_CLI = prevWorkerCli;
-      else delete process.env.OMX_TEAM_WORKER_CLI;
+      if (typeof prevWorkerCli === 'string') process.env.OMG_TEAM_WORKER_CLI = prevWorkerCli;
+      else delete process.env.OMG_TEAM_WORKER_CLI;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -2609,7 +2609,7 @@ esac
 
   it('restores standalone HUD panes with direct resize on native Windows', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-standalone-win32-hud-'));
-    const prevLeaderNodePath = process.env.OMX_LEADER_NODE_PATH;
+    const prevLeaderNodePath = process.env.OMG_LEADER_NODE_PATH;
     const prevMsystem = process.env.MSYSTEM;
     const prevOstype = process.env.OSTYPE;
     const prevWsl = process.env.WSL_DISTRO_NAME;
@@ -2643,7 +2643,7 @@ esac
           delete process.env.OSTYPE;
           delete process.env.WSL_DISTRO_NAME;
           delete process.env.WSL_INTEROP;
-          process.env.OMX_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
+          process.env.OMG_LEADER_NODE_PATH = 'C:\\Program Files\\nodejs\\node.exe';
           Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
 
           const paneId = restoreStandaloneHudPane('%11', cwd);
@@ -2660,8 +2660,8 @@ esac
       );
     } finally {
       if (origPlatform) Object.defineProperty(process, 'platform', origPlatform);
-      if (typeof prevLeaderNodePath === 'string') process.env.OMX_LEADER_NODE_PATH = prevLeaderNodePath;
-      else delete process.env.OMX_LEADER_NODE_PATH;
+      if (typeof prevLeaderNodePath === 'string') process.env.OMG_LEADER_NODE_PATH = prevLeaderNodePath;
+      else delete process.env.OMG_LEADER_NODE_PATH;
       if (typeof prevMsystem === 'string') process.env.MSYSTEM = prevMsystem;
       else delete process.env.MSYSTEM;
       if (typeof prevOstype === 'string') process.env.OSTYPE = prevOstype;
@@ -2677,8 +2677,8 @@ esac
   it('restores standalone HUD panes with an absolute OMX entry path after cwd drift', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'omg-standalone-relative-hud-'));
     const startupCwd = await mkdtemp(join(tmpdir(), 'omg-standalone-relative-start-'));
-    const previousEntryPath = process.env[OMX_ENTRY_PATH_ENV];
-    const previousStartupCwd = process.env[OMX_STARTUP_CWD_ENV];
+    const previousEntryPath = process.env[OMG_ENTRY_PATH_ENV];
+    const previousStartupCwd = process.env[OMG_STARTUP_CWD_ENV];
     const previousArgv = process.argv;
 
     try {
@@ -2706,8 +2706,8 @@ case "\${1:-}" in
 esac
 `,
         async ({ logPath }) => {
-          delete process.env[OMX_ENTRY_PATH_ENV];
-          process.env[OMX_STARTUP_CWD_ENV] = startupCwd;
+          delete process.env[OMG_ENTRY_PATH_ENV];
+          process.env[OMG_STARTUP_CWD_ENV] = startupCwd;
           process.argv = [previousArgv[0] || 'node', 'dist/cli/omg.js'];
 
           const paneId = restoreStandaloneHudPane('%11', cwd);
@@ -2720,10 +2720,10 @@ esac
       );
     } finally {
       process.argv = previousArgv;
-      if (typeof previousEntryPath === 'string') process.env[OMX_ENTRY_PATH_ENV] = previousEntryPath;
-      else delete process.env[OMX_ENTRY_PATH_ENV];
-      if (typeof previousStartupCwd === 'string') process.env[OMX_STARTUP_CWD_ENV] = previousStartupCwd;
-      else delete process.env[OMX_STARTUP_CWD_ENV];
+      if (typeof previousEntryPath === 'string') process.env[OMG_ENTRY_PATH_ENV] = previousEntryPath;
+      else delete process.env[OMG_ENTRY_PATH_ENV];
+      if (typeof previousStartupCwd === 'string') process.env[OMG_STARTUP_CWD_ENV] = previousStartupCwd;
+      else delete process.env[OMG_STARTUP_CWD_ENV];
       await rm(cwd, { recursive: true, force: true });
       await rm(startupCwd, { recursive: true, force: true });
     }
@@ -2753,14 +2753,14 @@ case "\${1:-}" in
 esac
 `,
         async ({ logPath }) => {
-          process.argv = [previousArgv[0] || 'node', '/tmp/codex-host-binary'];
+          process.argv = [previousArgv[0] || 'node', '/tmp/gemini-host-binary'];
 
           const paneId = restoreStandaloneHudPane('%11', cwd);
           assert.equal(paneId, '%44');
 
           const tmuxLog = await readFile(logPath, 'utf-8');
           assert.match(tmuxLog, /dist\/cli\/omg\.js' hud --watch/);
-          assert.doesNotMatch(tmuxLog, /\/tmp\/codex-host-binary' hud --watch/);
+          assert.doesNotMatch(tmuxLog, /\/tmp\/gemini-host-binary' hud --watch/);
         },
       );
     } finally {
@@ -2772,8 +2772,8 @@ esac
 
 describe('dismissTrustPromptIfPresent capture shape', () => {
   it('uses visible capture-pane argv without tail flags', async () => {
-    const previousAutoTrust = process.env.OMX_TEAM_AUTO_TRUST;
-    delete process.env.OMX_TEAM_AUTO_TRUST;
+    const previousAutoTrust = process.env.OMG_TEAM_AUTO_TRUST;
+    delete process.env.OMG_TEAM_AUTO_TRUST;
     try {
       await withMockTmuxFixture(
         'omg-tmux-dismiss-trust-visible-capture-',
@@ -2804,8 +2804,8 @@ esac
         },
       );
     } finally {
-      if (typeof previousAutoTrust === 'string') process.env.OMX_TEAM_AUTO_TRUST = previousAutoTrust;
-      else delete process.env.OMX_TEAM_AUTO_TRUST;
+      if (typeof previousAutoTrust === 'string') process.env.OMG_TEAM_AUTO_TRUST = previousAutoTrust;
+      else delete process.env.OMG_TEAM_AUTO_TRUST;
     }
   });
 });
@@ -2817,32 +2817,32 @@ describe('dismissTrustPromptIfPresent', () => {
     });
   });
 
-  it('returns false when OMX_TEAM_AUTO_TRUST is disabled', () => {
-    const prev = process.env.OMX_TEAM_AUTO_TRUST;
-    process.env.OMX_TEAM_AUTO_TRUST = '0';
+  it('returns false when OMG_TEAM_AUTO_TRUST is disabled', () => {
+    const prev = process.env.OMG_TEAM_AUTO_TRUST;
+    process.env.OMG_TEAM_AUTO_TRUST = '0';
     try {
       assert.equal(dismissTrustPromptIfPresent('omg-team-x', 1), false);
     } finally {
-      if (typeof prev === 'string') process.env.OMX_TEAM_AUTO_TRUST = prev;
-      else delete process.env.OMX_TEAM_AUTO_TRUST;
+      if (typeof prev === 'string') process.env.OMG_TEAM_AUTO_TRUST = prev;
+      else delete process.env.OMG_TEAM_AUTO_TRUST;
     }
   });
 
-  it('returns false when OMX_TEAM_AUTO_TRUST is unset (auto-trust enabled) but tmux unavailable', () => {
-    const prev = process.env.OMX_TEAM_AUTO_TRUST;
-    delete process.env.OMX_TEAM_AUTO_TRUST;
+  it('returns false when OMG_TEAM_AUTO_TRUST is unset (auto-trust enabled) but tmux unavailable', () => {
+    const prev = process.env.OMG_TEAM_AUTO_TRUST;
+    delete process.env.OMG_TEAM_AUTO_TRUST;
     try {
       withEmptyPath(() => {
         assert.equal(dismissTrustPromptIfPresent('omg-team-x', 1), false);
       });
     } finally {
-      if (typeof prev === 'string') process.env.OMX_TEAM_AUTO_TRUST = prev;
+      if (typeof prev === 'string') process.env.OMG_TEAM_AUTO_TRUST = prev;
     }
   });
 });
 
 describe('isWorkerAlive', () => {
-  it('does not require pane_current_command to match "codex"', () => {
+  it('does not require pane_current_command to match "gemini"', () => {
     // This was a real failure mode: tmux reports pane_current_command=node for the Gemini TUI,
     // which caused workers to be treated as dead and the leader to clean up state too early.
     withEmptyPath(() => {

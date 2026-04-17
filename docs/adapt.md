@@ -44,6 +44,6 @@ Foundation constraints:
 - no direct writes to external runtime internals
 - target capability reporting stays asymmetric; OMX reports what it owns, what is shared, and what is only target-observed
 - OpenClaw status is local evidence only; it does not claim downstream runtime acknowledgement or execution
-- command-gateway readiness still requires `OMX_OPENCLAW_COMMAND=1`
+- command-gateway readiness still requires `OMG_OPENCLAW_COMMAND=1`
 
-Hermes-specific evidence discovery uses `HERMES_HOME` plus an overrideable Hermes source root (`OMX_ADAPT_HERMES_ROOT`) so OMX can inspect an external runtime without vendoring or mutating it.
+Hermes-specific evidence discovery uses `HERMES_HOME` plus an overrideable Hermes source root (`OMG_ADAPT_HERMES_ROOT`) so OMX can inspect an external runtime without vendoring or mutating it.

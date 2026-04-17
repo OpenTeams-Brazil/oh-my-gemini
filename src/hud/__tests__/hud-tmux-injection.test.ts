@@ -194,9 +194,9 @@ describe('buildTmuxSplitArgs – shell injection hardening', () => {
     assert.ok(!cmd.includes('--preset='));
   });
 
-  it('prepends OMX_SESSION_ID when provided', () => {
+  it('prepends OMG_SESSION_ID when provided', () => {
     const args = buildTmuxSplitArgs('/home/user', '/usr/bin/omg.js', 'focused', 'sess-managed');
     const cmd = args[6];
-    assert.equal(cmd, "OMX_SESSION_ID='sess-managed' node '/usr/bin/omg.js' hud --watch --preset=focused");
+    assert.equal(cmd, "OMG_SESSION_ID='sess-managed' node '/usr/bin/omg.js' hud --watch --preset=focused");
   });
 });

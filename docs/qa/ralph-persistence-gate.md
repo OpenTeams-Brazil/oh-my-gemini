@@ -5,7 +5,7 @@ CI/release validation MUST fail when any required scenario below is missing or f
 
 ## Rollout policy (fixed for this port)
 
-- Release N: behind explicit opt-in flag `OMX_RALPH_PERSISTENCE_PORT=1`.
+- Release N: behind explicit opt-in flag `OMG_RALPH_PERSISTENCE_PORT=1`.
 - Release N+1 default enablement decision only after:
   - parity drift remains clean,
   - cancellation metrics show no cross-session corruption,

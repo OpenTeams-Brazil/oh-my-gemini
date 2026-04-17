@@ -11,10 +11,10 @@ describe("project wiki config/generator documentation contract", () => {
     assert.match(doc, /bootstrap\/config path should treat `omg_wiki` as a first-party OMX server/i);
   });
 
-  it("documents the OMX-native storage path instead of legacy OMC storage", () => {
+  it("documents the OMX-native storage path instead of legacy OMG storage", () => {
     const doc = loadSurface("docs/reference/project-wiki.md");
     assert.match(doc, /Wiki state is project-local and should live under/i);
     assert.match(doc, /`\.omg\/wiki\/\*\.md`/);
-    assert.match(doc, /The docs and code should never regress back to `\.omc\/wiki\/`/);
+    assert.match(doc, /The docs and code should never regress back to `\.omg\/wiki\/`/);
   });
 });

@@ -15,10 +15,10 @@ describe('buildPlatformCommandSpec', () => {
   it('wraps .cmd shims through ComSpec on Windows', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-cmd-'));
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
       await writeFile(cmdPath, '@echo off\r\n');
       const spec = buildPlatformCommandSpec(
-        'codex',
+        'gemini',
         ['--version'],
         'win32',
         {
@@ -31,7 +31,7 @@ describe('buildPlatformCommandSpec', () => {
       assert.equal(spec.command, 'C:\\Windows\\System32\\cmd.exe');
       assert.deepEqual(spec.args.slice(0, 3), ['/d', '/s', '/c']);
       assert.match(spec.args[3] || '', /^""/);
-      assert.match(spec.args[3] || '', /codex\.cmd/i);
+      assert.match(spec.args[3] || '', /gemini\.cmd/i);
       assert.match(spec.args[3] || '', /--version/i);
       assert.match(spec.args[3] || '', /""$/);
       assert.equal(spec.resolvedPath, cmdPath);
@@ -63,18 +63,18 @@ describe('buildPlatformCommandSpec', () => {
     }
   });
 
-  it('prefers the npm-installed codex.js entrypoint over Windows shims when available', async () => {
+  it('prefers the npm-installed gemini.js entrypoint over Windows shims when available', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-ps1-'));
     try {
-      const ps1Path = join(fakeBin, 'codex.ps1');
-      const cmdPath = join(fakeBin, 'codex.cmd');
-      const codexJsPath = join(fakeBin, 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const ps1Path = join(fakeBin, 'gemini.ps1');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
+      const geminiJsPath = join(fakeBin, 'node_modules', '@openai', 'gemini', 'bin', 'gemini.js');
       await writeFile(ps1Path, '');
       await writeFile(cmdPath, '');
-      await mkdir(join(fakeBin, 'node_modules', '@openai', 'codex', 'bin'), { recursive: true });
-      await writeFile(codexJsPath, '');
+      await mkdir(join(fakeBin, 'node_modules', '@openai', 'gemini', 'bin'), { recursive: true });
+      await writeFile(geminiJsPath, '');
       const spec = buildPlatformCommandSpec(
-        'codex',
+        'gemini',
         ['--version'],
         'win32',
         {
@@ -84,25 +84,25 @@ describe('buildPlatformCommandSpec', () => {
       );
 
       assert.equal(spec.command, process.execPath);
-      assert.deepEqual(spec.args, [codexJsPath, '--version']);
-      assert.equal(spec.resolvedPath, codexJsPath);
+      assert.deepEqual(spec.args, [geminiJsPath, '--version']);
+      assert.equal(spec.resolvedPath, geminiJsPath);
     } finally {
       await rm(fakeBin, { recursive: true, force: true });
     }
   });
 
-  it('resolves codex.js from npm .bin-style Windows shim layouts', async () => {
+  it('resolves gemini.js from npm .bin-style Windows shim layouts', async () => {
     const fakeRoot = await mkdtemp(join(tmpdir(), 'omg-platform-local-shim-'));
     const fakeBin = join(fakeRoot, 'node_modules', '.bin');
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
-      const codexJsPath = join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
+      const geminiJsPath = join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin', 'gemini.js');
       await mkdir(fakeBin, { recursive: true });
-      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'codex', 'bin'), { recursive: true });
+      await mkdir(join(fakeRoot, 'node_modules', '@openai', 'gemini', 'bin'), { recursive: true });
       await writeFile(cmdPath, '@echo off\r\n');
-      await writeFile(codexJsPath, '');
+      await writeFile(geminiJsPath, '');
       const spec = buildPlatformCommandSpec(
-        'codex',
+        'gemini',
         ['--version'],
         'win32',
         {
@@ -112,20 +112,20 @@ describe('buildPlatformCommandSpec', () => {
       );
 
       assert.equal(spec.command, process.execPath);
-      assert.deepEqual(spec.args, [codexJsPath, '--version']);
-      assert.equal(spec.resolvedPath, codexJsPath);
+      assert.deepEqual(spec.args, [geminiJsPath, '--version']);
+      assert.equal(spec.resolvedPath, geminiJsPath);
     } finally {
       await rm(fakeRoot, { recursive: true, force: true });
     }
   });
 
-  it('falls back to cmd shims when the node-hosted codex entrypoint is unavailable', async () => {
+  it('falls back to cmd shims when the node-hosted gemini entrypoint is unavailable', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-cmd-fallback-'));
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
       await writeFile(cmdPath, '@echo off\r\n');
       const spec = buildPlatformCommandSpec(
-        'codex',
+        'gemini',
         ['--version'],
         'win32',
         {
@@ -137,7 +137,7 @@ describe('buildPlatformCommandSpec', () => {
 
       assert.equal(spec.command, 'C:\\Windows\\System32\\cmd.exe');
       assert.deepEqual(spec.args.slice(0, 3), ['/d', '/s', '/c']);
-      assert.match(spec.args[3] || '', /codex\.cmd/i);
+      assert.match(spec.args[3] || '', /gemini\.cmd/i);
       assert.equal(spec.resolvedPath, cmdPath);
     } finally {
       await rm(fakeBin, { recursive: true, force: true });
@@ -147,12 +147,12 @@ describe('buildPlatformCommandSpec', () => {
   it('prefers cmd shims over PowerShell shims when no node-hosted entrypoint exists', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-ps1-fallback-'));
     try {
-      const ps1Path = join(fakeBin, 'codex.ps1');
-      const cmdPath = join(fakeBin, 'codex.cmd');
+      const ps1Path = join(fakeBin, 'gemini.ps1');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
       await writeFile(ps1Path, '');
       await writeFile(cmdPath, '');
       const spec = buildPlatformCommandSpec(
-        'codex',
+        'gemini',
         ['--version'],
         'win32',
         {
@@ -163,7 +163,7 @@ describe('buildPlatformCommandSpec', () => {
 
       assert.match(spec.command, /cmd(?:\.exe)?$/i);
       assert.deepEqual(spec.args.slice(0, 3), ['/d', '/s', '/c']);
-      assert.match(spec.args[3] || '', /codex\.cmd/i);
+      assert.match(spec.args[3] || '', /gemini\.cmd/i);
       assert.equal(spec.resolvedPath, cmdPath);
       assert.notEqual(spec.resolvedPath, ps1Path);
     } finally {
@@ -176,7 +176,7 @@ describe('buildPlatformCommandSpec', () => {
     const badPowerShellBin = await mkdtemp(join(tmpdir(), 'omg-platform-bad-powershell-'));
     const goodPowerShellBin = await mkdtemp(join(tmpdir(), 'omg-platform-good-powershell-'));
     try {
-      const ps1Path = join(shimBin, 'codex.ps1');
+      const ps1Path = join(shimBin, 'gemini.ps1');
       const powershellDirectory = join(badPowerShellBin, 'powershell');
       const powershellExePath = join(goodPowerShellBin, 'powershell.exe');
       await writeFile(ps1Path, '');
@@ -332,7 +332,7 @@ describe('spawnPlatformCommandSync', () => {
   it('passes the Windows-resolved spec into the spawn implementation', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-spawn-'));
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
       await writeFile(cmdPath, '@echo off\r\n');
       const calls: Array<{
         command: string;
@@ -341,7 +341,7 @@ describe('spawnPlatformCommandSync', () => {
       }> = [];
 
       const probed = spawnPlatformCommandSync(
-        'codex',
+        'gemini',
         ['--version'],
         { encoding: 'utf-8' },
         'win32',
@@ -367,21 +367,21 @@ describe('spawnPlatformCommandSync', () => {
       assert.equal(probed.spec.command, 'C:\\Windows\\System32\\cmd.exe');
       assert.equal(calls.length, 1);
       assert.equal(calls[0]?.command, 'C:\\Windows\\System32\\cmd.exe');
-      assert.match((calls[0]?.args[3] || ''), /codex\.cmd/i);
+      assert.match((calls[0]?.args[3] || ''), /gemini\.cmd/i);
       assert.equal(calls[0]?.options?.windowsVerbatimArguments, true);
     } finally {
       await rm(fakeBin, { recursive: true, force: true });
     }
   });
 
-  it('launches Windows node-hosted codex through process.execPath without verbatim cmd arguments', async () => {
+  it('launches Windows node-hosted gemini through process.execPath without verbatim cmd arguments', async () => {
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-spawn-node-hosted-'));
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
-      const codexJsPath = join(fakeBin, 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
+      const geminiJsPath = join(fakeBin, 'node_modules', '@openai', 'gemini', 'bin', 'gemini.js');
       await writeFile(cmdPath, '@echo off\r\n');
-      await mkdir(join(fakeBin, 'node_modules', '@openai', 'codex', 'bin'), { recursive: true });
-      await writeFile(codexJsPath, '');
+      await mkdir(join(fakeBin, 'node_modules', '@openai', 'gemini', 'bin'), { recursive: true });
+      await writeFile(geminiJsPath, '');
       const calls: Array<{
         command: string;
         args: readonly string[];
@@ -389,7 +389,7 @@ describe('spawnPlatformCommandSync', () => {
       }> = [];
 
       const probed = spawnPlatformCommandSync(
-        'codex',
+        'gemini',
         ['--version'],
         { encoding: 'utf-8' },
         'win32',
@@ -413,10 +413,10 @@ describe('spawnPlatformCommandSync', () => {
       );
 
       assert.equal(probed.spec.command, process.execPath);
-      assert.deepEqual(probed.spec.args, [codexJsPath, '--version']);
+      assert.deepEqual(probed.spec.args, [geminiJsPath, '--version']);
       assert.equal(calls.length, 1);
       assert.equal(calls[0]?.command, process.execPath);
-      assert.deepEqual(calls[0]?.args, [codexJsPath, '--version']);
+      assert.deepEqual(calls[0]?.args, [geminiJsPath, '--version']);
       assert.equal(calls[0]?.options?.windowsVerbatimArguments, undefined);
       assert.equal(calls[0]?.options?.windowsHide, true);
     } finally {
@@ -471,11 +471,11 @@ describe('spawnPlatformCommandSync', () => {
 
     const fakeBin = await mkdtemp(join(tmpdir(), 'omg-platform-spawn-real-'));
     try {
-      const cmdPath = join(fakeBin, 'codex.cmd');
-      await writeFile(cmdPath, '@echo off\r\necho fake-codex 1.2.3\r\n');
+      const cmdPath = join(fakeBin, 'gemini.cmd');
+      await writeFile(cmdPath, '@echo off\r\necho fake-gemini 1.2.3\r\n');
 
       const probed = spawnPlatformCommandSync(
-        'codex',
+        'gemini',
         ['--version'],
         { encoding: 'utf-8' },
         'win32',
@@ -488,7 +488,7 @@ describe('spawnPlatformCommandSync', () => {
       );
 
       assert.equal(probed.result.status, 0, probed.result.stderr);
-      assert.equal((probed.result.stdout || '').trim(), 'fake-codex 1.2.3');
+      assert.equal((probed.result.stdout || '').trim(), 'fake-gemini 1.2.3');
     } finally {
       await rm(fakeBin, { recursive: true, force: true });
     }

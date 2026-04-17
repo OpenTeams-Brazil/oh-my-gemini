@@ -10,17 +10,17 @@ import {
   installNativeAgentConfigs,
 } from "../native-config.js";
 
-const originalStandardModel = process.env.OMX_DEFAULT_STANDARD_MODEL;
+const originalStandardModel = process.env.OMG_DEFAULT_STANDARD_MODEL;
 
 beforeEach(() => {
-  process.env.OMX_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
+  process.env.OMG_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
 });
 
 afterEach(() => {
   if (typeof originalStandardModel === "string") {
-    process.env.OMX_DEFAULT_STANDARD_MODEL = originalStandardModel;
+    process.env.OMG_DEFAULT_STANDARD_MODEL = originalStandardModel;
   } else {
-    delete process.env.OMX_DEFAULT_STANDARD_MODEL;
+    delete process.env.OMG_DEFAULT_STANDARD_MODEL;
   }
 });
 
@@ -70,13 +70,13 @@ describe("agents/native-config", () => {
 
     const prompt = "Instruction line";
     const exactMiniToml = generateAgentToml(agent, prompt, {
-      env: { OMX_DEFAULT_STANDARD_MODEL: "gpt-5.4-mini" } as NodeJS.ProcessEnv,
+      env: { OMG_DEFAULT_STANDARD_MODEL: "gpt-5.4-mini" } as NodeJS.ProcessEnv,
     });
     const frontierToml = generateAgentToml(agent, prompt, {
-      env: { OMX_DEFAULT_STANDARD_MODEL: "gpt-5.4" } as NodeJS.ProcessEnv,
+      env: { OMG_DEFAULT_STANDARD_MODEL: "gpt-5.4" } as NodeJS.ProcessEnv,
     });
     const tunedToml = generateAgentToml(agent, prompt, {
-      env: { OMX_DEFAULT_STANDARD_MODEL: "gpt-5.4-mini-tuned" } as NodeJS.ProcessEnv,
+      env: { OMG_DEFAULT_STANDARD_MODEL: "gpt-5.4-mini-tuned" } as NodeJS.ProcessEnv,
     });
 
     assert.match(exactMiniToml, /exact gpt-5\.4-mini model/);
@@ -127,7 +127,7 @@ describe("agents/native-config", () => {
     const previousGeminiHome = process.env.GEMINI_HOME;
 
     try {
-      delete process.env.OMX_DEFAULT_STANDARD_MODEL;
+      delete process.env.OMG_DEFAULT_STANDARD_MODEL;
       process.env.GEMINI_HOME = geminiHome;
       await mkdir(promptsDir, { recursive: true });
       await mkdir(geminiHome, { recursive: true });
@@ -141,7 +141,7 @@ describe("agents/native-config", () => {
     } finally {
       if (typeof previousGeminiHome === "string") process.env.GEMINI_HOME = previousGeminiHome;
       else delete process.env.GEMINI_HOME;
-      process.env.OMX_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
+      process.env.OMG_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
       await rm(root, { recursive: true, force: true });
     }
   });
@@ -154,7 +154,7 @@ describe("agents/native-config", () => {
     const previousGeminiHome = process.env.GEMINI_HOME;
 
     try {
-      delete process.env.OMX_DEFAULT_STANDARD_MODEL;
+      delete process.env.OMG_DEFAULT_STANDARD_MODEL;
       process.env.GEMINI_HOME = geminiHome;
       await mkdir(promptsDir, { recursive: true });
       await mkdir(geminiHome, { recursive: true });
@@ -167,7 +167,7 @@ describe("agents/native-config", () => {
     } finally {
       if (typeof previousGeminiHome === "string") process.env.GEMINI_HOME = previousGeminiHome;
       else delete process.env.GEMINI_HOME;
-      process.env.OMX_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
+      process.env.OMG_DEFAULT_STANDARD_MODEL = "gpt-5.4-mini";
       await rm(root, { recursive: true, force: true });
     }
   });

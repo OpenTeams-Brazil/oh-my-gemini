@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://yeachan-heo.github.io/oh-my-gemini-website/omg-character-nobg.png" alt="oh-my-gemini character" width="280">
   <br>
-  <em>Seu codex não está sozinho.</em>
+  <em>Seu gemini não está sozinho.</em>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/oh-my-gemini)](https://www.npmjs.com/package/oh-my-gemini)
@@ -12,7 +12,7 @@
 
 > **[Website](https://yeachan-heo.github.io/oh-my-gemini-website/)** | **[Documentation](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html)** | **[CLI Reference](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#cli-reference)** | **[Workflows](https://yeachan-heo.github.io/oh-my-gemini-website/docs.html#workflows)** | **[Guia de integração OpenClaw](../openclaw-integration.pt.md)** | **[GitHub](https://github.com/Yeachan-Heo/oh-my-gemini)** | **[npm](https://www.npmjs.com/package/oh-my-gemini)**
 
-Camada de orquestração multiagente para [OpenAI Gemini CLI](https://github.com/openai/codex).
+Camada de orquestração multiagente para [OpenAI Gemini CLI](https://github.com/openai/gemini).
 
 ## Novidades na v0.9.0 — Spark Initiative
 
@@ -52,7 +52,7 @@ omg team shutdown <team-name>
 
 ## Modelo central
 
-OMX instala e conecta estas camadas:
+oh-my-gemini instala e conecta estas camadas:
 
 ```text
 User
@@ -88,7 +88,7 @@ OMX agora inclui `omg hooks` para scaffolding e validação de plugins.
 - `omg tmux-hook` continua sendo suportado e não foi alterado.
 - `omg hooks` é aditivo e não substitui os fluxos de trabalho do tmux-hook.
 - Arquivos de plugins ficam em `.omg/hooks/*.mjs`.
-- Plugins estão desativados por padrão; ative com `OMX_HOOK_PLUGINS=1`.
+- Plugins estão desativados por padrão; ative com `OMG_HOOK_PLUGINS=1`.
 
 Consulte `docs/hooks-extension.md` para o fluxo de trabalho completo de extensões e modelo de eventos.
 
@@ -114,7 +114,7 @@ Por padrão, as ferramentas MCP de state/memory/trace aceitam o `workingDirector
 Para restringir isso, defina uma lista de raízes permitidas:
 
 ```bash
-export OMX_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
+export OMG_MCP_WORKDIR_ROOTS="/path/to/project:/path/to/another-root"
 ```
 
 Quando definido, valores de `workingDirectory` fora dessas raízes são rejeitados.
@@ -127,14 +127,14 @@ Por padrão, OMX injeta:
 -c model_instructions_file="<cwd>/GEMINI.md"
 ```
 
-Isso combina o `GEMINI.md` de `CODEX_HOME` com o `GEMINI.md` do projeto (se existir) e depois adiciona o overlay de runtime.
+Isso combina o `GEMINI.md` de `GEMINI_HOME` com o `GEMINI.md` do projeto (se existir) e depois adiciona o overlay de runtime.
 Estende o comportamento do Gemini, mas não substitui nem contorna as políticas centrais do sistema Gemini.
 
 Controles:
 
 ```bash
-OMX_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # desativar injeção de GEMINI.md
-OMX_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
+OMG_BYPASS_DEFAULT_SYSTEM_PROMPT=0 omg     # desativar injeção de GEMINI.md
+OMG_MODEL_INSTRUCTIONS_FILE=/path/to/instructions.md omg
 ```
 
 ## Modo equipe
@@ -166,16 +166,16 @@ Team cleanup now follows one standalone path; legacy linked-Ralph shutdown handl
 Seleção de Worker CLI para workers da equipe:
 
 ```bash
-OMX_TEAM_WORKER_CLI=auto    # padrão; usa claude quando worker --model contém "claude"
-OMX_TEAM_WORKER_CLI=codex   # forçar workers Gemini CLI
-OMX_TEAM_WORKER_CLI=claude  # forçar workers Claude CLI
-OMX_TEAM_WORKER_CLI_MAP=codex,codex,claude,claude  # mix de CLI por worker (comprimento=1 ou quantidade de workers)
-OMX_TEAM_AUTO_INTERRUPT_RETRY=0  # opcional: desativar fallback adaptativo queue->resend
+OMG_TEAM_WORKER_CLI=auto    # padrão; usa claude quando worker --model contém "claude"
+OMG_TEAM_WORKER_CLI=gemini   # forçar workers Gemini CLI
+OMG_TEAM_WORKER_CLI=claude  # forçar workers Claude CLI
+OMG_TEAM_WORKER_CLI_MAP=gemini,gemini,claude,claude  # mix de CLI por worker (comprimento=1 ou quantidade de workers)
+OMG_TEAM_AUTO_INTERRUPT_RETRY=0  # opcional: desativar fallback adaptativo queue->resend
 ```
 
 Notas:
-- Argumentos de inicialização de workers são compartilhados via `OMX_TEAM_WORKER_LAUNCH_ARGS`.
-- `OMX_TEAM_WORKER_CLI_MAP` sobrescreve `OMX_TEAM_WORKER_CLI` para seleção por worker.
+- Argumentos de inicialização de workers são compartilhados via `OMG_TEAM_WORKER_LAUNCH_ARGS`.
+- `OMG_TEAM_WORKER_CLI_MAP` sobrescreve `OMG_TEAM_WORKER_CLI` para seleção por worker.
 - O envio de triggers usa retentativas adaptativas por padrão (queue/submit, depois fallback seguro clear-line+resend quando necessário).
 - No modo Claude worker, OMX inicia workers como `claude` simples (sem argumentos extras de inicialização) e ignora substituições explícitas de `--model` / `--config` / `--effort` para que o Claude use o `settings.json` padrão.
 
@@ -185,8 +185,8 @@ Notas:
 - Instalações dependentes do escopo:
   - `user`: `~/.gemini/prompts/`, `~/.gemini/skills/`, `~/.gemini/config.toml`, `~/.omg/agents/`, `~/.gemini/GEMINI.md`
   - `project`: `./.gemini/prompts/`, `./.gemini/skills/`, `./.gemini/config.toml`, `./.omg/agents/`, `./GEMINI.md`
-- Comportamento de inicialização: se o escopo persistido for `project`, o lançamento do `omg` usa automaticamente `CODEX_HOME=./.gemini` (a menos que `CODEX_HOME` já esteja definido).
-- As instruções de inicialização combinam `~/.gemini/GEMINI.md` (ou `CODEX_HOME/GEMINI.md`, quando sobrescrito) com o `./GEMINI.md` do projeto e depois adicionam o overlay de runtime.
+- Comportamento de inicialização: se o escopo persistido for `project`, o lançamento do `omg` usa automaticamente `GEMINI_HOME=./.gemini` (a menos que `GEMINI_HOME` já esteja definido).
+- As instruções de inicialização combinam `~/.gemini/GEMINI.md` (ou `GEMINI_HOME/GEMINI.md`, quando sobrescrito) com o `./GEMINI.md` do projeto e depois adicionam o overlay de runtime.
 - Arquivos `GEMINI.md` existentes nunca são sobrescritos silenciosamente: em TTY interativo o setup pergunta antes de substituir; em modo não interativo a substituição é ignorada, a menos que você use `--force` (verificações de segurança de sessões ativas continuam valendo).
 - Atualizações do `config.toml` (para ambos os escopos):
   - `notify = ["node", "..."]`

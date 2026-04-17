@@ -50,15 +50,15 @@ export function resolveInvocationSessionId(payload: any): string {
   return safeString(
     payload?.session_id
     || payload?.['session-id']
-    || process.env.OMX_SESSION_ID
-    || process.env.CODEX_SESSION_ID
+    || process.env.OMG_SESSION_ID
+    || process.env.GEMINI_SESSION_ID
     || process.env.SESSION_ID
     || '',
   ).trim();
 }
 
-function readNativeSessionId(sessionState: { native_session_id?: unknown; codex_session_id?: unknown }): string {
-  return safeString(sessionState.native_session_id || sessionState.codex_session_id || '').trim();
+function readNativeSessionId(sessionState: { native_session_id?: unknown; gemini_session_id?: unknown }): string {
+  return safeString(sessionState.native_session_id || sessionState.gemini_session_id || '').trim();
 }
 
 function readCurrentTmuxSessionName(): string {
@@ -112,7 +112,7 @@ function processHasAncestorPid(targetPid: number, currentPid = process.pid): boo
 }
 
 export async function resolveManagedSessionContext(cwd: string, payload: any, { allowTeamWorker = true } = {}): Promise<any> {
-  if (allowTeamWorker && safeString(process.env.OMX_TEAM_WORKER || '').trim() !== '') {
+  if (allowTeamWorker && safeString(process.env.OMG_TEAM_WORKER || '').trim() !== '') {
     return {
       managed: true,
       reason: 'team_worker',
@@ -265,8 +265,8 @@ async function readManagedPaneCommandState(paneTarget: string): Promise<{ curren
 
 function paneLooksLikeManagedAgent({ currentCommand, startCommand }: { currentCommand: string; startCommand: string }): boolean {
   if (/\bomg\b.*\bhud\b.*--watch/i.test(startCommand)) return false;
-  if (startCommand.includes('codex')) return true;
-  return currentCommand === 'codex' || currentCommand === 'node' || currentCommand === 'npx';
+  if (startCommand.includes('gemini')) return true;
+  return currentCommand === 'gemini' || currentCommand === 'node' || currentCommand === 'npx';
 }
 export async function resolveManagedCurrentPane(cwd: string, payload: any, { allowTeamWorker = false } = {}): Promise<string> {
   const paneTarget = safeString(process.env.TMUX_PANE || '').trim();
@@ -299,8 +299,8 @@ export async function resolveManagedSessionPane(cwd: string, payload: any): Prom
       const currentCommand = safeString(rawCurrentCommand).trim().toLowerCase();
       if (!candidatePaneId) continue;
       if (/\bomg\b.*\bhud\b.*--watch/i.test(startCommand)) continue;
-      if (startCommand.includes('codex')) return candidatePaneId;
-      if (currentCommand === 'codex') return candidatePaneId;
+      if (startCommand.includes('gemini')) return candidatePaneId;
+      if (currentCommand === 'gemini') return candidatePaneId;
     }
   } catch {
     // best effort only
@@ -332,8 +332,8 @@ export async function resolveManagedPaneFromAnchor(anchorPane: string, cwd: stri
       const currentCommand = safeString(rawCurrentCommand).trim().toLowerCase();
       if (!candidatePaneId) continue;
       if (/\bomg\b.*\bhud\b.*--watch/i.test(startCommand)) continue;
-      if (startCommand.includes('codex')) return candidatePaneId;
-      if (currentCommand === 'codex') return candidatePaneId;
+      if (startCommand.includes('gemini')) return candidatePaneId;
+      if (currentCommand === 'gemini') return candidatePaneId;
     }
   } catch {
     // best effort only

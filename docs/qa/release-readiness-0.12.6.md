@@ -15,7 +15,7 @@ Verdict: **GO** ✅
 - `src/cli/index.ts`, `src/cli/mcp-parity.ts`, `README.md`, `skills/wiki/SKILL.md` — CLI parity and user-facing workflow entry points
 
 ### Hooks / notifications / session state
-- `src/scripts/codex-native-hook.ts` — native hook session-state and release-readiness guardrails
+- `src/scripts/gemini-native-hook.ts` — native hook session-state and release-readiness guardrails
 - `src/scripts/notify-hook/team-dispatch.ts`, `src/scripts/notify-hook/team-leader-nudge.ts`, `src/scripts/notify-fallback-watcher.ts` — delivery / fallback / nudge stability
 - `src/notifications/*`, `src/hooks/session.ts`, `src/hud/state.ts` — session visibility, lifecycle dedupe, reply listener, tmux, idle cooldown, and HUD cleanup
 

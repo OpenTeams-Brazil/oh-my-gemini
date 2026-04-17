@@ -12,16 +12,16 @@ type ManagedHookEventName = (typeof MANAGED_HOOK_EVENTS)[number];
 
 type JsonObject = Record<string, unknown>;
 
-export interface ManagedCodexHooksConfig {
+export interface ManagedGeminiHooksConfig {
   hooks: Record<ManagedHookEventName, Array<Record<string, unknown>>>;
 }
 
-interface ParsedCodexHooksConfig {
+interface ParsedGeminiHooksConfig {
   root: JsonObject;
   hooks: JsonObject;
 }
 
-export interface RemoveManagedCodexHooksResult {
+export interface RemoveManagedGeminiHooksResult {
   nextContent: string | null;
   removedCount: number;
 }
@@ -55,10 +55,10 @@ function buildCommandHook(
   };
 }
 
-export function buildManagedCodexHooksConfig(
+export function buildManagedGeminiHooksConfig(
   pkgRoot: string,
-): ManagedCodexHooksConfig {
-  const hookScript = join(pkgRoot, "dist", "scripts", "codex-native-hook.js");
+): ManagedGeminiHooksConfig {
+  const hookScript = join(pkgRoot, "dist", "scripts", "gemini-native-hook.js");
   const command = `node "${hookScript}"`;
 
   return {
@@ -93,9 +93,9 @@ export function buildManagedCodexHooksConfig(
   };
 }
 
-export function parseCodexHooksConfig(
+export function parseGeminiHooksConfig(
   content: string,
-): ParsedCodexHooksConfig | null {
+): ParsedGeminiHooksConfig | null {
   try {
     const parsed = JSON.parse(content) as unknown;
     if (!isPlainObject(parsed)) return null;
@@ -110,7 +110,7 @@ export function parseCodexHooksConfig(
 }
 
 function isOmxManagedHookCommand(command: string): boolean {
-  return /(?:^|[\\/])codex-native-hook\.js(?:["'\s]|$)/.test(command);
+  return /(?:^|[\\/])gemini-native-hook\.js(?:["'\s]|$)/.test(command);
 }
 
 function countManagedHooksInEntry(entry: unknown): number {
@@ -126,10 +126,10 @@ function countManagedHooksInEntry(entry: unknown): number {
   }).length;
 }
 
-export function getMissingManagedCodexHookEvents(
+export function getMissingManagedGeminiHookEvents(
   content: string,
 ): ManagedHookEventName[] | null {
-  const parsed = parseCodexHooksConfig(content);
+  const parsed = parseGeminiHooksConfig(content);
   if (!parsed) return null;
 
   return MANAGED_HOOK_EVENTS.filter((eventName) => {
@@ -175,18 +175,18 @@ function stripManagedHooksFromEntry(entry: unknown): {
   };
 }
 
-function serializeCodexHooksConfig(root: JsonObject): string {
+function serializeGeminiHooksConfig(root: JsonObject): string {
   return JSON.stringify(root, null, 2) + "\n";
 }
 
-export function mergeManagedCodexHooksConfig(
+export function mergeManagedGeminiHooksConfig(
   existingContent: string | null | undefined,
   pkgRoot: string,
 ): string {
-  const managedConfig = buildManagedCodexHooksConfig(pkgRoot);
+  const managedConfig = buildManagedGeminiHooksConfig(pkgRoot);
   const parsed =
     typeof existingContent === "string"
-      ? parseCodexHooksConfig(existingContent)
+      ? parseGeminiHooksConfig(existingContent)
       : null;
 
   const nextRoot = parsed ? cloneJson(parsed.root) : {};
@@ -217,13 +217,13 @@ export function mergeManagedCodexHooksConfig(
     delete nextRoot.hooks;
   }
 
-  return serializeCodexHooksConfig(nextRoot);
+  return serializeGeminiHooksConfig(nextRoot);
 }
 
-export function removeManagedCodexHooks(
+export function removeManagedGeminiHooks(
   existingContent: string,
-): RemoveManagedCodexHooksResult {
-  const parsed = parseCodexHooksConfig(existingContent);
+): RemoveManagedGeminiHooksResult {
+  const parsed = parseGeminiHooksConfig(existingContent);
   if (!parsed) {
     return { nextContent: existingContent, removedCount: 0 };
   }
@@ -266,7 +266,7 @@ export function removeManagedCodexHooks(
   }
 
   return {
-    nextContent: serializeCodexHooksConfig(nextRoot),
+    nextContent: serializeGeminiHooksConfig(nextRoot),
     removedCount,
   };
 }

@@ -53,7 +53,7 @@ describe("adaptCommand", () => {
 		const out: string[] = [];
 		try {
 			process.env.GEMINI_HOME = join(cwd, ".gemini-home");
-			process.env.OMX_OPENCLAW = "1";
+			process.env.OMG_OPENCLAW = "1";
 			await adaptCommand(["openclaw", "status", "--json"], {
 				cwd,
 				stdout: (line) => out.push(line),
@@ -66,7 +66,7 @@ describe("adaptCommand", () => {
 			assert.equal(parsed.openclaw?.observedState, "missing-config");
 		} finally {
 			delete process.env.GEMINI_HOME;
-			delete process.env.OMX_OPENCLAW;
+			delete process.env.OMG_OPENCLAW;
 			await rm(cwd, { recursive: true, force: true });
 		}
 	});

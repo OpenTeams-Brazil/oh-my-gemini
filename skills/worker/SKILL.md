@@ -1,15 +1,15 @@
 ---
 name: worker
-description: Team worker protocol (ACK, mailbox, task lifecycle) for tmux-based OMX teams
+description: Team worker protocol (ACK, mailbox, task lifecycle) for tmux-based OMG teams
 ---
 
 # Worker Skill
 
-This skill is for a Gemini session that was started as an OMX Team worker (a tmux pane spawned by `$team`).
+This skill is for a Gemini session that was started as an OMG Team worker (a tmux pane spawned by `$team`).
 
 ## Identity
 
-You MUST be running with `OMX_TEAM_WORKER` set. It looks like:
+You MUST be running with `OMG_TEAM_WORKER` set. It looks like:
 
 `<team-name>/worker-<n>`
 
@@ -19,14 +19,14 @@ Example: `alpha/worker-2`
 
 When a worker inbox tells you to load this skill, resolve the first existing path:
 
-1. `${CODEX_HOME:-~/.gemini}/skills/worker/SKILL.md`
+1. `${GEMINI_HOME:-~/.gemini}/skills/worker/SKILL.md`
 2. `~/.gemini/skills/worker/SKILL.md`
 3. `<leader_cwd>/.gemini/skills/worker/SKILL.md`
 4. `<leader_cwd>/skills/worker/SKILL.md` (repo fallback)
 
 ## Startup Protocol (ACK)
 
-1. Parse `OMX_TEAM_WORKER` into:
+1. Parse `OMG_TEAM_WORKER` into:
    - `teamName` (before the `/`)
    - `workerName` (after the `/`, usually `worker-<n>`)
 2. Send a startup ACK to the lead mailbox **before task work**:
@@ -50,7 +50,7 @@ omg team api send-message --input "{\"team_name\":\"<teamName>\",\"from_worker\"
 ## Inbox + Tasks
 
 1. Resolve canonical team state root in this order:
-   1) `OMX_TEAM_STATE_ROOT` env
+   1) `OMG_TEAM_STATE_ROOT` env
    2) worker identity `team_state_root`
    3) team config/manifest `team_state_root`
    4) local cwd fallback (`.omg/state`)
