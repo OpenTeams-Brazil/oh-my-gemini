@@ -46,9 +46,9 @@ omg team shutdown <team-name>
 
 ## Fluxo recomendado
 
-1. `$deep-interview` — quando escopo ou limites ainda não estão claros.
+1. `$deep-interview` — quando escopo ou limites ainda não estão claros (agora com **melhores perguntas socráticas**).
 2. `$ralplan` — para transformar esse escopo esclarecido em um plano aprovado de arquitetura e implementação.
-3. `$team` ou `$ralph` — use `$team` para execução paralela coordenada, ou `$ralph` para um loop persistente de conclusão/verificação com um único responsável.
+3. `$team` ou `$ralph` — use `$team` para execução paralela coordenada (apoiada por **subagents nativos**), ou `$ralph` para um loop persistente de conclusão/verificação com um único responsável.
 
 ## Modelo central
 
@@ -250,6 +250,18 @@ npm test
 
 - Log de alterações completo: `CHANGELOG.md`
 - Guia de migração (pós-v0.4.4 mainline): `docs/migration-mainline-post-v0.4.4.md`
+- Notas de cobertura e paridade: `COVERAGE.md`
+- Fluxo de trabalho de extensão de hooks: `docs/hooks-extension.md`
+- Detalhes de instalação e contribuição: `CONTRIBUTING.md`
+
+## Agradecimentos
+
+Inspirado em [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode), adaptado para Gemini CLI.
+
+## Licença
+
+MIT
+ne): `docs/migration-mainline-post-v0.4.4.md`
 - Notas de cobertura e paridade: `COVERAGE.md`
 - Fluxo de trabalho de extensão de hooks: `docs/hooks-extension.md`
 - Detalhes de instalação e contribuição: `CONTRIBUTING.md`

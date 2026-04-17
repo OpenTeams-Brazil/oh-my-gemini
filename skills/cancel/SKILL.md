@@ -32,7 +32,6 @@ Automatically detects which mode is active and cancels it:
 /cancel
 ```
 
-Or say: "cancelomc", "stopomc"
 
 ## Auto-Detection
 

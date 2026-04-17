@@ -2,7 +2,7 @@
 
 This page is the canonical answer to:
 
-> Which OMC/OMX hooks run on native Gemini hooks already, which stay on runtime fallbacks, and which are not supported yet?
+> Which OMX hooks run on native Gemini hooks already, which stay on runtime fallbacks, and which are not supported yet?
 
 ## Install surface
 
@@ -85,3 +85,4 @@ When validating hooks, keep the proof boundary explicit:
    - behavior came from notify-hook / derived watcher / tmux runtime, not native Gemini hooks
 
 Do not claim “native hooks work” when only tmux or synthetic notify fallback paths were exercised.
+exercised.

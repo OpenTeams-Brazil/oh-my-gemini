@@ -27,6 +27,8 @@ It keeps Gemini as the execution engine and makes it easier to:
 - start a stronger Gemini session by default
 - run one consistent workflow from clarification to completion
 - invoke the canonical skills with `$deep-interview`, `$ralplan`, `$team`, and `$ralph`
+- leverage **native subagents** for independent parallel subtasks
+- utilize **better Socratic questions** via `$deep-interview` for high-leverage clarification
 - keep project guidance, plans, logs, and state in `.omg/`
 
 ## Core Maintainers
