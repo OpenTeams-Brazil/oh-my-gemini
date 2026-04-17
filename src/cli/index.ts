@@ -653,6 +653,7 @@ export async function main(args: string[]): Promise<void> {
     "ralph",
     "session",
     "resume",
+    "migrate",
     "version",
     "tmux-hook",
     "hooks",
@@ -745,6 +746,11 @@ export async function main(args: string[]): Promise<void> {
       case "session":
         await sessionCommand(args.slice(1));
         break;
+      case "migrate": {
+        const { migrateCommand } = await import("./migrate.js");
+        await migrateCommand(args.slice(1));
+        break;
+      }
       case "ralph":
         await ralphCommand(args.slice(1));
         break;

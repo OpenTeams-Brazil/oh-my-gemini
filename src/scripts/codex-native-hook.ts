@@ -45,6 +45,7 @@ import { dispatchHookEvent } from "../hooks/extensibility/dispatcher.js";
 import { reconcileHudForPromptSubmit } from "../hud/reconcile.js";
 import { onSessionStart as buildWikiSessionStartContext } from "../wiki/lifecycle.js";
 import { sessionModelInstructionsPath } from "../hooks/agents-overlay.js";
+import { logToolCall, translateToolName } from "../agents/shim.js";
 
 type GeminiHookEventName =
   | "SessionStart"
@@ -1470,8 +1471,33 @@ export async function dispatchGeminiNativeHook(
       };
     }
   } else if (hookEventName === "PreToolUse") {
+    const legacyName = safeString(payload.tool_name).trim();
+    const nativeName = translateToolName(legacyName);
+    const args = safeObject(payload.tool_input);
+    
+    logToolCall(legacyName, nativeName, args, "pending");
+    
     outputJson = buildNativePreToolUseOutput(payload);
+    
+    // Shim Layer: If names differ, we can try to override arguments or provide a system message.
+    // For now, we'll just log it and provide a hint if it's a legacy tool.
+    if (legacyName !== nativeName) {
+      const shimOutput = {
+        systemMessage: `Legacy tool ${legacyName} detected. Mapping to native Gemini tool ${nativeName}.`,
+        hookSpecificOutput: {
+          tool_name: nativeName, // This might not be supported by Gemini CLI but we log it.
+        }
+      };
+      outputJson = outputJson ? { ...outputJson, ...shimOutput } : shimOutput;
+    }
   } else if (hookEventName === "PostToolUse") {
+    const legacyName = safeString(payload.tool_name).trim();
+    const nativeName = translateToolName(legacyName);
+    const args = safeObject(payload.tool_input);
+    const result = payload.tool_response;
+    
+    logToolCall(legacyName, nativeName, args, "completed", result);
+
     if (detectMcpTransportFailure(payload)) {
       await markTeamTransportFailure(cwd, payload);
     }

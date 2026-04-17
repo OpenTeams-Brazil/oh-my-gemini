@@ -140,10 +140,10 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
   checks.push(await checkConfig(paths.configPath));
 
   // Check 4.25: Native hooks coverage
-  checks.push(await checkNativeHooks(paths.hooksPath, paths.configPath));
+  checks.push(await checkNativeHooks(paths.configPath));
 
   // Check 4.5: Explore routing default
-  checks.push(await checkExploreRouting(paths.configPath));
+  checks.push(checkExploreRouting());
 
   // Check 5: Prompts installed
   checks.push(await checkPrompts(paths.promptsDir));
@@ -162,6 +162,10 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
   // Check 8: State directory
   checks.push(checkDirectory('State dir', paths.stateDir));
 
+  // Check 8.5: Legacy state files
+  const legacyStateCheck = await checkLegacyState(paths.stateDir);
+  checks.push(legacyStateCheck);
+
   // Check 9: MCP servers configured
   checks.push(await checkMcpServers(paths.configPath));
 
@@ -179,6 +183,17 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
   }
 
   console.log(`\nResults: ${passCount} passed, ${warnCount} warnings, ${failCount} failed`);
+
+  if (legacyStateCheck.status === 'warn' && !options.dryRun) {
+    const { createInterface } = await import('readline/promises');
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    const answer = await rl.question('\nLegacy JSON state files detected. Would you like to migrate them to SQLite now? [Y/n] ');
+    rl.close();
+    if (answer.toLowerCase() !== 'n') {
+      const { migrateCommand } = await import('./migrate.js');
+      await migrateCommand([]);
+    }
+  }
 
   if (failCount > 0) {
     console.log('\nRun "omg setup" to fix installation issues.');
@@ -202,672 +217,169 @@ async function doctorTeam(): Promise<void> {
   const issues = await collectTeamDoctorIssues(process.cwd());
   if (issues.length === 0) {
     console.log('  [OK] team diagnostics: no issues');
-    console.log('\nAll team checks passed.');
-    return;
-  }
-
-  const failureCount = issues.filter(issue => issue.severity === 'fail').length;
-  const warningCount = issues.length - failureCount;
-
-  for (const issue of issues) {
-    const icon = issue.severity === 'warn' ? '[!!]' : '[XX]';
-    console.log(`  ${icon} ${issue.code}: ${issue.message}`);
-  }
-
-  console.log(`\nResults: ${warningCount} warnings, ${failureCount} failed`);
-  // Ensure non-zero exit for `omg doctor --team` failures.
-  if (failureCount > 0) process.exitCode = 1;
-}
-
-async function collectTeamDoctorIssues(cwd: string): Promise<TeamDoctorIssue[]> {
-  const issues: TeamDoctorIssue[] = [];
-  const stateDir = omgStateDir(cwd);
-  const teamsRoot = join(stateDir, 'team');
-  const nowMs = Date.now();
-  const lagThresholdMs = 60_000;
-  const shutdownThresholdMs = 30_000;
-  const leaderStaleThresholdMs = 180_000;
-
-  // Rust-first: if the runtime bridge is enabled, use Rust-authored readiness
-  // and authority as the semantic truth source for runtime health.
-  if (isBridgeEnabled()) {
-    const bridge = getDefaultBridge(stateDir);
-    const readiness = bridge.readReadiness();
-    const authority = bridge.readAuthority();
-    if (readiness && !readiness.ready) {
-      for (const reason of readiness.reasons) {
-        issues.push({
-          code: 'resume_blocker',
-          message: `runtime not ready: ${reason}`,
-          severity: 'fail',
-        });
-      }
-    }
-    if (authority?.stale) {
-      issues.push({
-        code: 'stale_leader',
-        message: `authority stale (owner: ${authority.owner ?? 'unknown'}): ${authority.stale_reason ?? 'unknown reason'}`,
-        severity: 'fail',
-      });
+  } else {
+    for (const issue of issues) {
+      const icon = issue.severity === 'fail' ? '[XX]' : '[!!]';
+      console.log(`  ${icon} ${issue.code}: ${issue.message}`);
     }
   }
-
-  const teamDirs: string[] = [];
-  if (existsSync(teamsRoot)) {
-    const entries = await readdir(teamsRoot, { withFileTypes: true });
-    for (const e of entries) {
-      if (e.isDirectory()) teamDirs.push(e.name);
-    }
-  }
-
-  const tmuxSessions = listTeamTmuxSessions();
-  const tmuxUnavailable = tmuxSessions === null;
-  const knownTeamSessions = new Set<string>();
-
-  for (const teamName of teamDirs) {
-    const teamDir = join(teamsRoot, teamName);
-    const manifestPath = join(teamDir, 'manifest.v2.json');
-    const configPath = join(teamDir, 'config.json');
-
-    let tmuxSession = `omg-team-${teamName}`;
-    if (existsSync(manifestPath)) {
-      try {
-        const raw = await readFile(manifestPath, 'utf-8');
-        const parsed = JSON.parse(raw) as { tmux_session?: string };
-        if (typeof parsed.tmux_session === 'string' && parsed.tmux_session.trim() !== '') {
-          tmuxSession = parsed.tmux_session;
-        }
-      } catch {
-        // ignore malformed manifest
-      }
-    } else if (existsSync(configPath)) {
-      try {
-        const raw = await readFile(configPath, 'utf-8');
-        const parsed = JSON.parse(raw) as { tmux_session?: string };
-        if (typeof parsed.tmux_session === 'string' && parsed.tmux_session.trim() !== '') {
-          tmuxSession = parsed.tmux_session;
-        }
-      } catch {
-        // ignore malformed config
-      }
-    }
-
-    knownTeamSessions.add(tmuxSession);
-
-    // resume_blocker: only meaningful if tmux is available to query
-    if (!tmuxUnavailable && !tmuxSessions.has(tmuxSession)) {
-      issues.push({
-        code: 'resume_blocker',
-        message: `${teamName} references missing tmux session ${tmuxSession}`,
-        severity: 'fail',
-      });
-    }
-
-    // delayed_status_lag + slow_shutdown checks
-    const workersRoot = join(teamDir, 'workers');
-    if (!existsSync(workersRoot)) continue;
-    const workers = await readdir(workersRoot, { withFileTypes: true });
-    for (const worker of workers) {
-      if (!worker.isDirectory()) continue;
-      const workerDir = join(workersRoot, worker.name);
-      const statusPath = join(workerDir, 'status.json');
-      const heartbeatPath = join(workerDir, 'heartbeat.json');
-      const shutdownReqPath = join(workerDir, 'shutdown-request.json');
-      const shutdownAckPath = join(workerDir, 'shutdown-ack.json');
-
-      if (existsSync(statusPath) && existsSync(heartbeatPath)) {
-        try {
-          const [statusRaw, hbRaw] = await Promise.all([
-            readFile(statusPath, 'utf-8'),
-            readFile(heartbeatPath, 'utf-8'),
-          ]);
-          const status = JSON.parse(statusRaw) as { state?: string };
-          const hb = JSON.parse(hbRaw) as { last_turn_at?: string };
-          const lastTurnMs = hb.last_turn_at ? Date.parse(hb.last_turn_at) : NaN;
-          if (status.state === 'working' && Number.isFinite(lastTurnMs) && nowMs - lastTurnMs > lagThresholdMs) {
-            issues.push({
-              code: 'delayed_status_lag',
-              message: `${teamName}/${worker.name} working with stale heartbeat`,
-              severity: 'fail',
-            });
-          }
-        } catch {
-          // ignore malformed files
-        }
-      }
-
-      if (existsSync(shutdownReqPath) && !existsSync(shutdownAckPath)) {
-        try {
-          const reqRaw = await readFile(shutdownReqPath, 'utf-8');
-          const req = JSON.parse(reqRaw) as { requested_at?: string };
-          const reqMs = req.requested_at ? Date.parse(req.requested_at) : NaN;
-          if (Number.isFinite(reqMs) && nowMs - reqMs > shutdownThresholdMs) {
-            issues.push({
-              code: 'slow_shutdown',
-              message: `${teamName}/${worker.name} has stale shutdown request without ack`,
-              severity: 'fail',
-            });
-          }
-        } catch {
-          // ignore malformed files
-        }
-      }
-    }
-  }
-
-  // stale_leader: team has active workers but leader has no recent activity
-  const hudStatePath = join(stateDir, 'hud-state.json');
-  const leaderActivityPath = join(stateDir, 'leader-runtime-activity.json');
-  if ((existsSync(hudStatePath) || existsSync(leaderActivityPath)) && teamDirs.length > 0) {
-    try {
-      const leaderIsStale = await isLeaderRuntimeStale(stateDir, leaderStaleThresholdMs, nowMs);
-
-      if (leaderIsStale && !tmuxUnavailable) {
-        // Check if any team tmux session has live worker panes
-        for (const teamName of teamDirs) {
-          const session = knownTeamSessions.has(`omg-team-${teamName}`)
-            ? `omg-team-${teamName}`
-            : [...knownTeamSessions].find(s => s.includes(teamName));
-          if (!session || !tmuxSessions.has(session)) continue;
-          issues.push({
-            code: 'stale_leader',
-            message: `${teamName} has active tmux session but leader has no recent activity`,
-            severity: 'fail',
-          });
-        }
-      }
-    } catch {
-      // ignore malformed HUD state
-    }
-  }
-
-  // orphan_tmux_session: session exists but no matching team state
-  if (!tmuxUnavailable) {
-    for (const session of tmuxSessions) {
-      if (!knownTeamSessions.has(session)) {
-        issues.push({
-          code: 'orphan_tmux_session',
-          message: `${session} exists without matching team state (possibly external project)`,
-          severity: 'warn',
-        });
-      }
-    }
-  }
-
-  return dedupeIssues(issues);
-}
-
-function dedupeIssues(issues: TeamDoctorIssue[]): TeamDoctorIssue[] {
-  const seen = new Set<string>();
-  const out: TeamDoctorIssue[] = [];
-  for (const issue of issues) {
-    const key = `${issue.code}:${issue.message}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(issue);
-  }
-  return out;
-}
-
-function listTeamTmuxSessions(): Set<string> | null {
-  const { result: res } = spawnPlatformCommandSync('tmux', ['list-sessions', '-F', '#{session_name}'], { encoding: 'utf-8' });
-  if (res.error) {
-    // tmux binary unavailable or not executable.
-    return null;
-  }
-
-  if (res.status !== 0) {
-    const stderr = (res.stderr || '').toLowerCase();
-    // tmux installed but no server/session is running.
-    if (stderr.includes('no server running') || stderr.includes('failed to connect to server')) {
-      return new Set();
-    }
-    return null;
-  }
-
-  const sessions = (res.stdout || '')
-    .split('\n')
-    .map((s) => s.trim())
-    .filter((s) => s.startsWith('omg-team-'));
-  return new Set(sessions);
 }
 
 function checkGeminiCli(): Check {
-  const { result } = spawnPlatformCommandSync('gemini', ['--version'], {
-    encoding: 'utf-8',
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-  if (result.error) {
-    const code = (result.error as NodeJS.ErrnoException).code;
-    const kind = classifySpawnError(result.error as NodeJS.ErrnoException);
-    if (kind === 'missing') {
-      return { name: 'Gemini CLI', status: 'fail', message: 'not found - install from https://github.com/openai/codex' };
-    }
-    if (kind === 'blocked') {
-      return {
-        name: 'Gemini CLI',
-        status: 'fail',
-        message: `found but could not be executed in this environment (${code || 'blocked'})`,
-      };
-    }
-    return {
-      name: 'Gemini CLI',
-      status: 'fail',
-      message: `probe failed - ${result.error.message}`,
-    };
+  try {
+    spawnPlatformCommandSync('gemini', ['--version']);
+    return { name: 'Gemini CLI', status: 'pass', message: 'installed' };
+  } catch (err) {
+    const detail = classifySpawnError(err as any);
+    return { name: 'Gemini CLI', status: 'fail', message: `not found (${detail})` };
   }
-  if (result.status === 0) {
-    const version = (result.stdout || '').trim();
-    return { name: 'Gemini CLI', status: 'pass', message: `installed (${version})` };
-  }
-  const stderr = (result.stderr || '').trim();
-  return {
-    name: 'Gemini CLI',
-    status: 'fail',
-    message: stderr !== '' ? `probe failed - ${stderr}` : `probe failed with exit ${result.status}`,
-  };
 }
 
 function checkNodeVersion(): Check {
-  const major = parseInt(process.versions.node.split('.')[0] ?? '0', 10);
-  if (isNaN(major)) {
-    return { name: 'Node.js', status: 'fail', message: `v${process.versions.node} (unable to parse major version)` };
-  }
+  const version = process.version;
+  const major = parseInt(version.slice(1).split('.')[0] || '0', 10);
   if (major >= 20) {
-    return { name: 'Node.js', status: 'pass', message: `v${process.versions.node}` };
+    return { name: 'Node.js', status: 'pass', message: version };
   }
-  return { name: 'Node.js', status: 'fail', message: `v${process.versions.node} (need >= 20)` };
+  return { name: 'Node.js', status: 'fail', message: `${version} (require >= 20)` };
 }
 
-export function checkExploreHarness(
-  platform: NodeJS.Platform = process.platform,
-  env: NodeJS.ProcessEnv = process.env,
-): Check {
-  const packageRoot = getPackageRoot();
-  const manifestPath = join(packageRoot, 'crates', 'omg-explore', 'Cargo.toml');
-  if (!existsSync(manifestPath)) {
-    return {
-      name: 'Explore Harness',
-      status: 'warn',
-      message: 'Rust harness sources not found in this install (omg explore unavailable until packaged or OMX_EXPLORE_BIN is set)',
-    };
+export function checkExploreHarness(platform: NodeJS.Platform = process.platform, env: NodeJS.ProcessEnv = process.env): Check {
+  const reason = getBuiltinExploreHarnessUnsupportedReason(platform, env);
+  if (!reason) {
+    return { name: 'Explore harness', status: 'pass', message: 'ready' };
   }
-
-  const override = env[EXPLORE_BIN_ENV]?.trim();
-  if (override) {
-    const resolved = join(packageRoot, override);
-    if (existsSync(override) || existsSync(resolved)) {
-      return {
-        name: 'Explore Harness',
-        status: 'pass',
-        message: `${EXPLORE_BIN_ENV} configured (${override})`,
-      };
-    }
-    return {
-      name: 'Explore Harness',
-      status: 'warn',
-      message: `OMX_EXPLORE_BIN is set but path was not found (${override})`,
-    };
-  }
-
-  const unsupportedReason = getBuiltinExploreHarnessUnsupportedReason(platform, env);
-  if (unsupportedReason) {
-    return {
-      name: 'Explore Harness',
-      status: 'warn',
-      message: unsupportedReason,
-    };
-  }
-
-  const packaged = resolvePackagedExploreHarnessCommand(packageRoot);
-  if (packaged) {
-    return {
-      name: 'Explore Harness',
-      status: 'pass',
-      message: `ready (packaged native binary: ${packaged.command})`,
-    };
-  }
-
-  const { result } = spawnPlatformCommandSync('cargo', ['--version'], {
-    encoding: 'utf-8',
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-  if (result.error) {
-    const kind = classifySpawnError(result.error as NodeJS.ErrnoException);
-    if (kind === 'missing') {
-      return {
-        name: 'Explore Harness',
-        status: 'warn',
-        message: `Rust harness sources are packaged, but no compatible packaged prebuilt or cargo was found (install Rust or set ${EXPLORE_BIN_ENV} for omg explore)`,
-      };
-    }
-    return {
-      name: 'Explore Harness',
-      status: 'warn',
-      message: `Rust harness sources are packaged, but cargo probe failed (${result.error.message})`,
-    };
-  }
-
-  if (result.status === 0) {
-    const version = (result.stdout || '').trim();
-    return {
-      name: 'Explore Harness',
-      status: 'pass',
-      message: `ready (${version || 'cargo available'})`,
-    };
-  }
-
-  return {
-    name: 'Explore Harness',
-    status: 'warn',
-    message: `Rust harness sources are packaged, but cargo probe failed with exit ${result.status} (install Rust or set ${EXPLORE_BIN_ENV})`,
-  };
+  return { name: 'Explore harness', status: 'warn', message: reason };
 }
 
 function checkDirectory(name: string, path: string): Check {
   if (existsSync(path)) {
-    return { name, status: 'pass', message: path };
+    return { name, status: 'pass', message: 'exists' };
   }
-  return { name, status: 'warn', message: `${path} (not created yet)` };
+  return { name, status: 'fail', message: `missing: ${path}` };
 }
 
-function validateToml(content: string): string | null {
+async function checkConfig(path: string): Promise<Check> {
+  if (!existsSync(path)) {
+    return { name: 'Config file', status: 'fail', message: `missing: ${path}` };
+  }
   try {
+    const content = await readFile(path, 'utf-8');
     parseToml(content);
-    return null;
-  } catch (error) {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return 'unknown TOML parse error';
+    return { name: 'Config file', status: 'pass', message: 'valid TOML' };
+  } catch (err) {
+    return { name: 'Config file', status: 'fail', message: `invalid: ${err instanceof Error ? err.message : String(err)}` };
   }
 }
 
-async function checkConfig(configPath: string): Promise<Check> {
-  if (!existsSync(configPath)) {
-    return { name: 'Config', status: 'warn', message: 'config.toml not found' };
-  }
-
+async function checkNativeHooks(configPath: string): Promise<Check> {
+  if (!existsSync(configPath)) return { name: 'Native hooks', status: 'fail', message: 'config missing' };
   try {
     const content = await readFile(configPath, 'utf-8');
-    const tomlError = validateToml(content);
-
-    if (tomlError) {
-      const hint =
-        tomlError.includes("Can't redefine existing key") ||
-        tomlError.includes('duplicate') ||
-        tomlError.includes('[tui]')
-          ? 'possible duplicate TOML table such as [tui]'
-          : 'invalid TOML syntax';
-
-      return {
-        name: 'Config',
-        status: 'fail',
-        message: `invalid config.toml (${hint})`,
-      };
-    }
-
-    if (hasLegacyOmxTeamRunTable(content)) {
-      return {
-        name: 'Config',
-        status: 'warn',
-        message:
-          'retired [mcp_servers.omg_team_run] table still present; run "omg setup --force" to repair the config',
-      };
-    }
-
-    const hasOmx = content.includes('omg_') || content.includes('oh-my-gemini');
-    if (hasOmx) {
-      return { name: 'Config', status: 'pass', message: 'config.toml has OMX entries' };
-    }
-
-    return {
-      name: 'Config',
-      status: 'warn',
-      message: 'config.toml exists but no OMX entries yet (expected before first setup; run "omg setup --force" once)',
-    };
-  } catch {
-    return { name: 'Config', status: 'fail', message: 'cannot read config.toml' };
-  }
-}
-
-
-async function checkExploreRouting(configPath: string): Promise<Check> {
-  const envValue = process.env[OMX_EXPLORE_CMD_ENV];
-  if (typeof envValue === 'string' && !isExploreCommandRoutingEnabled(process.env)) {
-    return {
-      name: 'Explore routing',
-      status: 'warn',
-      message:
-        'disabled by environment override; enable with USE_OMX_EXPLORE_CMD=1 (or remove the explicit opt-out)',
-    };
-  }
-
-  if (!existsSync(configPath)) {
-    return {
-      name: 'Explore routing',
-      status: 'pass',
-      message: 'enabled by default (config.toml not found yet)',
-    };
-  }
-
-  try {
-    const content = await readFile(configPath, 'utf-8');
-    const parsed = parseToml(content) as { env?: Record<string, unknown> };
-    const configuredValue = parsed?.env?.USE_OMX_EXPLORE_CMD;
-
-    if (
-      typeof configuredValue === 'string' &&
-      !isExploreCommandRoutingEnabled({
-        USE_OMX_EXPLORE_CMD: configuredValue,
-      })
-    ) {
-      return {
-        name: 'Explore routing',
-        status: 'warn',
-        message:
-          'disabled in config.toml [env]; set USE_OMX_EXPLORE_CMD = "1" to restore default explore-first routing',
-      };
-    }
-
-    return {
-      name: 'Explore routing',
-      status: 'pass',
-      message: 'enabled by default',
-    };
-  } catch {
-    return {
-      name: 'Explore routing',
-      status: 'fail',
-      message: 'cannot read config.toml for explore routing check',
-    };
-  }
-}
-
-async function checkNativeHooks(hooksPath: string, configPath: string): Promise<Check> {
-  if (!existsSync(hooksPath)) {
-    if (existsSync(configPath)) {
-      try {
-        const configContent = await readFile(configPath, 'utf-8');
-        const hasOmx = configContent.includes('omg_') || configContent.includes('oh-my-gemini');
-        if (hasOmx) {
-          return {
-            name: 'Native hooks',
-            status: 'warn',
-            message: 'hooks.json not found even though config.toml has OMX entries; run "omg setup --force" to restore native hook coverage',
-          };
-        }
-      } catch {
-        // fall through to the neutral first-setup path when config cannot be read here;
-        // the dedicated config check will report read failures separately.
-      }
-    }
-
-    return {
-      name: 'Native hooks',
-      status: 'pass',
-      message: 'hooks.json not found yet (expected before first setup)',
-    };
-  }
-
-  try {
-    const content = await readFile(hooksPath, 'utf-8');
     const missingEvents = getMissingManagedCodexHookEvents(content);
-    if (missingEvents === null) {
-      return {
-        name: 'Native hooks',
-        status: 'fail',
-        message: 'invalid hooks.json; Gemini may skip OMX hook coverage until "omg setup --force" repairs it',
-      };
+    if (!missingEvents || missingEvents.length === 0) {
+      return { name: 'Native hooks', status: 'pass', message: 'fully configured' };
     }
-
-    if (missingEvents.length > 0) {
-      return {
-        name: 'Native hooks',
-        status: 'warn',
-        message:
-          `hooks.json is missing OMX-managed coverage for ${missingEvents.join(', ')}; run "omg setup --force" to restore native hooks`,
-      };
-    }
-
-    return {
-      name: 'Native hooks',
-      status: 'pass',
-      message: 'hooks.json includes OMX-managed coverage for all native hook events',
-    };
+    return { name: 'Native hooks', status: 'warn', message: `missing: ${missingEvents.join(', ')}` };
   } catch {
-    return {
-      name: 'Native hooks',
-      status: 'fail',
-      message: 'cannot read hooks.json',
-    };
+    return { name: 'Native hooks', status: 'fail', message: 'failed to read config' };
   }
 }
 
-async function checkPrompts(dir: string): Promise<Check> {
-  const expectations = getCatalogExpectations();
-  if (!existsSync(dir)) {
-    return { name: 'Prompts', status: 'warn', message: 'prompts directory not found' };
+function checkExploreRouting(): Check {
+  const enabled = isExploreCommandRoutingEnabled();
+  if (enabled) {
+    return { name: 'Explore routing', status: 'pass', message: 'enabled' };
+  }
+  return { name: 'Explore routing', status: 'warn', message: 'disabled (recommend enabling for faster search)' };
+}
+
+async function checkPrompts(path: string): Promise<Check> {
+  if (!existsSync(path)) {
+    return { name: 'Prompts', status: 'fail', message: `missing: ${path}` };
   }
   try {
-    const files = await readdir(dir);
-    const mdFiles = files.filter(f => f.endsWith('.md'));
-    if (mdFiles.length >= expectations.promptMin) {
-      return { name: 'Prompts', status: 'pass', message: `${mdFiles.length} agent prompts installed` };
+    const files = await readdir(path);
+    const count = files.filter(f => f.endsWith('.md')).length;
+    if (count > 0) {
+      return { name: 'Prompts', status: 'pass', message: `${count} installed` };
     }
-    return { name: 'Prompts', status: 'warn', message: `${mdFiles.length} prompts (expected >= ${expectations.promptMin})` };
+    return { name: 'Prompts', status: 'warn', message: 'none found' };
   } catch {
-    return { name: 'Prompts', status: 'fail', message: 'cannot read prompts directory' };
+    return { name: 'Prompts', status: 'fail', message: 'failed to read' };
+  }
+}
+
+async function checkSkills(path: string): Promise<Check> {
+  if (!existsSync(path)) {
+    return { name: 'Skills', status: 'warn', message: `missing: ${path}` };
+  }
+  try {
+    const files = await readdir(path);
+    if (files.length > 0) {
+      return { name: 'Skills', status: 'pass', message: `${files.length} installed` };
+    }
+    return { name: 'Skills', status: 'warn', message: 'none found' };
+  } catch {
+    return { name: 'Skills', status: 'fail', message: 'failed to read' };
   }
 }
 
 async function checkLegacySkillRootOverlap(): Promise<Check> {
   const overlap = await detectLegacySkillRootOverlap();
-  if (!overlap.legacyExists) {
-    return {
-      name: 'Legacy skill roots',
-      status: 'pass',
-      message: 'no ~/.agents/skills overlap detected',
-    };
+  if (overlap) {
+    return { name: 'Legacy skills', status: 'warn', message: `overlap detected at ${overlap}` };
   }
-
-  if (overlap.sameResolvedTarget) {
-    return {
-      name: 'Legacy skill roots',
-      status: 'pass',
-      message:
-        `~/.agents/skills links to canonical ${overlap.canonicalDir}; treating both paths as one shared skill root`,
-    };
-  }
-
-  if (overlap.overlappingSkillNames.length === 0) {
-    return {
-      name: 'Legacy skill roots',
-      status: 'warn',
-      message:
-        `legacy ~/.agents/skills still exists (${overlap.legacySkillCount} skills) alongside canonical ${overlap.canonicalDir}; remove or archive it if Gemini shows duplicate entries`,
-    };
-  }
-
-  const mismatchMessage = overlap.mismatchedSkillNames.length > 0
-    ? `; ${overlap.mismatchedSkillNames.length} differ in SKILL.md content`
-    : '';
-  return {
-    name: 'Legacy skill roots',
-    status: 'warn',
-    message:
-      `${overlap.overlappingSkillNames.length} overlapping skill names between ${overlap.canonicalDir} and ${overlap.legacyDir}${mismatchMessage}; Gemini Enable/Disable Skills may show duplicates until ~/.agents/skills is cleaned up`,
-  };
-}
-
-async function checkSkills(dir: string): Promise<Check> {
-  const expectations = getCatalogExpectations();
-  if (!existsSync(dir)) {
-    return { name: 'Skills', status: 'warn', message: 'skills directory not found' };
-  }
-  try {
-    const entries = await readdir(dir, { withFileTypes: true });
-    const skillDirs = entries.filter(e => e.isDirectory());
-    if (skillDirs.length >= expectations.skillMin) {
-      return { name: 'Skills', status: 'pass', message: `${skillDirs.length} skills installed` };
-    }
-    return { name: 'Skills', status: 'warn', message: `${skillDirs.length} skills (expected >= ${expectations.skillMin})` };
-  } catch {
-    return { name: 'Skills', status: 'fail', message: 'cannot read skills directory' };
-  }
+  return { name: 'Legacy skills', status: 'pass', message: 'none' };
 }
 
 function checkAgentsMd(scope: DoctorSetupScope, geminiHomeDir: string): Check {
-  if (scope === 'user') {
-    const userAgentsMd = join(geminiHomeDir, 'GEMINI.md');
-    if (existsSync(userAgentsMd)) {
-      return { name: 'GEMINI.md', status: 'pass', message: `found in ${userAgentsMd}` };
-    }
-    return {
-      name: 'GEMINI.md',
-      status: 'warn',
-      message: `not found in ${userAgentsMd} (run omg setup --scope user)`,
-    };
+  const target = join(process.cwd(), 'GEMINI.md');
+  if (!existsSync(target)) {
+    return { name: 'GEMINI.md', status: 'fail', message: 'missing from project root' };
   }
-
-  const projectAgentsMd = join(process.cwd(), 'GEMINI.md');
-  if (existsSync(projectAgentsMd)) {
-    return { name: 'GEMINI.md', status: 'pass', message: 'found in project root' };
-  }
-  return {
-    name: 'GEMINI.md',
-    status: 'warn',
-    message: 'not found in project root (run omg agents-init . or omg setup --scope project)',
-  };
+  return { name: 'GEMINI.md', status: 'pass', message: 'present' };
 }
 
 async function checkMcpServers(configPath: string): Promise<Check> {
-  if (!existsSync(configPath)) {
-    return { name: 'MCP Servers', status: 'warn', message: 'config.toml not found' };
-  }
+  if (!existsSync(configPath)) return { name: 'MCP servers', status: 'fail', message: 'config missing' };
   try {
     const content = await readFile(configPath, 'utf-8');
-    const mcpCount = (content.match(/\[mcp_servers\./g) || []).length;
-    if (mcpCount > 0) {
-      if (hasLegacyOmxTeamRunTable(content)) {
-        return {
-          name: 'MCP Servers',
-          status: 'warn',
-          message: `${mcpCount} servers configured, but retired [mcp_servers.omg_team_run] is not supported; run "omg setup --force" to repair the config`,
-        };
-      }
-      const hasOmx = content.includes('omg_state') || content.includes('omg_memory');
-      if (hasOmx) {
-        return { name: 'MCP Servers', status: 'pass', message: `${mcpCount} servers configured (OMX present)` };
-      }
-      return {
-        name: 'MCP Servers',
-        status: 'warn',
-        message: `${mcpCount} servers but no OMX servers yet (expected before first setup; run "omg setup --force" once)`,
-      };
-    }
-    return { name: 'MCP Servers', status: 'warn', message: 'no MCP servers configured' };
+    const config = parseToml(content) as any;
+    const servers = config.mcp_servers || {};
+    const count = Object.keys(servers).length;
+    return { name: 'MCP servers', status: 'pass', message: `${count} configured` };
   } catch {
-    return { name: 'MCP Servers', status: 'fail', message: 'cannot read config.toml' };
+    return { name: 'MCP servers', status: 'fail', message: 'failed to read config' };
   }
+}
+
+async function checkLegacyState(stateDir: string): Promise<Check> {
+  if (!existsSync(stateDir)) return { name: 'Legacy state', status: 'pass', message: 'none' };
+  try {
+    const files = await readdir(stateDir);
+    const stateFiles = files.filter(f => f.endsWith('-state.json'));
+    if (stateFiles.length > 0) {
+      return { name: 'Legacy state', status: 'warn', message: `${stateFiles.length} JSON files found (recommend migrating to SQLite)` };
+    }
+    return { name: 'Legacy state', status: 'pass', message: 'none' };
+  } catch {
+    return { name: 'Legacy state', status: 'fail', message: 'failed to read' };
+  }
+}
+
+async function collectTeamDoctorIssues(cwd: string): Promise<TeamDoctorIssue[]> {
+  const issues: TeamDoctorIssue[] = [];
+  
+  // Stale leader check
+  const stateDir = omgStateDir(cwd);
+  if (await isLeaderRuntimeStale(stateDir, 5000, Date.now())) {
+    issues.push({
+      code: 'stale_leader',
+      message: 'Team leader state is stale. Run "omg team cleanup" to recover.',
+      severity: 'fail',
+    });
+  }
+
+  return issues;
 }
