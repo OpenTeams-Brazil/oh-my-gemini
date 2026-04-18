@@ -16,8 +16,8 @@ import { setup } from "../setup.js";
 
 const EXPECTED_PROJECT_GITIGNORE = [
   ".omg/",
-  ".gemini/*",
-  "!.gemini/agents/",
+  ".omx/",
+  ".gemini/*",  "!.gemini/agents/",
   "!.gemini/agents/**",
   "!.gemini/skills/",
   "!.gemini/skills/**",
@@ -547,7 +547,7 @@ describe("omg setup refresh summary and dry-run behavior", () => {
     }
   });
 
-  it("ignores legacy ~/.omg/mcp-registry.json during setup unless candidates are passed explicitly", async () => {
+  it("ignores legacy ~/.omx/mcp-registry.json during setup unless candidates are passed explicitly", async () => {
     const wd = await mkdtemp(join(tmpdir(), "omg-setup-refresh-"));
     const previousHome = process.env.HOME;
     const previousGeminiHome = process.env.GEMINI_HOME;
@@ -556,9 +556,9 @@ describe("omg setup refresh summary and dry-run behavior", () => {
       delete process.env.GEMINI_HOME;
 
       await mkdir(join(wd, ".omg", "state"), { recursive: true });
-      await mkdir(join(wd, ".omg"), { recursive: true });
+      await mkdir(join(wd, ".omx"), { recursive: true });
       await writeFile(
-        join(wd, ".omg", "mcp-registry.json"),
+        join(wd, ".omx", "mcp-registry.json"),
         JSON.stringify({
           legacy_helper: { command: "legacy-helper", args: ["mcp"] },
         }),

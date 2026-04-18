@@ -166,6 +166,14 @@ export interface SkillRootOverlapReport {
   mismatchedSkillNames: string[];
 }
 
+export interface UserProjectSkillOverlapReport {
+  userDir: string;
+  projectDir: string;
+  userExists: boolean;
+  projectExists: boolean;
+  overlappingSkillNames: string[];
+}
+
 async function readInstalledSkillsFromDir(
   dir: string,
   scope: InstalledSkillScope,
@@ -209,6 +217,34 @@ export async function listInstalledSkillDirectories(
   }
 
   return deduped;
+}
+
+export async function detectUserProjectSkillOverlap(
+  projectRoot?: string,
+): Promise<UserProjectSkillOverlapReport> {
+  const userDir = userSkillsDir();
+  const projectDir = projectSkillsDir(projectRoot);
+  const userExists = existsSync(userDir);
+  const projectExists = existsSync(projectDir);
+
+  const [userSkills, projectSkills] = await Promise.all([
+    readInstalledSkillsFromDir(userDir, "user"),
+    readInstalledSkillsFromDir(projectDir, "project"),
+  ]);
+
+  const userNames = new Set(userSkills.map((s) => s.name));
+  const overlappingSkillNames = projectSkills
+    .map((s) => s.name)
+    .filter((name) => userNames.has(name))
+    .sort((a, b) => a.localeCompare(b));
+
+  return {
+    userDir,
+    projectDir,
+    userExists,
+    projectExists,
+    overlappingSkillNames,
+  };
 }
 
 export async function detectLegacySkillRootOverlap(

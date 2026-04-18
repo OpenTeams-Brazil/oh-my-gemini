@@ -324,7 +324,7 @@ describe("omg setup scope behavior", () => {
       assert.match(res.stdout, /Using setup scope: user/);
       assert.match(
         res.stdout,
-        /User scope leaves project AGENTS\.md unchanged\./,
+        /User scope leaves project GEMINI.md unchanged\./,
       );
 
       assert.equal(existsSync(join(home, ".gemini", "prompts")), true);
@@ -391,7 +391,7 @@ describe("omg setup scope behavior", () => {
       );
       assert.match(
         res.stdout,
-        /\[OK\] AGENTS\.md: found in .*home\/\.gemini\/AGENTS\.md/,
+        /\[OK\] GEMINI.md: found in .*home\/\.gemini\/GEMINI.md/,
       );
     } finally {
       await rm(wd, { recursive: true, force: true });
@@ -438,7 +438,7 @@ describe("omg setup scope behavior", () => {
       if (shouldSkipForSpawnPermissions(res.error)) return;
       assert.equal(res.status, 0, res.stderr || res.stdout);
       const refreshed = await readFile(join(wd, "GEMINI.md"), "utf-8");
-      assert.match(res.stdout, /Skipped AGENTS\.md overwrite/);
+      assert.match(res.stdout, /Skipped GEMINI.md overwrite/);
       assert.equal(refreshed, existingAgents);
     } finally {
       await rm(wd, { recursive: true, force: true });

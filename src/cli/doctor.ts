@@ -140,7 +140,7 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
   checks.push(await checkConfig(paths.configPath));
 
   // Check 4.25: Native hooks coverage
-  checks.push(await checkNativeHooks(paths.configPath));
+  checks.push(await checkNativeHooks(paths.hooksPath, paths.configPath));
 
   // Check 4.5: Explore routing default
   checks.push(checkExploreRouting());
@@ -254,7 +254,7 @@ export function checkExploreHarness(platform: NodeJS.Platform = process.platform
 
 function checkDirectory(name: string, path: string): Check {
   if (existsSync(path)) {
-    return { name, status: 'pass', message: 'exists' };
+    return { name, status: 'pass', message: path };
   }
   return { name, status: 'fail', message: `missing: ${path}` };
 }
@@ -272,17 +272,22 @@ async function checkConfig(path: string): Promise<Check> {
   }
 }
 
-async function checkNativeHooks(configPath: string): Promise<Check> {
-  if (!existsSync(configPath)) return { name: 'Native hooks', status: 'fail', message: 'config missing' };
+async function checkNativeHooks(hooksPath: string, configPath: string): Promise<Check> {
+  if (!existsSync(hooksPath)) {
+    if (existsSync(configPath)) {
+      return { name: 'Native hooks', status: 'warn', message: 'hooks.json not found even though config.toml has OMX entries; run "omg setup --force" to restore native hook coverage' };
+    }
+    return { name: 'Native hooks', status: 'pass', message: 'hooks.json not found yet (expected before first setup)' };
+  }
   try {
-    const content = await readFile(configPath, 'utf-8');
+    const content = await readFile(hooksPath, 'utf-8');
     const missingEvents = getMissingManagedGeminiHookEvents(content);
     if (!missingEvents || missingEvents.length === 0) {
       return { name: 'Native hooks', status: 'pass', message: 'fully configured' };
     }
-    return { name: 'Native hooks', status: 'warn', message: `missing: ${missingEvents.join(', ')}` };
+    return { name: 'Native hooks', status: 'warn', message: `hooks.json is missing OMX-managed coverage for ${missingEvents.join(', ')}; run "omg setup --force" to restore native hooks` };
   } catch {
-    return { name: 'Native hooks', status: 'fail', message: 'failed to read config' };
+    return { name: 'Native hooks', status: 'fail', message: 'invalid hooks.json; Gemini may skip OMX hook coverage until "omg setup --force" repairs it' };
   }
 }
 
@@ -327,18 +332,39 @@ async function checkSkills(path: string): Promise<Check> {
 
 async function checkLegacySkillRootOverlap(): Promise<Check> {
   const overlap = await detectLegacySkillRootOverlap();
-  if (overlap) {
-    return { name: 'Legacy skills', status: 'warn', message: `overlap detected at ${overlap}` };
+  if (overlap.legacyExists && overlap.sameResolvedTarget) {
+    return {
+      name: 'Legacy skill roots',
+      status: 'pass',
+      message: `~/.agents/skills links to canonical ${overlap.canonicalDir}; treating both paths as one shared skill root`,
+    };
+  }
+  if (overlap.legacyExists && overlap.overlappingSkillNames.length > 0) {
+    return {
+      name: 'Legacy skill roots',
+      status: 'warn',
+      message: `${overlap.overlappingSkillNames.length} overlapping skill names between ${overlap.canonicalDir} and legacy ${overlap.legacyDir}; ${overlap.mismatchedSkillNames.length} differ in SKILL.md content; Gemini Enable/Disable Skills may show duplicates until ~/.agents/skills is cleaned up`,
+    };
+  }
+  if (overlap.legacyExists && overlap.overlappingSkillNames.length === 0) {
+    return {
+      name: 'Legacy skill roots',
+      status: 'warn',
+      message: `legacy ~/.agents/skills still exists (${overlap.legacySkillCount} skills) alongside canonical ${overlap.canonicalDir}; remove or archive it if Gemini shows duplicate entries`,
+    };
   }
   return { name: 'Legacy skills', status: 'pass', message: 'none' };
 }
 
 function checkAgentsMd(scope: DoctorSetupScope, geminiHomeDir: string): Check {
-  const target = join(process.cwd(), 'GEMINI.md');
+  const target = scope === 'project' 
+    ? join(process.cwd(), 'GEMINI.md') 
+    : join(geminiHomeDir, 'GEMINI.md');
   if (!existsSync(target)) {
-    return { name: 'GEMINI.md', status: 'fail', message: 'missing from project root' };
+    const scopeName = scope === 'project' ? 'project root' : 'user home';
+    return { name: 'GEMINI.md', status: 'fail', message: `missing from ${scopeName}` };
   }
-  return { name: 'GEMINI.md', status: 'pass', message: 'present' };
+  return { name: 'GEMINI.md', status: 'pass', message: `found in ${target}` };
 }
 
 async function checkMcpServers(configPath: string): Promise<Check> {

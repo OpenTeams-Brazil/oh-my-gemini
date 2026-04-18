@@ -88,8 +88,8 @@ describe('omg setup AGENTS refresh behavior', () => {
         scope: 'user',
       });
 
-      assert.match(output, /Generated AGENTS\.md in .*home\/\.gemini\./);
-      assert.match(output, /User scope leaves project AGENTS\.md unchanged\./);
+      assert.match(output, /Generated GEMINI.md in .*home\/\.gemini\./);
+      assert.match(output, /User scope leaves project GEMINI.md unchanged\./);
       assert.match(output, /agents_md: updated=1, unchanged=0, backed_up=0, skipped=0, removed=0/);
       assert.equal(await readFile(join(wd, 'GEMINI.md'), 'utf-8'), existing);
       assert.equal(existsSync(join(home, '.gemini', 'GEMINI.md')), true);
@@ -117,7 +117,7 @@ describe('omg setup AGENTS refresh behavior', () => {
       });
 
       const agentsContent = await readFile(join(wd, 'GEMINI.md'), 'utf-8');
-      assert.match(output, /Generated AGENTS\.md in project root\./);
+      assert.match(output, /Generated GEMINI.md in project root\./);
       assert.match(output, /agents_md: updated=1, unchanged=0, backed_up=1, skipped=0, removed=0/);
       assert.match(agentsContent, /^<!-- AUTONOMY DIRECTIVE — DO NOT REMOVE -->/);
       assert.match(agentsContent, /# oh-my-gemini - Intelligent Multi-Agent Orchestration/);
@@ -164,8 +164,8 @@ describe('omg setup AGENTS refresh behavior', () => {
         { geminiHomeOverride: join(wd, '.gemini') },
       );
 
-      assert.match(output, /Refreshed AGENTS\.md model capability table in project root\./);
-      assert.doesNotMatch(output, /Skipped AGENTS\.md overwrite/);
+      assert.match(output, /Refreshed GEMINI.md model capability table in project root\./);
+      assert.doesNotMatch(output, /Skipped GEMINI.md overwrite/);
       assert.match(
         agentsContent,
         new RegExp(`\\| Frontier \\(leader\\) \\| \`${expectedContext.frontierModel}\` \\| high \\|`),
@@ -221,7 +221,7 @@ describe('omg setup AGENTS refresh behavior', () => {
         { geminiHomeOverride: join(wd, '.gemini') },
       );
 
-      assert.match(output, /Refreshed AGENTS\.md model capability table in project root\./);
+      assert.match(output, /Refreshed GEMINI.md model capability table in project root\./);
       assert.match(agentsContent, /Keep this custom guidance\./);
       assert.match(agentsContent, /Footer guidance stays user-owned\./);
       assert.match(
@@ -251,8 +251,8 @@ describe('omg setup AGENTS refresh behavior', () => {
         scope: 'project',
       });
 
-      assert.match(output, /Skipped AGENTS\.md overwrite/);
-      assert.doesNotMatch(output, /Refreshed AGENTS\.md model capability table/);
+      assert.match(output, /Skipped GEMINI.md overwrite/);
+      assert.doesNotMatch(output, /Refreshed GEMINI.md model capability table/);
       assert.equal(await readFile(join(wd, 'GEMINI.md'), 'utf-8'), existing);
       assert.equal(existsSync(join(wd, '.omg', 'backups', 'setup')), false);
     } finally {
@@ -277,7 +277,7 @@ describe('omg setup AGENTS refresh behavior', () => {
         agentsOverwritePrompt: async () => false,
       });
 
-      assert.match(output, /Skipped AGENTS\.md overwrite/);
+      assert.match(output, /Skipped GEMINI.md overwrite/);
       assert.match(output, /agents_md: updated=0, unchanged=0, backed_up=0, skipped=1, removed=0/);
       assert.equal(await readFile(join(wd, 'GEMINI.md'), 'utf-8'), existing);
       assert.equal(existsSync(join(wd, '.omg', 'backups', 'setup')), false);
@@ -314,7 +314,7 @@ describe('omg setup AGENTS refresh behavior', () => {
       });
 
       assert.match(output, /WARNING: Active omg session detected/);
-      assert.match(output, /Skipping AGENTS\.md overwrite to avoid corrupting runtime overlay\./);
+      assert.match(output, /Skipping GEMINI.md overwrite to avoid corrupting runtime overlay\./);
       assert.match(output, /Stop the active session first, then re-run setup\./);
       assert.match(output, /agents_md: updated=0, unchanged=0, backed_up=0, skipped=1, removed=0/);
       assert.equal(await readFile(join(wd, 'GEMINI.md'), 'utf-8'), existing);

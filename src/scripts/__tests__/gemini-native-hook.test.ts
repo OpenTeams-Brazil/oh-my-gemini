@@ -279,7 +279,7 @@ describe("gemini native hook dispatch", () => {
 
       assert.equal(result.omgEventName, "session-start");
       const gitignore = await readFile(join(cwd, ".gitignore"), "utf-8");
-      assert.match(gitignore, /^node_modules\/\n\.omg\/\n$/);
+      assert.match(gitignore, /^node_modules\/\n\.omg\/\n\.omx\/\n$/);
       assert.match(
         JSON.stringify(result.outputJson),
         /Added \.omg\/ to .*\.gitignore/,

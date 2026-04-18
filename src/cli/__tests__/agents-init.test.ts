@@ -81,7 +81,7 @@ describe('omg agents-init', () => {
       assert.match(rootAgents, /<!-- END AUTONOMY DIRECTIVE -->\n\n# oh-my-gemini - Intelligent Multi-Agent Orchestration/);
       assert.match(rootAgents, /# oh-my-gemini - Intelligent Multi-Agent Orchestration/);
       assert.match(rootAgents, /\.\/\.gemini/);
-      assert.match(srcAgents, /<!-- Parent: ..\/AGENTS\.md -->/);
+      assert.match(srcAgents, /<!-- Parent: ..\/GEMINI.md -->/);
       assert.match(srcAgents, /`index\.ts`/);
       assert.match(docsAgents, /`guide\.md`/);
       assert.equal(existsSync(join(wd, 'node_modules', 'GEMINI.md')), false);

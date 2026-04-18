@@ -37,3 +37,4 @@ snapshot.json
 .gemini/skills/.system/**
 !.gemini/prompts/
 !.gemini/prompts/**
+.omx/

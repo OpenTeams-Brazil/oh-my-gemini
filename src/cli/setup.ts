@@ -133,6 +133,7 @@ export interface SkillFrontmatterMetadata {
 
 const PROJECT_GITIGNORE_ENTRIES = [
   ".omg/",
+  ".omx/",
   ".gemini/*",
   "!.gemini/agents/",
   "!.gemini/agents/**",
@@ -651,7 +652,7 @@ async function persistSetupScope(
     return;
   }
   await mkdir(dirname(scopePath), { recursive: true });
-  const payload: PersistedSetupScope = { scope };
+  const payload: PersistedSetupScope & { tool: string } = { scope, tool: "omg" };
   await writeFile(scopePath, JSON.stringify(payload, null, 2) + "\n");
   if (options.verbose) console.log(`  Wrote ${scopePath}`);
 }

@@ -366,11 +366,13 @@ async function ensureOmxGitignoreEntry(cwd: string): Promise<{ changed: boolean;
     ? await readFile(gitignorePath, "utf-8")
     : "";
   const lines = existing.split(/\r?\n/).map((line) => line.trim());
-  if (lines.includes(".omg/")) {
+  const missing = [".omg/", ".omx/"].filter((entry) => !lines.includes(entry));
+
+  if (missing.length === 0) {
     return { changed: false, gitignorePath };
   }
 
-  const next = `${existing}${existing.endsWith("\n") || existing.length === 0 ? "" : "\n"}.omg/\n`;
+  const next = `${existing}${existing.endsWith("\n") || existing.length === 0 ? "" : "\n"}${missing.join("\n")}\n`;
   await writeFile(gitignorePath, next);
   return { changed: true, gitignorePath };
 }
@@ -383,7 +385,7 @@ async function buildSessionStartContext(
 
   const gitignoreResult = await ensureOmxGitignoreEntry(cwd);
   if (gitignoreResult.changed) {
-    sections.push(`Added .omg/ to ${gitignoreResult.gitignorePath} to keep local OMX state out of source control.`);
+    sections.push(`Added .omg/ to ${gitignoreResult.gitignorePath} to keep local OMG/OMX state out of source control.`);
   }
 
   const modeSummaries: string[] = [];
@@ -453,6 +455,11 @@ async function buildSessionStartContext(
   const subagentSummary = await readSubagentSessionSummary(cwd, sessionId).catch(() => null);
   if (subagentSummary && subagentSummary.activeSubagentThreadIds.length > 0) {
     sections.push(`[Subagents]\n- active subagent threads: ${subagentSummary.activeSubagentThreadIds.length}`);
+  }
+
+  const metrics = await readJsonIfExists(join(cwd, ".omg", "metrics.json"));
+  if (metrics && typeof metrics.last_activity === "string") {
+    sections.push(`[Last activity]\n- timestamp: ${metrics.last_activity}\n- total turns: ${metrics.total_turns ?? 0}`);
   }
 
   return sections.length > 0 ? sections.join("\n\n") : null;
@@ -1392,12 +1399,38 @@ async function buildStopHookOutput(
   };
 }
 
+async function shouldSkipHook(cwd: string): Promise<boolean> {
+  const scopePath = join(cwd, ".omg", "setup-scope.json");
+  if (!existsSync(scopePath)) return false;
+  try {
+    const raw = await readFile(scopePath, "utf-8");
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed.tool === "string" && parsed.tool !== "omg") {
+      // Project is explicitly managed by another tool (e.g. omx)
+      return true;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return false;
+}
+
 export async function dispatchGeminiNativeHook(
   payload: GeminiHookPayload,
   options: NativeHookDispatchOptions = {},
 ): Promise<NativeHookDispatchResult> {
   const hookEventName = readHookEventName(payload);
   const cwd = options.cwd ?? (safeString(payload.cwd).trim() || process.cwd());
+
+  if (await shouldSkipHook(cwd)) {
+    return {
+      hookEventName,
+      omgEventName: null,
+      skillState: null,
+      outputJson: null,
+    };
+  }
+
   const stateDir = join(cwd, ".omg", "state");
   await mkdir(stateDir, { recursive: true });
 

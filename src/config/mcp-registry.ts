@@ -128,7 +128,7 @@ export function getUnifiedMcpRegistryCandidates(homeDir = homedir()): string[] {
 }
 
 export function getLegacyUnifiedMcpRegistryCandidate(homeDir = homedir()): string {
-  return join(homeDir, ".omg", "mcp-registry.json");
+  return join(homeDir, ".omx", "mcp-registry.json");
 }
 
 export async function loadUnifiedMcpRegistry(
